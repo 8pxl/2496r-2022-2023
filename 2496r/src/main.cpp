@@ -83,7 +83,6 @@ void usercontrol(void) {
   bool run = true;
 
   // vex::thread t(odom);
-  // odom();
   vertEncoder.setPosition(0,deg);
   horizEncoder.setPosition(0,deg);
   imu.calibrate();
