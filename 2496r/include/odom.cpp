@@ -9,6 +9,10 @@ double dtr(double input){
   return(pi*input/180);
 }
 
+double mod(double a, double b){
+  return fmod(360-std::abs(a), b);
+}
+
 void odom(){
 
   double prevRotation = imu.heading();
@@ -21,14 +25,20 @@ void odom(){
     printf("%i",x);
     printf("%c",',');
     printf("%i\n",y);
+   
     
     double currRotation = imu.heading();
 
     // calcualting change in rotation
     double deltaRotation = dtr(currRotation - prevRotation);
+    double hDeltaRotation = dtr((currRotation-90) - (prevRotation-90));
     
     if (std::abs(deltaRotation) > 300){
-      deltaRotation = dtr(fmod(currRotation,360) - fmod(prevRotation,360));
+      deltaRotation = dtr(mod(currRotation,360) - mod(prevRotation,360));
+    }
+
+    if (std::abs(hDeltaRotation) > 300){
+      hDeltaRotation = dtr(mod(currRotation-90,360) - mod(prevRotation-90,360));
     }
 
     prevRotation = currRotation;
@@ -36,20 +46,28 @@ void odom(){
     //change in encoder value
     double deltaVert = vertEncoder.position(degrees);
     double deltaHoriz = horizEncoder.position(degrees);
-
     // calculating change in relative y
+    int posY = -1;
     double sOverTheta = deltaVert/deltaRotation;
     double relativeY = sin(deltaRotation) * sOverTheta;
+    if (relativeY > 0){
+      posY = 1;
+    }
     
     // calculating change in relative x
-    sOverTheta = deltaHoriz/deltaRotation;
-    double relativeX = sin(deltaRotation) * sOverTheta;
+    int posX= -1;
+    sOverTheta = deltaHoriz/hDeltaRotation;
+    double relativeX = sin(hDeltaRotation) * sOverTheta;
+    if (relativeX > 0){
+      posX = 1;
+    }
 
     // calculing absolute x
-    double magnitude = sqrt( (pow(relativeX,2) + pow(relativeY,2)) );
+    double magnitude = posX * posY * sqrt( (pow(relativeX,2) + pow(relativeY,2)) );
     double deltaX = sin(dtr(currRotation)) * magnitude;
     double deltaY = cos(dtr(currRotation)) * magnitude;
 
+    // printf("%f\n", deltaX);
     // updating global x and global y
     x += deltaX;
     y += deltaY;

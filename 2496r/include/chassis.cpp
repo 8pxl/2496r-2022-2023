@@ -1,28 +1,43 @@
 #include "vex.h"
 
 #include <cmath>
+
+
 timer integralTimer;
 timer endTimer;
 timer timeoutTimer;
 
+void moveDist(){
+    frontLeft.spin(fwd,100,rpm);
+  backLeft.spin(fwd,100,rpm);
+  frontRight.spin(fwd,100,rpm);
+  backRight.spin(fwd,100,rpm);
+  wait(3,sec);
+  printf("%s\n" , "2");
+}
+
+
+
+
+
 int dirToSpin(double target, double unscaled){
-  // 0 for clockwise
+  // -1 for clockwise
   // 1 for counterclockwise
   double currHeading = unscaled - 180;
   if (currHeading > 0){
     if (currHeading - 180 <= target){
       return 1;
     }
-    return 0;
+    return -1;
   }
 
   else if (currHeading < 0){
     if(currHeading + 180 >= target){
-      return 0;
+      return -1;
     }
     return 1;
   }
-  return 0;
+  return -1;
 }
 
 void spinTo(double target, double timeout, double tolerance){
@@ -32,9 +47,9 @@ void spinTo(double target, double timeout, double tolerance){
   timeoutTimer.reset();
 
   //basic constants
-  double kP = 0.7;
+  double kP = 2.1;
   double kI = 0;
-  double kD = 0 ;
+  double kD = 0.1;
   double endTime = 1;
 
   //general vars
@@ -54,12 +69,20 @@ void spinTo(double target, double timeout, double tolerance){
 
   //dee vars
   double derivative;
-
-  //pid loop
+  //pid loop 
   while (!end){
+    printf("%i\n", dir);
     //relative heading
+    // printf("%f\n" , error);
     currHeading = imu.heading();
-    relativeHeading += std::abs(currHeading - prevHeading);
+    double deltaRotation = (currHeading - prevHeading);
+    
+    if (std::abs(deltaRotation) > 300){
+      deltaRotation = mod(currHeading,360) - mod(prevHeading,360);
+    }
+
+    relativeHeading += deltaRotation * dir;
+
     prevHeading = currHeading;
     
     //pee
@@ -83,8 +106,8 @@ void spinTo(double target, double timeout, double tolerance){
 
     //double fwd is spin cw
 
-    double rVel = pow(-1,dir) * (error*kP + integral*kI + derivative*kD);
-    double lVel = pow(-1,dir) * (error*kP + integral*kI + derivative*kD);
+    double rVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
+    double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
 
     frontLeft.spin(fwd,lVel,rpm);
     backLeft.spin(fwd,lVel,rpm);
@@ -92,21 +115,26 @@ void spinTo(double target, double timeout, double tolerance){
     backRight.spin(fwd,rVel,rpm);
     
     //end condition
-
+    // printf("%lu\n", endTimer.time()/1000);
     if (error >= tolerance){
       endTimer.reset();
     }
 
     if (endTimer.time() >= endTime){
       end = true;
+
     } 
 
-    if (timeoutTimer >= timeout){
+    if (timeoutTimer.time() >= timeout){
       end = true;
     }
 
     prevError = error;
     wait(15,msec);
   }
+  frontLeft.stop(brakeType::hold);
+  backLeft.stop(brakeType::hold);
+  frontRight.stop(brakeType::hold);
+  backRight.stop(brakeType::hold);
 
 }

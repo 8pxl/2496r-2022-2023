@@ -62,12 +62,13 @@ void pre_auton(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-
+///
 void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
 }
+
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -81,13 +82,20 @@ void autonomous(void) {
 
 void usercontrol(void) {
   bool run = true;
-
-  // vex::thread t(odom);
+  imu.calibrate();
+  wait(3,sec);
+  vex::thread t(odom);
+  // odom();
   vertEncoder.setPosition(0,deg);
   horizEncoder.setPosition(0,deg);
-  imu.calibrate();
+  // spinTo(90,7000,1);
+  printf("%f", absoluteAngleToPoint(0,0));
+  // spinTo(180,5000,1);
+  // spinTo(270,5000,1);
+  // spinTo(0,5000,1);
+
+  //  moveDist();
   while (1) {
-    // spinTo(35,5,5);
     // printf("%f\n", imu.heading());
     // printf("%f\n",horizEncoder.rotation(deg));
     if (run){
@@ -108,8 +116,8 @@ void usercontrol(void) {
 
     if (Controller1.ButtonR2.pressing() && run){
 
-      // spinTo(absoluteAngleToPoint(0,0), 5, 5);
-      spinTo(35,5,5);
+      spinTo(absoluteAngleToPoint(0,0), 50000, 0);
+      // spinTo(190,5000,5);
       run = false;
       
     }
@@ -122,9 +130,8 @@ void usercontrol(void) {
     backLeft.spin(directionType::rev,(Controller1.Axis3.value() + Controller1.Axis1.value()) *(0.094),voltageUnits::volt);
     backRight.spin(directionType::fwd,(Controller1.Axis3.value() - Controller1.Axis1.value()) *(0.094),voltageUnits::volt);
     
-    leftFly.spin(forward,averageRpm()+ fPid(rpmTarget), velocityUnits::rpm);
-    rightFly.spin(reverse, averageRpm() + fPid(rpmTarget), velocityUnits::rpm);
-
+    // leftFly.spin(forward,averageRpm()+ fPid(rpmTarget), velocityUnits::rpm);
+    // rightFly.spin(reverse, averageRpm() + fPid(rpmTarget), velocityUnits::rpm);
     // printf("%i\n", averageRpm());
     // printf("%i\n", rpmTarget);
     // printf("%s\n",' ');
@@ -134,7 +141,8 @@ void usercontrol(void) {
 
 //
 // Main will set up the competition functions and callbacks.
-//
+// 
+
 int main() {
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
