@@ -62,7 +62,7 @@ void odom(){
       posX = 1;
     }
 
-    // calculing absolute x
+    // calculing absolute x and y
     double magnitude = posX * posY * sqrt( (pow(relativeX,2) + pow(relativeY,2)) );
     double deltaX = sin(dtr(currRotation)) * magnitude;
     double deltaY = cos(dtr(currRotation)) * magnitude;
@@ -87,5 +87,5 @@ double distToPoint(int px, int py){
 }
 
 double absoluteAngleToPoint(int px, int py){
-  return 90 - imu.heading();
+  return atan(px-x/py-y);
 }
