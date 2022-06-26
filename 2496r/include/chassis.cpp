@@ -7,19 +7,6 @@ timer integralTimer;
 timer endTimer;
 timer timeoutTimer;
 
-void moveDist(){
-    frontLeft.spin(fwd,100,rpm);
-  backLeft.spin(fwd,100,rpm);
-  frontRight.spin(fwd,100,rpm);
-  backRight.spin(fwd,100,rpm);
-  wait(3,sec);
-  printf("%s\n" , "2");
-}
-
-
-
-
-
 int dirToSpin(double target, double unscaled){
   // -1 for clockwise
   // 1 for counterclockwise
@@ -75,13 +62,13 @@ void spinTo(double target, double timeout, double tolerance){
     //relative heading
     // printf("%f\n" , error);
     currHeading = imu.heading();
-    double deltaRotation = (currHeading - prevHeading);
+    double deltaRotation = std::abs(currHeading - prevHeading);
     
-    if (std::abs(deltaRotation) > 300){
-      deltaRotation = mod(currHeading,360) - mod(prevHeading,360);
+    if (deltaRotation > 300){
+      deltaRotation = std::abs (mod(currHeading,360) - mod(prevHeading,360));
     }
 
-    relativeHeading += deltaRotation * dir;
+    relativeHeading += (deltaRotation);
 
     prevHeading = currHeading;
     
@@ -125,16 +112,107 @@ void spinTo(double target, double timeout, double tolerance){
 
     } 
 
-    if (timeoutTimer.time() >= timeout){
-      end = true;
-    }
+      if (timeoutTimer.time() >= timeout){
+        end = true;
+      }
 
     prevError = error;
     wait(15,msec);
   }
+
   frontLeft.stop(brakeType::hold);
   backLeft.stop(brakeType::hold);
   frontRight.stop(brakeType::hold);
   backRight.stop(brakeType::hold);
 
-}
+} 
+
+void moveDist(double target, double timeout, double tolerance){
+  //resetting timers
+  integralTimer.reset();
+  endTimer.reset();
+  timeoutTimer.reset();
+
+  //resetting sensors
+  frontLeft.resetRotation();
+  backLeft.resetRotation();
+  frontRight.resetRotation();
+  backRight.resetRotation();
+
+  //basic constants
+  double kP = 2.1;
+  double kI = 0;
+  double kD = 0.1;
+  double endTime = 1;
+
+  //general vars
+  double currRotation = 0;
+  double error;
+  double prevError;
+  bool end = false;
+
+  //eye vars
+  double integral = 0;
+  double integralTimeout = 0;
+  double errorThreshold = 30;
+
+  //dee vars
+  double derivative;
+  //pid loop 
+  while (!end){
+    currRotation = imu.heading();
+
+    //pee
+    error = target - currRotation;
+
+    //eye
+    if (error > errorThreshold){
+      integral += error;
+    } 
+    if (error <= tolerance && integralTimer.value() > integralTimeout){
+      integral = 0;
+    }
+    else if (error >= tolerance ){
+      integralTimer.reset();
+    }
+
+    //dee
+    derivative = error - prevError;
+    
+    //spin motors
+
+    //double fwd is spin cw
+
+    double rVel =  (error*kP + integral*kI + derivative*kD);
+    double lVel =  -(error*kP + integral*kI + derivative*kD);
+
+    frontLeft.spin(fwd,lVel,rpm);
+    backLeft.spin(fwd,lVel,rpm);
+    frontRight.spin(fwd,rVel,rpm);
+    backRight.spin(fwd,rVel,rpm);
+    
+    //end condition
+    // printf("%lu\n", endTimer.time()/1000);
+    if (error >= tolerance){
+      endTimer.reset();
+    }
+
+    if (endTimer.time() >= endTime){
+      end = true;
+
+    } 
+
+      if (timeoutTimer.time() >= timeout){
+        end = true;
+      }
+
+    prevError = error;
+    wait(15,msec);
+  }
+
+  frontLeft.stop(brakeType::hold);
+  backLeft.stop(brakeType::hold);
+  frontRight.stop(brakeType::hold);
+  backRight.stop(brakeType::hold);
+
+} 
