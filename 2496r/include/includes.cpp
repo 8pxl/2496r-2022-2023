@@ -1,8 +1,8 @@
 #include "vex.h"
+#include <cmath>
 
-int rpmTarget = 550;
-float averageRpm(){
-  return ( (leftFly.velocity(rpm) + abs(rightFly.velocity(rpm))) /2 );
+float averageRpm(vex::motor m1, vex::motor m2, vex::motor m3, vex::motor m4){
+  return ( std::abs(m1.velocity(rpm)) + std::abs(m2.velocity(rpm)) + std::abs(m3.velocity(rpm)) + std::abs(m4.velocity(rpm)) / 4 );
 }
 
 float fPid(float target){
