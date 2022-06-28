@@ -13,6 +13,9 @@ extern motor backRight;
 extern encoder vertEncoder;
 extern inertial imu;
 extern encoder horizEncoder;
+extern motor rightIntake;
+extern motor leftIntake;
+extern digital_out indexer;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
