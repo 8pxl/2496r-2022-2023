@@ -1,5 +1,5 @@
 #include "vex.h"
-
+#include "common.hpp"
 #include <cmath>
 
 
@@ -160,7 +160,7 @@ void moveDist(double target, double timeout, double tolerance){
   double derivative;
   //pid loop 
   while (!end){
-    currRotation = imu.heading();
+    currRotation = averageRpm(frontLeft, backLeft, frontRight, backRight);
 
     //pee
     error = target - currRotation;

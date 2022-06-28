@@ -1,17 +1,7 @@
-#include "vex.h"
 #include <cmath>
+#include "vex.h"
+#include "common.hpp"
 
-double pi = 3.141592;
-int x=0;
-int y=0;
-
-double dtr(double input){
-  return(pi*input/180);
-}
-
-double mod(double a, double b){
-  return fmod(360-std::abs(a), b);
-}
 
 void odom(){
   vertEncoder.setPosition(0,deg);
@@ -51,7 +41,7 @@ void odom(){
 
     // calculing absolute x and y 
     // rotates the vector [relativeX, relativeY] to get an absolute position vector
-    double rotationOffset = currRotation+deltaRotation/2;
+    double rotationOffset = dtr(currRotation)+deltaRotation/2;
     double deltaX = relativeX * cos(rotationOffset) - relativeY* sin(rotationOffset);
     double deltaY = relativeX * sin(rotationOffset) + relativeY* cos(rotationOffset);
 
@@ -72,5 +62,5 @@ double distToPoint(int px, int py){
 }
 
 double absoluteAngleToPoint(int px, int py){
-  return atan(px-x/py-y);
+  return atan2(px-x,py-y);
 }
