@@ -14,60 +14,47 @@ double mod(double a, double b){
 }
 
 void odom(){
-
-  double prevRotation = imu.heading();
-
   vertEncoder.setPosition(0,deg);
   horizEncoder.setPosition(0,deg);
-  vex::task::sleep(200);
+  double prevRotation = imu.heading();
   
   while(1){
-    printf("%i",x);
-    printf("%c",',');
-    printf("%i\n",y);
-   
-    
-    double currRotation = imu.heading();
+    printf("(%i,%i)\n",x,y);
 
     // calcualting change in rotation
+    double currRotation = imu.heading();
     double deltaRotation = dtr(currRotation - prevRotation);
-    double hDeltaRotation = dtr((currRotation-90) - (prevRotation-90));
     
+    /* when angle difference jumps by more than 300, it can be assumed that it is caused by the imu rotating past
+    0 to 360 or from 360 to 0. in order to get the absolute difference in rotation, the mod of bothvalues is taken.
+    the fmod() function in cmath is not used, as it does not deal with negative numbers the same way modulo works
+    in mathematics
+    */
+
     if (std::abs(deltaRotation) > 300){
       deltaRotation = dtr(mod(currRotation,360) - mod(prevRotation,360));
     }
 
-    if (std::abs(hDeltaRotation) > 300){
-      hDeltaRotation = dtr(mod(currRotation-90,360) - mod(prevRotation-90,360));
-    }
-
     prevRotation = currRotation;
     
-    //change in encoder value
+    // change in encoder value
     double deltaVert = vertEncoder.position(degrees);
     double deltaHoriz = horizEncoder.position(degrees);
+
     // calculating change in relative y
-    int posY = -1;
     double sOverTheta = deltaVert/deltaRotation;
-    double relativeY = sin(deltaRotation) * sOverTheta;
-    if (relativeY > 0){
-      posY = 1;
-    }
+    double relativeY = 2 * sin(deltaRotation/2) * sOverTheta;
     
     // calculating change in relative x
-    int posX= -1;
-    sOverTheta = deltaHoriz/hDeltaRotation;
-    double relativeX = sin(hDeltaRotation) * sOverTheta;
-    if (relativeX > 0){
-      posX = 1;
-    }
+    sOverTheta = deltaHoriz/deltaRotation;
+    double relativeX = 2* sin(deltaRotation/2) * sOverTheta;
 
-    // calculing absolute x and y
-    double magnitude = posX * posY * sqrt( (pow(relativeX,2) + pow(relativeY,2)) );
-    double deltaX = sin(dtr(currRotation)) * magnitude;
-    double deltaY = cos(dtr(currRotation)) * magnitude;
+    // calculing absolute x and y 
+    // rotates the vector [relativeX, relativeY] to get an absolute position vector
+    double rotationOffset = currRotation+deltaRotation/2;
+    double deltaX = relativeX * cos(rotationOffset) - relativeY* sin(rotationOffset);
+    double deltaY = relativeX * sin(rotationOffset) + relativeY* cos(rotationOffset);
 
-    // printf("%f\n", deltaX);
     // updating global x and global y
     x += deltaX;
     y += deltaY;
@@ -76,9 +63,7 @@ void odom(){
     horizEncoder.setPosition(0,deg);
     vertEncoder.setPosition(0,deg);
 
-    // printf("(%i,%i)\n",x,y);
-
-    vex::task::sleep(20);
+    vex::task::sleep(10);
   }
 }
 
