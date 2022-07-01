@@ -1,5 +1,5 @@
 #include "vex.h"
-#include "common.hpp"
+#include "common.h"
 #include <cmath>
 
 
@@ -10,7 +10,18 @@ timer timeoutTimer;
 int dirToSpin(double target, double unscaled){
   // -1 for clockwise
   // 1 for counterclockwise
-  double currHeading = unscaled - 180;
+  double currHeading;
+
+  // scales a reading of 0-360 to -180,180, because i made this with -180-180 in mind but then i didng know that the immu reads from 0-360
+  // isnt that dumb.
+  if (unscaled > 180){
+    currHeading = unscaled - 360;
+  }
+
+  else{
+    currHeading = unscaled;
+  }
+
   if (currHeading > 0){
     if (currHeading - 180 <= target){
       return 1;
@@ -58,7 +69,7 @@ void spinTo(double target, double timeout, double tolerance){
   double derivative;
   //pid loop 
   while (!end){
-    printf("%i\n", dir);
+    // printf("%i\n", dir);
     //relative heading
     // printf("%f\n" , error);
     currHeading = imu.heading();
