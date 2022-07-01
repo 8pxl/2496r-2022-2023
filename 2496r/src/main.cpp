@@ -1,9 +1,10 @@
-#include "vex.h"
 #include <cmath>
+#include "common.h"
+
+#include "vex.h"
 #include "includes.cpp"
 #include "odom.cpp"
 #include "chassis.cpp"
-#include "common.hpp"
 
 using namespace vex;
 // A global instance of competition
@@ -18,17 +19,17 @@ void autonomous(void) {
 
 void usercontrol(void) {
   bool pressed = true;
-  imu.calibrate();
+  // imu.calibrate();
   // wait(3,sec);
-  vex::thread t(odom);
-  // spinTo(90,70001);
-  printf("%f", absoluteAngleToPoint(0,0));
+  // vex::thread t(odom);
+  // spinTo(90,7000,1);
   // spinTo(180,5000,1);
   // spinTo(270,5000,1);
   // spinTo(0,5000,1);
   // int rpmTarget = 550;
 
   while (1) {
+    //  printf("%f", absoluteAngleToPoint(0,0));
     // printf("%f\n", imu.heading());
     // printf("%f\n",horizEncoder.rotation(deg));
     if (!pressed){
@@ -45,8 +46,9 @@ void usercontrol(void) {
 
       if (Controller1.ButtonR2.pressing()){
 
-        // spinTo(absoluteAngleToPoint(0,0), 50000, 0);
-        spinTo(90,5000,5);
+        // spinTo(absoluteAngleToPoint(0,0), 50000, 1);
+        printf("%f", absoluteAngleToPoint(0,0));
+        // spinTo(90,5000,5);
         pressed = true;
         
       }
@@ -67,7 +69,7 @@ void usercontrol(void) {
       }
     }
   
-    if (!Controller1.ButtonDown.pressing() && ! Controller1.ButtonUp.pressing()){
+    if (!Controller1.ButtonDown.pressing() && ! Controller1.ButtonUp.pressing() && ! Controller1.ButtonR2.pressing()){
       pressed = false;
     }
 
@@ -90,10 +92,10 @@ void usercontrol(void) {
   
 
     
-    leftFly.spin(reverse,600 , velocityUnits::rpm);
-    rightFly.spin(reverse,600, velocityUnits::rpm);
+    // leftFly.spin(reverse,600 , velocityUnits::rpm);
+    // rightFly.spin(reverse,600, velocityUnits::rpm);
 
-    printf("%f\n", leftFly.velocity(rpm));
+    // printf("%f\n", leftFly.velocity(rpm));
     // printf("%i\n", rpmTarget);
     // printf("%s\n",' ');
     wait(20, msec);
