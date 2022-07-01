@@ -1,22 +1,22 @@
 #include <cmath>
 #include "vex.h"
-#include "common.hpp"
+#include "common.h"
 
+int x = 0;
+int y = 0;
 
 void odom(){
   vertEncoder.setPosition(0,deg);
   horizEncoder.setPosition(0,deg);
   double prevRotation = imu.heading();
-  
   while(1){
     printf("(%i,%i)\n",x,y);
-
     // calcualting change in rotation
     double currRotation = imu.heading();
     double deltaRotation = dtr(currRotation - prevRotation);
     
     /* when angle difference jumps by more than 300, it can be assumed that it is caused by the imu rotating past
-    0 to 360 or from 360 to 0. in order to get the absolute difference in rotation, the mod of bothvalues is taken.
+    0 to 360 or from 360 to 0. in order toget the absolute difference in rotation, the mod of bothvalues is taken.
     the fmod() function in cmath is not used, as it does not deal with negative numbers the same way modulo works
     in mathematics
     */
@@ -33,11 +33,11 @@ void odom(){
 
     // calculating change in relative y
     double sOverTheta = deltaVert/deltaRotation;
-    double relativeY = 2 * sin(deltaRotation/2) * sOverTheta;
+    double relativeY = 2*sin(deltaRotation/2) * sOverTheta;
     
     // calculating change in relative x
     sOverTheta = deltaHoriz/deltaRotation;
-    double relativeX = 2* sin(deltaRotation/2) * sOverTheta;
+    double relativeX = 2*sin(deltaRotation/2) * sOverTheta;
 
     // calculing absolute x and y 
     // rotates the vector [relativeX, relativeY] to get an absolute position vector
@@ -53,14 +53,19 @@ void odom(){
     horizEncoder.setPosition(0,deg);
     vertEncoder.setPosition(0,deg);
 
-    vex::task::sleep(10);
+    vex::task::sleep(20);
   }
 }
 
-double distToPoint(int px, int py){
-  return sqrt( (px-x)^2 + (py-y)^2 );
+double distToPoint(int cx, int cy, int px, int py){
+  return sqrt( (px-cx)^2 + (py-cy)^2 );
 }
 
 double absoluteAngleToPoint(int px, int py){
-  return atan2(px-x,py-y);
+  double t = atan2(py-y,px-x);
+  
+  if (t<0){
+    return (t+360);
+  }
+  return t;
 }
