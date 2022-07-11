@@ -18,18 +18,3 @@ double mod(double a, double b){
   return fmod(360-std::abs(a), b);
 }
 
-// float fPid(float target){
-//   float kp = 1.3;
-//   int error = target - averageRpm();
-//   return error*kp;
-// }
-
-// void targetUp(){
-//   int offset = 50;
-//   rpmTarget = rpmTarget+offset;
-// }
-
-// void targetDown(){
-//   int offset = 50;
-//   rpmTarget = rpmTarget- offset;
-// }

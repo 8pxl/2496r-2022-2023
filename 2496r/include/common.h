@@ -1,9 +1,13 @@
 #include <iostream>
+#include "vex.h"
 
 #define PI 3.14159
 
 extern int x;
 extern int y;
+
+class coordinate;
+
 
 double dtr(double input);
 double mod(double a, double b);
@@ -12,26 +16,8 @@ int sign(double input);
 double distToPoint(int x, int y, int px, int py);
 double absoluteAngleToPoint(int px, int py);
 int dirToSpin(double target, double unscaled);
+std::tuple<int, int> moveToVel(coordinate target);
+void spinChassis(double lVel,double rVel);
+void stopChassis();
+void moveTo(coordinate target, double timeout);
 
-class coordinate{
-    friend std::ostream& operator<<(std::ostream&, coordinate const&);
-    private:
-    
-    int x;
-    int y;
-    
-    public:
-    
-    coordinate(int a, int b){
-        x = a;
-        y = b;
-    }
-    
-    int getX(){
-        return x;
-    }
-    int getY(){
-        return y;
-    }
-    
-};
