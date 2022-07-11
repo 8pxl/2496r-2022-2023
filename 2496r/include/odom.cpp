@@ -9,6 +9,9 @@ void odom(){
   vertEncoder.setPosition(0,deg);
   horizEncoder.setPosition(0,deg);
   double prevRotation = imu.heading();
+  double deltaX = 0;
+  double deltaY = 0;
+
   while(1){
     printf("(%i,%i)\n",x,y);
     // calcualting change in rotation
@@ -42,8 +45,16 @@ void odom(){
     // calculing absolute x and y 
     // rotates the vector [relativeX, relativeY] to get an absolute position vector
     double rotationOffset = dtr(currRotation)+deltaRotation/2;
-    double deltaX = relativeX * cos(rotationOffset) - relativeY* sin(rotationOffset);
-    double deltaY = relativeX * sin(rotationOffset) + relativeY* cos(rotationOffset);
+
+    double theta = atan2(relativeY, relativeX);
+    double radius = sqrt(relativeX*relativeX + relativeY*relativeY);
+    theta = theta-rotationOffset;
+    
+    deltaX = radius*cos(theta);
+    deltaY = radius*sin(theta);
+
+    // double deltaX = relativeX * cos(rotationOffset) - relativeY* sin(rotationOffset);
+    // double deltaY = relativeX * sin(rotationOffset) + relativeY* cos(rotationOffset);
 
     // updating global x and global y
     x += deltaX;
