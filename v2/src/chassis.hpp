@@ -22,8 +22,6 @@ void spinTo(double target, double timeout, double tolerance)
   double prevHeading = currHeading;
   double error;
   double prevError;
-  double relativeHeading = 0;
-  double relativeDist = std::abs ( target - currHeading);
   bool end = false;
 
   //eye vars
