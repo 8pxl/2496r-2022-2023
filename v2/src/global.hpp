@@ -1,6 +1,4 @@
-#include "/Users/keijayhuang/Desktop/2496r-2022-2023/v2/include/main.h"
-#include "pros/motors.h"
-#include <algorithm>
+#include "main.h"
 
 namespace glb
 {
@@ -68,6 +66,31 @@ namespace group
             }
     };
 
-    class chassis{};
+    class chassis:public mtrs
+    {
+        public:
+
+            chassis(std::vector<pros::Motor> motors) : mtrs(motors){}
+
+            void spinDiffy(int rpct, int lpct)
+            {
+                double rvolt = rpct * 120;
+                double lvolt = lpct * 120;
+
+                for (int i=0; i <= sizeof(motors)/2; i++)
+                {
+                    motors[i].move_voltage(rvolt);
+                    motors[i+2].move_voltage(lvolt);
+                }
+            }
+    };
 }
 
+
+// init
+
+pros::Motor c[] = {glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
+
+std::vector<pros::Motor> ch(c, c + sizeof(c)/ sizeof(c[0]));
+
+group::chassis chass(ch);

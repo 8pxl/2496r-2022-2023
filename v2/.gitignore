@@ -19,4 +19,4 @@ temp.errors
 .cache/
 firmware/
 .cache/
-# include
+include/

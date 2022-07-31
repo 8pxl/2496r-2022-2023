@@ -1,4 +1,5 @@
 #include "main.h"
+#include "global.hpp"
 
 /**
  * A callback function for LLEMU's center button.
