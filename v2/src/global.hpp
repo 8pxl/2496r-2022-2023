@@ -1,4 +1,4 @@
-#include "main.h"
+#include "/Users/keijayhuang/Desktop/2496r-2022-2023/v2/include/main.h"
 #include "pros/motors.h"
 #include <algorithm>
 
@@ -67,5 +67,7 @@ namespace group
                 }
             }
     };
+
+    class chassis{};
 }
 
