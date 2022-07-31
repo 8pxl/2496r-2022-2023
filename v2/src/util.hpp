@@ -44,7 +44,7 @@ int util::dirToSpin(double target,double currHeading)
     return(diff > 180 ? 1 : -1);
 }
 
-double minError(double target, double current)
+double util::minError(double target, double current)
 {
     double b = std::max(target,current);
     double s = std::min(target,current);
