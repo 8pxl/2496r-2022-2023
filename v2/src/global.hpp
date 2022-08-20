@@ -1,33 +1,40 @@
+#ifndef __GLOBAL__
+#define __GLOBAL__
+
 #include "main.h"
-
-namespace glb
-{
-    //motors
-
-    pros::Motor frontLeft(1, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor frontRight(2, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor backLeft(3, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor backRight(4, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor intake1(5, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor intake2(6, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor fw1(7, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor fw2(8, pros::E_MOTOR_GEARSET_06, false);
-
-    //sensors
-
-    pros::Imu imu(1);
-    pros::Controller controller(pros::E_CONTROLLER_MASTER);    
-
-    //variables
-
-    double x;
-    double y; 
-}
+#include "pros/adi.hpp"
 
 namespace group
 {
     class mtrs;
     class chassis;
+}
+
+namespace glb
+{
+    //motors
+    pros::Motor frontLeft(3, pros::E_MOTOR_GEARSET_06, true);
+    pros::Motor frontRight(2, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor backLeft(4, pros::E_MOTOR_GEARSET_06, true);
+    pros::Motor backRight(1, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor intake1(15, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor intake2(14, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor fw2(13, pros::E_MOTOR_GEARSET_06, false);
+
+    //sensors
+    pros::Imu imu(5);
+    pros::Controller controller(pros::E_CONTROLLER_MASTER);   
+    pros::ADIEncoder leftEncoder(1,2,false);
+    pros::ADIEncoder horizEncoder(3,4,false);
+    pros::ADIEncoder rightEncoder(5,6,false);
+
+    //variables
+
+    double x;
+    double y; 
+
+    //init
 }
 
 class group::mtrs
@@ -36,25 +43,24 @@ class group::mtrs
 
         pros::motor_brake_mode_e returnBrakeType(std::string brakeMode)
         {
-        return brakeMode == "c" ? pros::E_MOTOR_BRAKE_COAST : brakeMode == "b" ? pros::E_MOTOR_BRAKE_COAST : pros::E_MOTOR_BRAKE_HOLD;
+        return brakeMode == "c" ? pros::E_MOTOR_BRAKE_COAST : brakeMode == "b" ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_HOLD;
         }
+
+    protected:
+        std::vector<pros::Motor> motors;
 
     public:
 
-        std::vector<pros::Motor> motors;
+        // mtrs(const std::initializer_list<pros::Motor> & motorsList)
 
-        mtrs(std::vector<pros::Motor> motorsList)
+        mtrs(const std::vector<pros::Motor> & motorsList) : motors(motorsList){}
+
+        void spin(double volts = 127)
         {
-            motors = motorsList;   
-        }
 
-        void spin(int pct = 100)
-        {
-            double voltage = pct * 120;
-
-            for (int i=0; i <= sizeof(motors); i++)
+            for (int i=0; i < sizeof(motors); i++)
             {
-                motors[i].move_voltage(voltage);
+                motors[i].move(volts);
             }
         }
 
@@ -62,7 +68,7 @@ class group::mtrs
         {
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
-            for (int i=0; i <= sizeof(motors); i++)
+            for (int i=0; i < sizeof(motors); i++)
             {
                 motors[i].set_brake_mode(brakeType);
                 motors[i].brake();
@@ -74,27 +80,26 @@ class group::chassis : public group::mtrs
 {
     public:
 
-        chassis(std::vector<pros::Motor> motors) : mtrs(motors){}
+        // chassis(const std::initializer_list<pros::Motor> & motors) : mtrs(motors){}
+        chassis(const std::vector<pros::Motor> & motorsList) : mtrs(motorsList){}
 
-        void spinDiffy(int rpct, int lpct)
+        void spinDiffy(double rvolt, double lvolt)
         {
-            double rvolt = rpct * 120;
-            double lvolt = lpct * 120;
+            // printf("%f", rvolt);
 
-            for (int i=0; i <= sizeof(motors)/2; i++)
+            for (int i=0; i < motors.size()/2; i++)
             {
-                motors[i].move_voltage(rvolt);
-                motors[i+2].move_voltage(lvolt);
+                motors[i].move(rvolt);
+                motors[i+2].move(lvolt);
+                // glb::controller.print(0,0,"%f", rvolt);
             }
         }
 };
 
+namespace robot
+{
+    std::vector<pros::Motor> chassisMotors{glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
+    group::chassis chass(chassisMotors);
+}
 
-
-// init
-pros::Motor c[] = {glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
-
-std::vector<pros::Motor> ch(c, c + sizeof(c)/ sizeof(c[0]));
-
-group::chassis chass(ch);
- 
+#endif
