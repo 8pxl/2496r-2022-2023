@@ -3,7 +3,7 @@
 
 #include "main.h"
 #include <cmath>
-# define PI 3.14159265358979323846
+#define PI 3.14159265358979323846
 
 namespace util
 {
@@ -145,10 +145,11 @@ class util::bezier
 
             for (int i=0; i < resolution; i++)
             {
-                p0 = lut[i];
-                p1 = lut[i+1];
-                length += distToPoint(p0.x,p0.y,p1.x,p1.y);
+                coordinate first = lut[i];
+                coordinate second = lut[i+1];
+                length += distToPoint(first.x,first.y,second.x,second.y);
             }
+
             return length;
         }
 };
