@@ -2,6 +2,7 @@
 #define __GLOBAL__
 
 #include "main.h"
+#include "util.hpp"
 
 namespace group
 {
@@ -30,8 +31,7 @@ namespace glb
 
     //variables
 
-    double x;
-    double y; 
+    util::coordinate pos = util::coordinate(0,0);
 
     //init
 }
