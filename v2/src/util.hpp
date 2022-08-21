@@ -1,7 +1,6 @@
 #ifndef __UTIL__
 #define __UTIL__
 
-#include "global.hpp"
 #include "main.h"
 #include <cmath>
 #define PI 3.14159265358979323846
@@ -192,13 +191,13 @@ double util::mod(double a, double b){
   return fmod(360-std::abs(a), b);
 }
 
-double absoluteAngleToPoint(util::coordinate point)
+double absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 {
     double t;
 
     try
     { 
-    t = atan2(point.x - glb::pos.x,point.y-glb::pos.y);
+    t = atan2(point.x - pos.x,point.y-pos.y);
     }
 
     catch(...)

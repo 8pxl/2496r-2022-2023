@@ -103,7 +103,7 @@ namespace chassis
     {
       
       //pee
-      error = dist - (dist-util::distToPoint(util::coordinate (glb::x, glb::y),util::coordinate(tx,ty)));
+      error = dist - (dist-util::distToPoint(util::coordinate (glb::pos.x, glb::pos.y),util::coordinate(tx,ty)));
 
       //eye
       integral = error <= tolerance ? 0 : fabs(error) < integralThreshold ? integral += error : integral;
@@ -135,7 +135,7 @@ namespace chassis
     double linearVel = linearError*lkp;
 
     double currHeading =  glb::imu.get_heading() > 0 ? util::rtd(glb::imu.get_heading()) : util::rtd(glb::imu.get_heading()) + 360; //0-360
-    double targetHeading = 180-absoluteAngleToPoint(target); // -180-180
+    double targetHeading = 180-absoluteAngleToPoint(glb::pos, target); // -180-180
 
     targetHeading = targetHeading >= 0 ? targetHeading : fabs(targetHeading) + 180;
 
@@ -200,7 +200,6 @@ namespace chassis
         break;
       }
     }
-
     moveTo(lut[t], 10000, lkp, rkp, rotationBias);
   }
 
