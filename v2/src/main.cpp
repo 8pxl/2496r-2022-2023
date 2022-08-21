@@ -1,7 +1,7 @@
 #include "main.h"
-#include "global.hpp"
 #include "controls.hpp"
 #include "chassis.hpp"
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -74,7 +74,6 @@ void autonomous() {}
  */
 void opcontrol() 
 {
-
 	while (true) 
 	{
 		glb::imu.reset();

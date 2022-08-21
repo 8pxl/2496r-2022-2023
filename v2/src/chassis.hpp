@@ -25,7 +25,6 @@ namespace chassis
 
     //eye vars
     double integral = 0;
-    double integralTimeout = 0;
     double integralThreshold = 10;
 
     //dee vars
@@ -127,4 +126,6 @@ namespace chassis
     }
     robot::chass.stop("b");
   }  
+
+
 }

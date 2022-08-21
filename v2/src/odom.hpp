@@ -66,6 +66,5 @@ void odom()
         glb::leftEncoder.reset();
 
         pros::delay(10);
-
     }
 }

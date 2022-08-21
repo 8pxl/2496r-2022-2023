@@ -2,7 +2,6 @@
 #define __GLOBAL__
 
 #include "main.h"
-#include "pros/adi.hpp"
 
 namespace group
 {
