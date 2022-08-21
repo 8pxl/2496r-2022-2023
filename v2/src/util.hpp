@@ -1,6 +1,7 @@
 #ifndef __UTIL__
 #define __UTIL__
 
+#include "global.hpp"
 #include "main.h"
 #include <cmath>
 #define PI 3.14159265358979323846
@@ -15,7 +16,7 @@ namespace util
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
     double minError(double target, double current);
-    double distToPoint(double x, double y, double tx, double ty);
+    double distToPoint(util::coordinate p1, util::coordinate p2);
     double mod(double a, double b);
 }
 
@@ -97,6 +98,7 @@ class util::bezier
             return coordinate( pow(omt,3) * x0 + 3 * pow(omt,2) * t * x1 + 3*omt * pow(t,2) * x2 + pow(t,3) * x3, pow(omt,3) * y0 + 3 * pow(omt,2) * t * y1 + 3*omt * pow(t,2) * y2 + pow(t,3) * y3);
         }
         
+
         // double tangentLineAngle(double t)
         // {
         //     double x0 = p0.x;
@@ -147,7 +149,7 @@ class util::bezier
             {
                 coordinate first = lut[i];
                 coordinate second = lut[i+1];
-                length += distToPoint(first.x,first.y,second.x,second.y);
+                length += distToPoint(first,second);
             }
 
             return length;
@@ -181,13 +183,30 @@ double util::minError(double target, double current)
     return(diff <= 180 ? diff : (360-b) + s);
 }
 
-double util::distToPoint(double x, double y, double px, double py)
+double util::distToPoint(util::coordinate p1, util::coordinate p2)
 {
-    return( sqrt( pow((px-x),2) + pow((py-y), 2)));
+    return( sqrt( pow((p2.x-p1.x),2) + pow((p2.y-p1.y), 2)));
 }
 
 double util::mod(double a, double b){
   return fmod(360-std::abs(a), b);
+}
+
+double absoluteAngleToPoint(util::coordinate point)
+{
+    double t;
+
+    try
+    { 
+    t = atan2(point.x - glb::pos.x,point.y-glb::pos.y);
+    }
+
+    catch(...)
+    {
+        t = PI/2;
+    }
+
+    return (t * (180/PI));
 }
 
 #endif
