@@ -18,7 +18,7 @@ void odom()
 
     while(1)
     {
-        printf("(%f,%f)\n",glb::x, glb::y);
+        printf("(%f,%f)\n",glb::pos.x, glb::pos.y);
 
         // calcualting change in rotation
         double currRotation = glb::imu.get_heading();
@@ -63,8 +63,8 @@ void odom()
         // double deltaY = relativeX * sin(rotationOffset) + relativeY* cos(rotationOffset);
 
         // updating global x and global y
-        glb::x += deltaX;
-        glb::y += deltaY;
+        glb::pos.x += deltaX;
+        glb::pos.y += deltaY;
 
         // reset encoders
         glb::horizEncoder.reset();
