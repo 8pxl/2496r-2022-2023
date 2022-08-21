@@ -1,5 +1,6 @@
 #include "global.hpp"
 #include "util.hpp"
+#include <cmath>
 #include <vector>
 
 namespace chassis
@@ -128,12 +129,8 @@ namespace chassis
     robot::chass.stop("b");
   }  
 
-  std::vector<double> moveToVel(util::coordinate target)
+  std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias)
   {
-    double lkp = 0.1;
-    double rkp = 0.1;
-    double krp = 1.2;
-
     double linearError = distToPoint(glb::pos,target);
     double linearVel = linearError*lkp;
 
@@ -147,36 +144,64 @@ namespace chassis
     double rotationError = util::minError(targetHeading,currHeading);
     double rotationVel = rotationError * rkp * dir; 
 
-    double lVel = (linearVel - fabs(rotationVel) * krp) - rotationVel;
-    double rVel = (linearVel - fabs(rotationVel) * krp) + rotationVel;
+    double lVel = (linearVel - fabs(rotationVel) * rotationBias) - rotationVel;
+    double rVel = (linearVel - fabs(rotationVel) * rotationBias) + rotationVel;
 
     return std::vector<double> {lVel, rVel};
   }
 
-  void moveToPosePID(util::coordinate target, double finalHeading, double initialBias, double finalBias, double timeout, double initialHeading = glb::imu.get_heading())
+  void moveTo(util::coordinate target, double timeout, double lkp, double rkp, double rotationBias)
   {
+    util::timer timeoutTimer;
+    timeoutTimer.start();
 
-    util::bezier curve = util::bezier(glb::pos,target,initialBias,finalBias, util::dtr(initialHeading),util::dtr(finalHeading));
-
-    std::vector<util::coordinate> lut = curve.createLUT(100);
-
-    bool run = true;
-    int i = 0;
-    double incrementDist = 0.01;
-    util::coordinate targetPos = lut[i];
-
-    while(run)
+    while(timeoutTimer.time() < timeout)
     {
-      if(util::distToPoint(glb::pos, targetPos) <= incrementDist)
-      {
-        i++;
-      }
-
-      targetPos = lut[i];
-
-      std::vector<double> velocities = moveToVel(targetPos);
-      robot::chass.spinDiffy(velocities[1], velocities[0]);
+      std::vector<double> velocites = moveToVel(target, lkp, rkp, rotationBias); 
+      robot::chass.spinDiffy(velocites[1],velocites[0]);
     }
+
+    robot::chass.stop("b");
+  }
+
+// void moveToPosePID(util::coordinate target, double finalHeading, double initialBias, double finalBias, double timeout, double initialHeading = glb::imu.get_heading())
+  void moveToPose(util::bezier curve, double timeOut, double lkp, double rkp, double rotationBias)
+  {
+    
+    int resolution = 100;
+
+    // util::bezier curve = util::bezier(glb::pos,target,initialBias,finalBias, util::dtr(initialHeading),util::dtr(finalHeading));
+
+    std::vector<util::coordinate> lut = curve.createLUT(resolution);
+
+    double t;
+    double distTraveled = 0;
+    double ratioTraveled;
+    double curveLength = curve.approximateLength(lut, resolution);
+
+    util::coordinate prevPos = glb::pos;
+    util::coordinate targetPos;
+
+    while(1)
+    {
+      distTraveled += util::distToPoint(prevPos, glb::pos);
+      prevPos = glb::pos;
+
+      ratioTraveled = distTraveled/curveLength;
+      t = std::ceil(ratioTraveled * resolution);
+
+      targetPos = lut[t-1];
+
+      std::vector<double> velocities = moveToVel(targetPos,0.1,0.1,0.1);
+      robot::chass.spinDiffy(velocities[1], velocities[0]);
+
+      if (t == lut.size())
+      {
+        break;
+      }
+    }
+
+    moveTo(lut[t], 10000, lkp, rkp, rotationBias);
   }
 
 }
