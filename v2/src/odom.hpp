@@ -11,6 +11,11 @@ void odom()
     double deltaX = 0;
     double deltaY = 0;
 
+    //scale and stuff
+    double trackingDiameter = 2.75;
+    double trackingCirumfrence = 2.75 * PI;
+    double scaleFactor = 5.3625;
+
     while(1)
     {
         printf("(%f,%f)\n",glb::x, glb::y);
@@ -33,8 +38,8 @@ void odom()
         prevRotation = currRotation;
 
         // change in encoder value
-        double deltaVert = glb::leftEncoder.get_value();
-        double deltaHoriz = glb::horizEncoder.get_value();
+        double deltaVert = (glb::leftEncoder.get_value() * trackingCirumfrence / 360) * scaleFactor;
+        double deltaHoriz = (glb::horizEncoder.get_value() * trackingCirumfrence / 360) * scaleFactor;
 
         // calculating change in relative y
         double sOverTheta = deltaVert/deltaRotation;
