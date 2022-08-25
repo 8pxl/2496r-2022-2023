@@ -12,7 +12,7 @@ namespace group
 
 namespace glb
 {
-    //motors
+    // motors
     pros::Motor frontLeft(3, pros::E_MOTOR_GEARSET_06, true);
     pros::Motor frontRight(2, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor backLeft(4, pros::E_MOTOR_GEARSET_06, true);
@@ -22,18 +22,16 @@ namespace glb
     pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor fw2(13, pros::E_MOTOR_GEARSET_06, false);
 
-    //sensors
+    // sensors
     pros::Imu imu(5);
     pros::Controller controller(pros::E_CONTROLLER_MASTER);   
-    pros::ADIEncoder leftEncoder(1,2,false);
-    pros::ADIEncoder horizEncoder(3,4,false);
-    pros::ADIEncoder rightEncoder(5,6,false);
+    pros::ADIEncoder leftEncoder(3,4,false);
+    pros::ADIEncoder horizEncoder(1,2,false);
+    // pros::ADIEncoder rightEncoder(5,6,false);
 
-    //variables
+    // variables
 
     util::coordinate pos = util::coordinate(0,0);
-
-    //init
 }
 
 class group::mtrs
@@ -57,7 +55,7 @@ class group::mtrs
         void spin(double volts = 127)
         {
 
-            for (int i=0; i < sizeof(motors); i++)
+            for (int i=0; i < motors.size(); i++)
             {
                 motors[i].move(volts);
             }
@@ -67,11 +65,23 @@ class group::mtrs
         {
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
-            for (int i=0; i < sizeof(motors); i++)
+            for (int i=0; i < motors.size(); i++)
             {
                 motors[i].set_brake_mode(brakeType);
                 motors[i].brake();
             }
+        }
+
+        double getSpeed()
+        {
+            double vel = 0;
+
+            for (int i=0; i < motors.size(); i++)
+            {
+                vel += motors[i].get_actual_velocity();
+            }
+            
+            return(vel/motors.size());
         }
 };
 
@@ -95,10 +105,41 @@ class group::chassis : public group::mtrs
         }
 };
 
+
 namespace robot
 {
     std::vector<pros::Motor> chassisMotors{glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
+    std::vector<pros::Motor> intakeMotors{glb::intake1,glb::intake2};
+    std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
+    
     group::chassis chass(chassisMotors);
+    group::mtrs intake(intakeMotors);
+    group::mtrs flywheel(flywheelMotors);
+}
+
+namespace flywheel
+{
+    double target;
+    
+    void spin()
+    {
+        while (true)
+        {
+            double currSpeed = robot::flywheel.getSpeed();
+            double diff = target - currSpeed;
+
+            if (diff < 50)
+            {
+                robot::flywheel.spin((currSpeed += diff/2) * 127 / 600);
+            }
+
+            else
+            {
+                robot::flywheel.spin(target * 127 / 600);
+            }
+        }
+    }
+
 }
 
 #endif
