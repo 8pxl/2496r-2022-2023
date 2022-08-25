@@ -1,5 +1,7 @@
 #include "main.h"
 #include "controls.hpp"
+#include "global.hpp"
+#include "odom.hpp"
 #include "chassis.hpp"
 
 /**
@@ -74,11 +76,18 @@ void autonomous() {}
  */
 void opcontrol() 
 {
+	glb::imu.reset();
+	pros::delay(3000);
+	pros::Task od(odom);
+	pros::Task fw(flywheel::spin);
+
+	flywheel::target = 600;
+
 	while (true) 
 	{
-		glb::imu.reset();
-		// driveContol();
-		chassis::spinTo(90,100000,1);
+		driveContol();
+		glb::controller.print(0,0,"(%f, %f)\n", glb::pos.x,glb::pos.y);
+		// chassis::spinTo(90,100000,1);
 		pros::delay(20);
 
 	}
