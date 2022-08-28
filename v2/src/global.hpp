@@ -19,7 +19,7 @@ namespace glb
     pros::Motor backRight(1, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor intake1(15, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor intake2(14, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, true);
     pros::Motor fw2(13, pros::E_MOTOR_GEARSET_06, false);
 
     // sensors
