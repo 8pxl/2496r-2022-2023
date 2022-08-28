@@ -25,7 +25,6 @@ class util::timer
         int startTime = 0;
 
     public:
-
         void start()
         {
             startTime = pros::millis();
@@ -35,6 +34,7 @@ class util::timer
         {
             return (pros::millis() - startTime);
         }
+        
 };
 
 class util::coordinate
@@ -154,7 +154,7 @@ class util::bezier
             return length;
         }
 };
-
+	
 double util::dtr(double input)
 {
   return(PI * input/180);
@@ -197,15 +197,22 @@ double absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 
     try
     { 
-    t = atan2(point.x - pos.x,point.y-pos.y);
+        t = -atan2(pos.y-point.y,pos.x - point.x) - PI/2;
     }
 
     catch(...)
     {
         t = PI/2;
     }
+    
+    t = util::rtd(t);
 
-    return (t * (180/PI));
+    if(t < -180)
+    {
+        t = 90 + (270 - fabs(t));
+    }
+
+    return (t);
 }
 
 #endif
