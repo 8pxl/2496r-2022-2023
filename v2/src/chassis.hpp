@@ -16,10 +16,10 @@ namespace chas
     timeoutTimer.start();
 
     // basic constants
-    double kP = 1.3;
-    double kI = 0;
-    double kD = 0.3;
-    double endTime = 1000;
+    double kP = 2.1;
+    double kI = 0.1;
+    double kD = 7;
+    double endTime = 2000;
 
     // general vars
     double currHeading = glb::imu.get_heading();
@@ -36,7 +36,7 @@ namespace chas
     double derivative;
     
     // pid loop 
-    while (end)
+    while (!end)
     {
 
       currHeading = glb::imu.get_heading();
@@ -44,7 +44,7 @@ namespace chas
 
       //pee
       error = util::minError(target,currHeading);
-      // glb::controller.print(0, 0, "%f", error);
+      glb::controller.print(0, 0, "%f", error);
 
       //eye
       integral = error <= tolerance ? 0 : fabs(error) < integralThreshold ? integral += error : integral;
@@ -71,7 +71,69 @@ namespace chas
     robot::chass.stop("b");
   } 
 
-  void drive(double distance, double timeout, double tolerance)
+  void drive(double target, double timeout, double tolerance)
+  { 
+    // timers
+    util::timer endTimer;
+    util::timer timeoutTimer;
+    timeoutTimer.start();
+
+    // basic constants
+    double kP = 0.1;
+    double kI = 0;
+    double kD = 0;
+    double endTime = 100000;
+
+    // general vars
+    double error;
+    double prevError;
+    bool end = false;
+
+    // eye vars
+    double integral = 0;
+    double integralThreshold = 10;
+
+    // dee vars
+    double derivative;
+    
+    // pid loop 
+    robot::chass.reset();
+
+    while (!end)
+    {
+
+      double currRotation = robot::chass.getRotation();
+
+      //pee
+      error = target - currRotation;
+      glb::controller.print(0, 0, "%f", error);
+
+      //eye
+      integral = error <= tolerance ? 0 : fabs(error) < integralThreshold ? integral += error : integral;
+
+      //dee
+      derivative = error - prevError;
+      prevError = error;
+
+      //end conditions
+      if (error >= tolerance)
+      {
+        endTimer.start();
+      }
+
+      end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
+
+      // spin motors
+      double rVel = (error*kP + integral*kI + derivative*kD);
+      double lVel = (error*kP + integral*kI + derivative*kD);
+      robot::chass.spinDiffy(rVel,lVel);
+
+      pros::delay(10);
+    }
+    robot::chass.stop("b");
+  } 
+
+  void odomDrive(double distance, double timeout, double tolerance)
   { 
     
     // resetting timers
