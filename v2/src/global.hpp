@@ -2,6 +2,8 @@
 #define __GLOBAL__
 
 #include "main.h"
+#include "pros/optical.hpp"
+#include "pros/rtos.hpp"
 #include "util.hpp"
 
 namespace group
@@ -27,6 +29,7 @@ namespace glb
     pros::Controller controller(pros::E_CONTROLLER_MASTER);   
     pros::ADIEncoder leftEncoder(3,4,false);
     pros::ADIEncoder horizEncoder(1,2,false);
+    pros::Optical optical(20);
     // pros::ADIEncoder rightEncoder(5,6,false);
 
     // variables
@@ -83,6 +86,26 @@ class group::mtrs
             
             return(vel/motors.size());
         }
+
+        double getRotation()
+        {
+            double rotation = 0;
+
+            for (int i=0; i < motors.size(); i++)
+            {
+                rotation += motors[i].get_position();
+            }
+            
+            return(rotation/motors.size());
+        }
+
+        void reset()
+        {
+            for (int i=0; i < motors.size(); i++)
+            {
+                motors[i].set_zero_position(0);
+            }
+        }
 };
 
 class group::chassis : public group::mtrs
@@ -128,18 +151,52 @@ namespace flywheel
             double currSpeed = robot::flywheel.getSpeed();
             double diff = target - currSpeed;
 
-            if (diff < 50)
+            if (std::abs(diff) < 50)
             {
                 robot::flywheel.spin((currSpeed += diff/2) * 127 / 600);
+                if (target == 400 || target == 600)
+                {
+                    glb::controller.rumble("-");
+                }
             }
 
             else
             {
                 robot::flywheel.spin(target * 127 / 600);
             }
+            // glb::controller.print(0, 0, "%f", target);
         }
     }
 
+}
+
+namespace rollers
+{
+    bool red = true;
+    void spin()
+    {
+        if(red)
+        {   
+            glb::controller.print(0, 0, "%f", glb::optical.get_hue());
+
+            if(glb::optical.get_hue() >= 200)
+            {
+                robot::intake.spin(80);
+            }
+
+            else if(glb::optical.get_hue() <= 10)
+            {
+                robot::intake.spin(-80);
+                pros::delay(100);
+            }
+
+            else
+            {
+                robot::intake.stop("c");
+            }
+
+        }
+    }
 }
 
 #endif
