@@ -33,8 +33,8 @@ namespace glb
     // pros::ADIEncoder rightEncoder(5,6,false);
 
     // variables
-
     util::coordinate pos = util::coordinate(0,0);
+    bool red = false;
 }
 
 class group::mtrs
@@ -172,29 +172,33 @@ namespace flywheel
 
 namespace rollers
 {
-    bool red = true;
+    bool noInput = true;
+
     void spin()
     {
-        if(red)
-        {   
-            glb::controller.print(0, 0, "%f", glb::optical.get_hue());
+        while (noInput)
+        {
+            if(glb::red)
+            {   
+                glb::controller.print(0, 0, "%f", glb::optical.get_hue());
 
-            if(glb::optical.get_hue() >= 200)
-            {
-                robot::intake.spin(80);
+                if(glb::optical.get_hue() >= 200)
+                {
+                    robot::intake.spin(80);
+                }
+
+                else if(glb::optical.get_hue() <= 10)
+                {
+                    robot::intake.spin(-80);
+                    pros::delay(100);
+                }
+
+                else
+                {
+                    robot::intake.stop("c");
+                }
+
             }
-
-            else if(glb::optical.get_hue() <= 10)
-            {
-                robot::intake.spin(-80);
-                pros::delay(100);
-            }
-
-            else
-            {
-                robot::intake.stop("c");
-            }
-
         }
     }
 }
