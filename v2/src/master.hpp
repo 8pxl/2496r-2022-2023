@@ -3,6 +3,7 @@
 #include "chassis.hpp"
 #include "util.hpp"
 #include "autons.hpp"
+#include "intake.hpp"
 
 util::timer decelTimer; 
 
@@ -28,9 +29,9 @@ void driveContol()
 
     else
     {
-        rollers::noInput = true;
+        // rollers::noInput = true;
         // rollers::spin();
-        // robot::intake.stop("c");
+        robot::intake.stop("c");
     }
 
     // fw
@@ -39,12 +40,12 @@ void driveContol()
     {
         if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
         {
-            flywheel::target = 500;
+            flywheel::target = 600;
         }
 
         else
         {
-            flywheel::target = 600;
+            flywheel::target = 500;
         }
 
         decelTimer.start();
@@ -68,8 +69,42 @@ void driveContol()
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
     {
-        chas::spinTo(90, 2000, 1);
-        chas::drive(1200, 3000, 20);
+
+        flywheel::target = 480;
+        robot::chass.spin(80);
+        robot::intake.spin(110);
+        pros::delay(450);
+        robot::intake.stop("c");
+        chas::drive(-500, 1000, 1);
+        chas::spinTo(356, 800, 0.5);
+        index(1);
+        pros::delay(1100);
+        index(2);
+        chas::spinTo(233, 1400, 1);
+        robot::intake.spin(127); 
+        glb::derrick.set_value(true);
+        chas::drive(1300, 900, 20);
+        glb::derrick.set_value(false);
+        pros::delay(500);
+        flywheel::target = 420;
+        chas::spinTo(345, 1300, 1);
+        robot::intake.stop("c");
+        flywheel::target = 480;
+        index(1);
+        pros::delay(500);
+        index(1);
+        pros::delay(500);
+        index(1);
+        chas::drive(500, 600, 1);
+        chas::spinTo(217, 1400, 1);
+        robot::intake.spin(127); 
+        chas::drive(6500, 2500, 20);
+        chas::spinTo(270, 800, 1);
+        robot::intake.stop("b"); 
+        robot::chass.spin(80);
+        robot::intake.spin(110);
+        pros::delay(300);
+        robot::intake.stop("c");
         // chas::moveTo(util::coordinate(0,0), 100000, 0.6, 0.4, 1);
     }
 
@@ -96,23 +131,24 @@ void driveContol()
 
 int autonSelector()
 {
-    int numAutons = autons.size();
+    int numAutons = autons.size() - 1;
     int selectedAut = 0;
     bool autSelected = false;
 
     robot::flywheel.reset();
 
-    while(!autSelected)
+    while(1)
     {   
+        glb::controller.clear();
 
-        if(robot::flywheel.getRotation() >= 200)
+        if(robot::flywheel.getRotation() >= 60)
         {
             selectedAut = selectedAut == numAutons ? 0 : selectedAut++;
             robot::flywheel.spin(-2);
             robot::flywheel.reset();
         }
 
-        if(robot::flywheel.getRotation() <= -200)
+        if(robot::flywheel.getRotation() <= -60)
         {
             selectedAut = selectedAut == 0 ? numAutons : selectedAut --;
             robot::flywheel.spin(-2);
@@ -121,11 +157,15 @@ int autonSelector()
 
         if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
         {
-            autSelected = true;
+            break;
         }
 
-        glb::controller.print(0, 0, "%s", autonNames[numAutons]);
+        glb::controller.print(0, 0, "%s", autonNames[selectedAut]);
+
+        // glb::controller.print(0, 0, "%f", robot::flywheel.getRotation());
+
     }
 
     return(selectedAut);
 }
+
