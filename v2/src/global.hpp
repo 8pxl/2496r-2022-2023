@@ -2,14 +2,15 @@
 #define __GLOBAL__
 
 #include "main.h"
-#include "pros/optical.hpp"
-#include "pros/rtos.hpp"
+#include "pros/adi.hpp"
 #include "util.hpp"
+#include <vector>
 
 namespace group
 {
     class mtrs;
     class chassis;
+    class pis;
 }
 
 namespace glb
@@ -23,6 +24,9 @@ namespace glb
     pros::Motor intake2(14, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, true);
     pros::Motor fw2(13, pros::E_MOTOR_GEARSET_06, false);
+
+    //pistons
+    pros::ADIDigitalOut derrick(6);
 
     // sensors
     pros::Imu imu(5);
@@ -43,7 +47,7 @@ class group::mtrs
 
         pros::motor_brake_mode_e returnBrakeType(std::string brakeMode)
         {
-        return brakeMode == "c" ? pros::E_MOTOR_BRAKE_COAST : brakeMode == "b" ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_HOLD;
+            return brakeMode == "c" ? pros::E_MOTOR_BRAKE_COAST : brakeMode == "b" ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_HOLD;
         }
 
     protected:
@@ -128,79 +132,51 @@ class group::chassis : public group::mtrs
         }
 };
 
+class group::pis
+{
+    private:
+        std::vector<pros::ADIDigitalOut> pistons;
+        bool state;
+    
+    public:
+
+        pis(std::vector<pros::ADIDigitalOut> p, bool s) : pistons(p), state(s)
+        {
+            setState(s);
+        }
+
+        void toggle()
+        {
+            state = !state;
+
+            for(int i = 0; i < pistons.size(); i++)
+            {
+                pistons[i].set_value(state);
+            }
+        }
+
+        void setState(bool iState)
+        {
+            state = iState;
+
+            for(int i = 0; i < pistons.size(); i++)
+            {
+                pistons[i].set_value(iState);
+            }
+        }
+};
 
 namespace robot
 {
     std::vector<pros::Motor> chassisMotors{glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
     std::vector<pros::Motor> intakeMotors{glb::intake1,glb::intake2};
     std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
+    std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
     
     group::chassis chass(chassisMotors);
     group::mtrs intake(intakeMotors);
     group::mtrs flywheel(flywheelMotors);
-}
-
-namespace flywheel
-{
-    double target;
-    
-    void spin()
-    {
-        while (true)
-        {
-            double currSpeed = robot::flywheel.getSpeed();
-            double diff = target - currSpeed;
-
-            if (std::abs(diff) < 50)
-            {
-                robot::flywheel.spin((currSpeed += diff/2) * 127 / 600);
-                if (target == 400 || target == 600)
-                {
-                    glb::controller.rumble("-");
-                }
-            }
-
-            else
-            {
-                robot::flywheel.spin(target * 127 / 600);
-            }
-            // glb::controller.print(0, 0, "%f", target);
-        }
-    }
-
-}
-
-namespace rollers
-{
-    bool noInput = true;
-
-    void spin()
-    {
-        while (noInput)
-        {
-            if(glb::red)
-            {   
-                glb::controller.print(0, 0, "%f", glb::optical.get_hue());
-
-                if(glb::optical.get_hue() >= 200)
-                {
-                    robot::intake.spin(80);
-                }
-
-                else if(glb::optical.get_hue() <= 10)
-                {
-                    robot::intake.spin(-80);
-                    pros::delay(100);
-                }
-
-                else
-                {
-                    robot::intake.stop("c");
-                }
-
-            }
-        }
-    }
-}
+    group::pis tsukasa(intakePistons,true);
+} 
 
 #endif
