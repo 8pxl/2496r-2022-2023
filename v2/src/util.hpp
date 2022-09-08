@@ -17,6 +17,8 @@ namespace util
     double minError(double target, double current);
     double distToPoint(util::coordinate p1, util::coordinate p2);
     double mod(double a, double b);
+    double absoluteAngleToPoint(util::coordinate pos, util::coordinate point);
+    double imuToRad(double heading);
 }
 
 class util::timer
@@ -34,7 +36,7 @@ class util::timer
         {
             return (pros::millis() - startTime);
         }
-        
+
 };
 
 class util::coordinate
@@ -191,7 +193,7 @@ double util::mod(double a, double b){
   return fmod(360-std::abs(a), b);
 }
 
-double absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
+double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 {
     double t;
 
@@ -207,12 +209,22 @@ double absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
     
     t = util::rtd(t);
 
+    // -270 - 90
+    
     if(t < -180)
     {
         t = 90 + (270 - fabs(t));
     }
 
+    //-180 - 180
+
     return (t);
+}
+
+double util::imuToRad(double heading)
+{
+    // could be like shifted over? idk
+    return (heading < 180) ? dtr(heading) : dtr(-(heading - 180));
 }
 
 #endif
