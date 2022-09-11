@@ -1,5 +1,6 @@
 #include "global.hpp"
 #include "flywheel.hpp"
+#include "pros/rtos.hpp"
 
 namespace intake
 {
@@ -18,9 +19,10 @@ namespace intake
     {
         for (int i = 0; i < num; i++)
         {
-            while (true)
+            bool notIndexing = true;
+            while (notIndexing)
             {
-                if(flywheel::target - robot::flywheel.getSpeed() > 30)
+                if(flywheel::target - robot::flywheel.getSpeed() > 10)
                 {
                     robot::intake.stop("b");
                 }
@@ -28,6 +30,9 @@ namespace intake
                 else
                 {
                     robot::intake.spin(-50);
+                    pros::delay(80);
+                    robot::intake.stop("b");
+                    notIndexing = false;
                 }
             }
 
@@ -111,3 +116,9 @@ namespace intake
         }
     }
 }
+
+
+
+
+
+
