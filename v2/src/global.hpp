@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "pros/adi.hpp"
+#include "pros/imu.hpp"
 #include "util.hpp"
 #include <vector>
 
@@ -11,6 +12,7 @@ namespace group
     class mtrs;
     class chassis;
     class pis;
+    class imu;
 }
 
 namespace glb
@@ -41,6 +43,8 @@ namespace glb
     bool red = false;
 }
 
+
+
 class group::mtrs
 {   
     private:
@@ -51,6 +55,7 @@ class group::mtrs
         }
 
     protected:
+
         std::vector<pros::Motor> motors;
 
     public:
@@ -126,7 +131,7 @@ class group::chassis : public group::mtrs
             for (int i=0; i < motors.size()/2; i++)
             {
                 motors[i].move(rvolt);
-                motors[i+2].move(lvolt);
+                motors[i+motors.size()/2].move(lvolt);
                 // glb::controller.print(0,0,"%f", rvolt);
             }
         }
@@ -135,6 +140,7 @@ class group::chassis : public group::mtrs
 class group::pis
 {
     private:
+
         std::vector<pros::ADIDigitalOut> pistons;
         bool state;
     
@@ -166,9 +172,38 @@ class group::pis
         }
 };
 
+class group::imu
+{
+    private:
+
+        pros::IMU inertial;
+        double initHeading;
+    
+    public:
+
+        imu(pros::IMU imu, double heading): inertial(imu), initHeading(heading) {}
+
+        double degHeading()
+        {
+            double t = inertial.get_heading() + initHeading;
+            return(t <= 360 ? t : 0 + (t-360));
+        }
+
+        double radHeading()
+        {
+            double t = inertial.get_heading() + initHeading;
+            return(t <= 360 ? util::dtr(t) : util::dtr((t-360)));
+        }
+
+        void init(double heading)
+        {
+            initHeading = heading;
+        }
+};
+
 namespace robot
 {
-    std::vector<pros::Motor> chassisMotors{glb::frontLeft,glb::backLeft,glb::frontRight,glb::backRight};
+    std::vector<pros::Motor> chassisMotors{glb::frontLeft,glb::backLeft, glb::frontRight,glb::backRight};
     std::vector<pros::Motor> intakeMotors{glb::intake1,glb::intake2};
     std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
     std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
@@ -176,7 +211,8 @@ namespace robot
     group::chassis chass(chassisMotors);
     group::mtrs intake(intakeMotors);
     group::mtrs flywheel(flywheelMotors);
-    group::pis tsukasa(intakePistons,true);
+    group::pis tsukasa(intakePistons,false);
+    group::imu imu(glb::imu, 0);
 } 
 
 #endif
