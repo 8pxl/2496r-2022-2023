@@ -2,30 +2,30 @@
 #include "master.hpp"
 #include "global.hpp"
 #include "odom.hpp"
-#include "chassis.hpp"
 #include "util.hpp"
+#include "flywheel.hpp"
 
 //globals
-int auton;
-
-void on_center_button() {}
+void (*auton)();
 
 void initialize() 
 {
 	//calibration and sensor init
 	glb::imu.reset();
 	glb::optical.set_led_pwm(100);
+	glb::controller.clear();
+	pros::delay(3000);
 
+	//autSelector
+	// auton = autonSelector();
+	
 	//tasks
 	pros::Task od(odom);
 	pros::Task fw(flywheel::spin);
-	pros::Task rl(rollers::spin);
 
 	//fw initial vel
 	flywheel::target = 0;
 	
-	//autSelector
-	auton = autonSelector();
 }
 
 void disabled() {}
@@ -34,11 +34,13 @@ void competition_initialize() {}
 
 void autonomous() 
 {
-	autons[auton];
+	(*auton)();
 }
 
 void opcontrol() 
 {
+	glb::red = true;
+
 	while (true) 
 	{
 		driveContol();
