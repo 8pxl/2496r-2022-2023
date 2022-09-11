@@ -3,7 +3,6 @@
 
 #include "global.hpp"
 
-
 namespace flywheel
 {
     double target;
@@ -15,9 +14,10 @@ namespace flywheel
             double currSpeed = robot::flywheel.getSpeed();
             double diff = target - currSpeed;
 
-            if (std::abs(diff) < 50)
+            if (std::abs(diff) < 30)
             {
-                robot::flywheel.spin((currSpeed += diff/2) * 127 / 600);
+                robot::flywheel.spin((currSpeed + diff/2) * 127 / 600);
+                
                 if (target == 400 || target == 500)
                 {
                     glb::controller.rumble("-");
