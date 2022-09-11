@@ -13,16 +13,17 @@ void odom()
 
     //scale and stuff
     double trackingDiameter = 2.75;
-    double trackingCirumfrence = 2.75 * PI;
     double scaleFactor = 5.3625;
-    double offset = 0 * scaleFactor;
+    double trackingCirumfrence = (2.75 * PI);
+    double horizOffset = 0 * scaleFactor;
+    double vertOffset = 0 * scaleFactor;
 
     while(1)
     {
-        // glb::controller.print(0,0,"(%f, %f)\n", glb::pos.x,glb::pos.y);
+        glb::controller.print(1,1,"(%f, %f)\n", glb::pos.x,glb::pos.y);
 
         // calcualting change in rotation
-        double currRotation = glb::imu.get_heading();
+        double currRotation = robot::imu.degHeading();
         double deltaRotation = currRotation - prevRotation;
 
         /* when angle difference jumps by more than 300, it can be assumed that it is caused by the imu rotating past
@@ -45,7 +46,6 @@ void odom()
         double deltaVert = (trackingCirumfrence / 360) * glb::leftEncoder.get_value() * scaleFactor;
         double deltaHoriz = (trackingCirumfrence / 360) * glb::horizEncoder.get_value() * scaleFactor;
 
-        
         if (deltaRotation == 0)
         {
             deltaY = cos(2*PI-currRotation) * deltaVert;
@@ -55,16 +55,16 @@ void odom()
         else
         {
             // calculating change in relative y
-            double sOverTheta = deltaVert / deltaRotation + 0;
+            double sOverTheta = (deltaVert / deltaRotation) + horizOffset;
             double relativeY = 2*sin(deltaRotation/2) * sOverTheta;
 
             // calculating change in relative x
-            sOverTheta = deltaHoriz / deltaRotation + 0;
+            sOverTheta = (deltaHoriz / deltaRotation) + vertOffset;
             double relativeX = 2*sin(deltaRotation/2) * sOverTheta;
 
             // calculing absolute x and y 
             double rotationOffset = currRotation + (deltaRotation/2);
-
+    
             double theta = atan2(relativeY, relativeX);
             double radius = sqrt(relativeX*relativeX + relativeY*relativeY);
             theta -= rotationOffset;
@@ -75,7 +75,7 @@ void odom()
         // updating global x and global y
         // glb::controller.print(0,0,"(%f, %f)\n", deltaX,deltaY);
         glb::pos.x -= deltaX;
-        glb::pos.y -= deltaY;
+        glb::pos.y += deltaY;
 
         // reset encoders
         glb::horizEncoder.reset();
