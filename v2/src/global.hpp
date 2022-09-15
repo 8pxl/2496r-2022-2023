@@ -115,6 +115,30 @@ class group::mtrs
                 motors[i].set_zero_position(0);
             }
         }
+
+        void spinDist(double deg, double vel, std::string brakeMode)
+        {
+            this->reset();
+
+            while(deg < this->getRotation())
+            {
+                this->spin(vel);
+            }
+
+            this->stop(brakeMode);
+        }
+
+        void spinFor(double time, double vel, std::string brakeMode)
+        {
+            util::timer timer;
+
+            while(timer.time() < time)
+            {
+                this->spin(vel);
+            }
+
+            this->stop(brakeMode);
+        }
 };
 
 class group::chassis : public group::mtrs
