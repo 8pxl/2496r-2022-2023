@@ -10,7 +10,7 @@ namespace chas
   void drive(double target, double timeout, double tolerance);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
-  void moveTo(util::coordinate target, double timeout, double lkp, double rkp, double rotationBias);
+  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias);
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
 }
 
@@ -206,9 +206,9 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   double linearVel = linearError*lkp;
 
   double currHeading =  robot::imu.degHeading(); //0-360
-  double targetHeading = absoluteAngleToPoint(glb::pos, target); // -180-180
+  double targetHeading = 180-absoluteAngleToPoint(glb::pos, target); // -180-180
   // targetHeading = targetHeading >= 0 ? targetHeading + -180 : targetHeading - 180;
-  targetHeading = targetHeading >= 0 ? targetHeading : 360 - fabs(targetHeading);  //conver to 0-360
+  targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);  //conver to 0-360
 
   int dir = -util::dirToSpin(targetHeading,currHeading);
 
@@ -220,20 +220,46 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   double rVel = (linearVel - (fabs(rotationVel) * rotationBias)) + rotationVel;
 
   // glb::controller.print(0,0,"(%f, %f)\n", linearError,targetHeading);
-  // spinTo(targetHeading, 1000000, 1);
   return std::vector<double> {lVel, rVel};
 }
 
-void chas::moveTo(util::coordinate target, double timeout, double lkp, double rkp, double rotationBias)
+void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias)
 {
   // this one is pretty self explanatory
   util::timer timeoutTimer;
   timeoutTimer.start();
 
-  while(timeoutTimer.time() < timeout)
+  double linearError = distToPoint(glb::pos,target);
+
+  double currHeading =  robot::imu.degHeading();
+  double targetHeading = 180-absoluteAngleToPoint(glb::pos, target);
+  targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);
+  double rotationError = util::minError(targetHeading,currHeading);
+
+  util::pid linearController(lConstants);
+  util::pid rotationController(rConstants);
+
+  linearController.init(linearError);
+  rotationController.init(rotationError);
+
+  while (timeoutTimer.time() < timeout)
   {
-    std::vector<double> velocites = moveToVel(target, lkp, rkp, rotationBias); 
-    robot::chass.spinDiffy(velocites[1],velocites[0]);
+    linearError = distToPoint(glb::pos,target);
+
+    currHeading =  robot::imu.degHeading(); //0-360
+    targetHeading = 180-absoluteAngleToPoint(glb::pos, target);
+    targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);
+    
+    int dir = -util::dirToSpin(targetHeading,currHeading);
+    rotationError = util::minError(targetHeading,currHeading);
+
+    double linearVel = linearController.out(linearError);
+    double rotationVel = dir*rotationController.out(rotationError);
+
+    double rVel = (linearVel - (fabs(rotationVel) * rotationBias)) + rotationVel;
+    double lVel = (linearVel - (fabs(rotationVel) * rotationBias)) - rotationVel;
+
+    robot::chass.spinDiffy(rVel,lVel);
   }
 
   robot::chass.stop("b");
@@ -284,7 +310,7 @@ void chas::moveToPose(util::bezier curve, double timeout, double lkp, double rkp
       break;
     }
   }
-  moveTo(lut[t], timeout, lkp, rkp, rotationBias);
+  // moveTo(lut[t], timeout, lkp, rkp, rotationBias);
 }
 
 #endif
