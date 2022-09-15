@@ -11,6 +11,8 @@ namespace util
     class coordinate;
     class pose;
     class bezier;
+    class pidConstants;
+    class pid;
     double dtr(double input);
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
@@ -27,6 +29,12 @@ class util::timer
         int startTime = 0;
 
     public:
+
+        timer()
+        {
+            start();
+        }
+
         void start()
         {
             startTime = pros::millis();
@@ -156,7 +164,45 @@ class util::bezier
             return length;
         }
 };
-	
+
+class util::pidConstants
+{
+    public:
+        double p,i,d,tolerance,integralThreshold;
+        pidConstants(double kp, double ki, double kd, double deviation, double threshold) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold) {}
+};
+
+class util::pid
+{
+    private:
+
+        double prevError,error,derivative,integralThreshold;
+        double integral = 0;
+        util::pidConstants constants;
+
+    public:
+
+        pid(util::pidConstants cons) : constants(cons){}
+
+        double out(double error)
+        {
+            //eye
+            integral = error <= constants.tolerance ? 0 : fabs(error) < constants.integralThreshold ? integral += error : integral;
+
+            //dee
+            derivative = error - prevError;
+            prevError = error;
+
+            return(error * constants.p  + integral * constants.i + derivative * constants.d);
+        }
+
+        void init(double error)
+        {
+            prevError = error;
+        }
+};
+
+
 double util::dtr(double input)
 {
   return(PI * input/180);
@@ -199,7 +245,8 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 
     try
     { 
-        t = -atan2(pos.y-point.y,pos.x - point.x) - PI/2;
+        // t = -atan2(pos.y-point.y,pos.x - point.x) - PI/2;
+        t = atan2(point.x - pos.x, point.y - pos.y);
     }
 
     catch(...)
@@ -211,10 +258,10 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 
     // -270 - 90
     
-    if(t < -180)
-    {
-        t = 90 + (270 - fabs(t));
-    }
+    // if(t < -180)
+    // {
+    //     t = 90 + (270 - fabs(t));
+    // }
 
     //-180 - 180
 
