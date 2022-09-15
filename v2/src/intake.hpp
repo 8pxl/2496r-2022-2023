@@ -19,8 +19,7 @@ namespace intake
     {
         for (int i = 0; i < num; i++)
         {
-            bool notIndexing = true;
-            while (notIndexing)
+            while (true)
             {
                 if(flywheel::target - robot::flywheel.getSpeed() > 10)
                 {
@@ -29,53 +28,44 @@ namespace intake
 
                 else
                 {
-                    robot::intake.spin(-50);
-                    pros::delay(80);
-                    robot::intake.stop("b");
-                    notIndexing = false;
+                    robot::intake.spinDist(120, 50 , "b");
+                    break;
                 }
             }
 
         }
     }
 
-    void spinUntil(double c1, double c2, double speed)
+    void spinUntil(double color, double speed)
     {
-        //c1 is curr color
-        while (true)
+        robot::chass.spin(50);
+        
+        if(color == 200)
         {
-            if (c1 < c2)
+            while(true)
             {
-                robot::chass.spin(100);
-                if(glb::optical.get_hue() <= c1)
-                {
-                    robot::intake.spin(speed);
-                }
+                robot::intake.spin(127);
 
-                else if(glb::optical.get_hue() >= c2)
+                if( glb::optical.get_hue() > color)
                 {
-                    // robot::intake.spin(-speed);
-                    // pros::delay(150);
-                    break;
-                }
-            }
-
-            else
-            {
-                robot::chass.spin(100);
-                if(glb::optical.get_hue() >= c1)
-                {
-                    robot::intake.spin(speed);
-                }
-
-                else if(glb::optical.get_hue() <= c2)
-                {
-                    // robot::intake.spin(-speed);
-                    // pros::delay(150);
                     break;
                 }
             }
         }
+
+        else
+        {
+            while(true)
+            {
+                robot::intake.spin(127);
+
+                if( glb::optical.get_hue() < color)
+                {
+                    break;
+                }
+            }
+        }
+        robot::chass.stop("b");
     }
 
 
@@ -89,29 +79,32 @@ namespace intake
         double blue = 200;
         double speed = 80;
 
-        if(glb::red)
-        {   
-            if (initRed)
+        if (glb::red)
+        {
+            if(initRed)
             {
-                spinUntil(red, blue, -speed);
+                spinUntil(blue, 127);
+                spinUntil(red, speed);
             }
 
             else
             {
-                spinUntil(blue, red, speed);
+                spinUntil(red, speed);
             }
+            
         }
 
-        else
-        {   
-            if (initRed)
+        else 
+        {
+            if(initRed)
             {
-                spinUntil(red, blue, -speed);
+                spinUntil(blue, speed);
             }
 
             else
             {
-                spinUntil(blue, red, -speed);
+                spinUntil(red, 127);
+                spinUntil(blue, speed);
             }
         }
     }
