@@ -91,6 +91,11 @@ void driveContol()
 
     //aut
 
+    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
+    {
+        intake::toggle();
+    }
+
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
     {
         // chas::moveTo(util::coordinate(0,0), 100000, 0.7, 4, 0.6);
@@ -180,7 +185,7 @@ void driveContol()
         intake::index(2);  
         flywheel::target = 200;
         robot::tsukasa.toggle();
-        chas::moveTo(util::coordinate(200,530), 4000, linearConstants, rotationConstants, 1.2);
+        chas::moveTo(util::coordinate(200,530), 4000, linearConstants, rotationConstants, 1.2,0);
         robot::tsukasa.toggle();
         robot::intake.spin(127);
         pros::delay(1000);
