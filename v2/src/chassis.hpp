@@ -3,6 +3,7 @@
 
 #include "global.hpp"
 #include "util.hpp"
+#include <cmath>
 
 namespace chas
 {
@@ -10,7 +11,7 @@ namespace chas
   void drive(double target, double timeout, double tolerance);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
-  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias);
+  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale);
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
 }
 
@@ -223,38 +224,41 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   return std::vector<double> {lVel, rVel};
 }
 
-void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias)
+void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale)
 {
-  // this one is pretty self explanatory
+  //init
   util::timer timeoutTimer;
-  timeoutTimer.start();
-
+  double rotationVel, linearVel;
   double linearError = distToPoint(glb::pos,target);
-
   double currHeading =  robot::imu.degHeading();
-  double targetHeading = 180-absoluteAngleToPoint(glb::pos, target);
-  targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);
+  double targetHeading = absoluteAngleToPoint(glb::pos, target);
   double rotationError = util::minError(targetHeading,currHeading);
 
-  util::pid linearController(lConstants);
-  util::pid rotationController(rConstants);
+  //init pid controllers
+  util::pid linearController(lConstants,linearError);
+  util::pid rotationController(rConstants,rotationError);
 
-  linearController.init(linearError);
-  rotationController.init(rotationError);
+  //maths for scaling the angular p
+  double scale = rConstants.p / log(linearError - lConstants.tolerance + 1);
 
   while (timeoutTimer.time() < timeout)
   {
+    //error
     linearError = distToPoint(glb::pos,target);
-
     currHeading =  robot::imu.degHeading(); //0-360
-    targetHeading = 180-absoluteAngleToPoint(glb::pos, target);
-    targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);
-    
-    int dir = -util::dirToSpin(targetHeading,currHeading);
+
+    targetHeading = absoluteAngleToPoint(glb::pos, target);
     rotationError = util::minError(targetHeading,currHeading);
 
-    double linearVel = linearController.out(linearError);
-    double rotationVel = dir*rotationController.out(rotationError);
+    rConstants.p = scale * log(linearError - lConstants.tolerance + 1);
+    rConstants.p = rConstants.p < 0 ? 0 : rConstants.p;
+    rotationController.update(rConstants);
+
+    int dir = -util::dirToSpin(targetHeading,currHeading);
+    double cre = cos(rotationError <= 90 ? util::dtr(rotationError) : PI/2);
+
+    rotationVel = dir*rotationController.out(rotationError);
+    linearVel = cre * linearController.out(linearError);
 
     double rVel = (linearVel - (fabs(rotationVel) * rotationBias)) + rotationVel;
     double lVel = (linearVel - (fabs(rotationVel) * rotationBias)) - rotationVel;
