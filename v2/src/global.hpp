@@ -84,6 +84,16 @@ class group::mtrs
             }
         }
 
+        void setBrake(std::string brakeMode)
+        {
+            pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
+
+            for (int i=0; i < motors.size(); i++)
+            {
+                motors[i].set_brake_mode(brakeType);
+            }
+        }
+
         double getSpeed()
         {
             double vel = 0;
