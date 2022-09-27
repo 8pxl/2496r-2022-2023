@@ -3,3 +3,10 @@
 !/v2
 /v2/*
 !/v2/src
+
+
+/*
+!/.gitignore
+!/.github
+/.github/*
+!/.github/workflows
