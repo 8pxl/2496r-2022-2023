@@ -2,10 +2,8 @@
 #define __GLOBAL__
 
 #include "main.h"
-#include "pros/adi.hpp"
-#include "pros/imu.hpp"
 #include "util.hpp"
-#include <vector>
+#include <string>
 
 namespace group
 {
@@ -44,7 +42,6 @@ namespace glb
 }
 
 
-
 class group::mtrs
 {   
     private:
@@ -57,15 +54,17 @@ class group::mtrs
     protected:
 
         std::vector<pros::Motor> motors;
+        std::string name;
 
     public:
 
         // mtrs(const std::initializer_list<pros::Motor> & motorsList)
 
-        mtrs(const std::vector<pros::Motor> & motorsList) : motors(motorsList){}
+        mtrs(const std::vector<pros::Motor> & motorsList, std::string title) : motors(motorsList) , name(title){}
 
         void spin(double volts = 127)
         {
+            // printf("%s.spin(%f);\n", name.c_str(),volts);
 
             for (int i=0; i < motors.size(); i++)
             {
@@ -75,6 +74,7 @@ class group::mtrs
 
         void stop(std::string brakeMode)
         {
+            // printf("%s.stop(%s);\n", name.c_str(),"brakeMode");
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
             for (int i=0; i < motors.size(); i++)
@@ -156,11 +156,11 @@ class group::chassis : public group::mtrs
     public:
 
         // chassis(const std::initializer_list<pros::Motor> & motors) : mtrs(motors){}
-        chassis(const std::vector<pros::Motor> & motorsList) : mtrs(motorsList){}
+        chassis(const std::vector<pros::Motor> & motorsList, std::string title) : mtrs(motorsList,title){}
 
         void spinDiffy(double rvolt, double lvolt)
         {
-            // printf("%f", rvolt);
+            // printf("%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
             for (int i=0; i < motors.size()/2; i++)
             {
@@ -176,10 +176,10 @@ class group::pis
     private:
 
         std::vector<pros::ADIDigitalOut> pistons;
-        bool state;
     
     public:
-
+        bool state;
+        
         pis(std::vector<pros::ADIDigitalOut> p, bool s) : pistons(p), state(s)
         {
             setState(s);
@@ -242,9 +242,9 @@ namespace robot
     std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
     std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
     
-    group::chassis chass(chassisMotors);
-    group::mtrs intake(intakeMotors);
-    group::mtrs flywheel(flywheelMotors);
+    group::chassis chass(chassisMotors,"chass");
+    group::mtrs intake(intakeMotors, "intake");
+    group::mtrs flywheel(flywheelMotors, "flywheel");
     group::pis tsukasa(intakePistons,false);
     group::imu imu(glb::imu, 0);
 } 
