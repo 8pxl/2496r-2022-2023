@@ -1,2 +1,6 @@
-- name: Repo Visualizer
-  uses: githubocto/repo-visualizer@0.8.2
+name: ym
+run-name: ${{ github.actor }} is testing out ym 🚀
+on: [push]
+jobs:
+  - name: Repo Visualizer
+    uses: githubocto/repo-visualizer@0.8.2
