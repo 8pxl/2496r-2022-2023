@@ -7,15 +7,16 @@
 
 namespace chas
 {
-  void spinTo(double target, double timeout, double tolerance);
+  void spinTo(double target, double timeout, util::pidConstants constants);
   void drive(double target, double timeout, double tolerance);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
-  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale);
+  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
+  void timedSpin(double target, double speed,double timeout);
 }
 
-void chas::spinTo(double target, double timeout, double tolerance)
+void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
 { 
   // timers
   util::timer endTimer;
@@ -23,9 +24,10 @@ void chas::spinTo(double target, double timeout, double tolerance)
   timeoutTimer.start();
 
   // basic constants
-  double kP = 2.1;
-  double kI = 0.1;
-  double kD = 7;
+  double kP = constants.p;
+  double kI = constants.i;
+  double kD = constants.d;
+  double tolerance = constants.tolerance;
   double endTime = 2000;
 
   // general vars
@@ -37,7 +39,8 @@ void chas::spinTo(double target, double timeout, double tolerance)
 
   // eye vars
   double integral = 0;
-  double integralThreshold = 10;
+  double integralThreshold = constants.integralThreshold;
+  double maxIntegral = constants.maxIntegral;
 
   // dee vars
   double derivative;
@@ -51,10 +54,14 @@ void chas::spinTo(double target, double timeout, double tolerance)
 
     //pee
     error = util::minError(target,currHeading);
-    glb::controller.print(0, 0, "%f", error);
 
     //eye
-    integral = error <= tolerance ? 0 : fabs(error) < integralThreshold ? integral += error : integral;
+    integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
+
+    if(integral > maxIntegral)
+    {
+      integral = 0;
+    }
 
     //dee
     derivative = error - prevError;
@@ -74,21 +81,75 @@ void chas::spinTo(double target, double timeout, double tolerance)
     robot::chass.spinDiffy(rVel,lVel);
 
     pros::delay(10);
+    glb::controller.print(0, 0, "%f", error);
+    // glb::controller.print(0, 0, "%f", integral);
   }
   robot::chass.stop("b");
 } 
+
+// void chas::spinTo(double target, double timeout, double tolerance)
+// { 
+//   // timers
+//   util::timer timeoutTimer;
+
+//   // basic constants
+//   double kP = 2.1;
+//   double kI = 0.1;
+//   double kD = 7;
+
+//   // general vars
+//   double currHeading = robot::imu.degHeading();
+//   double error;
+//   int dir;
+//   double vel;
+
+//   // eye vars
+//   double integral = 0;
+//   double integralThreshold = 10;
+
+//   // dee vars
+//   double derivative;
+  
+//   util::pidConstants constants(kP,kI,kD, tolerance, integralThreshold);
+//   error = util::minError(target,currHeading);
+//   util::pid pid(constants, error);
+
+
+//   // pid loop 
+//   while (true)
+//   {
+//     //end condition
+//     if(timeoutTimer.time() >= timeout)
+//     {
+//       break;
+//     }
+
+//     //error
+//     currHeading = robot::imu.degHeading();
+//     dir = -util::dirToSpin(target,currHeading);
+//     error = util::minError(target,currHeading);
+
+//     //vel
+//     vel = pid.out(error);
+
+//     // spin motors
+//     robot::chass.spinDiffy(vel * dir,-vel * dir);
+
+//     pros::delay(10);
+//   }
+//   robot::chass.stop("b");
+// } 
 
 void chas::drive(double target, double timeout, double tolerance)
 { 
   // timers
   util::timer endTimer;
   util::timer timeoutTimer;
-  timeoutTimer.start();
 
   // basic constants
-  double kP = 0.1;
-  double kI = 0;
-  double kD = 0;
+  double kP = 0.3;
+  double kI = 0.1;
+  double kD = 2.4;
   double endTime = 100000;
 
   // general vars
@@ -98,7 +159,8 @@ void chas::drive(double target, double timeout, double tolerance)
 
   // eye vars
   double integral = 0;
-  double integralThreshold = 10;
+  double integralThreshold = 30;
+  double maxIntegral = 10000;
 
   // dee vars
   double derivative;
@@ -116,8 +178,12 @@ void chas::drive(double target, double timeout, double tolerance)
     glb::controller.print(0, 0, "%f", error);
 
     //eye
-    integral = error <= tolerance ? 0 : fabs(error) < integralThreshold ? integral += error : integral;
+    integral = error <= tolerance ? 0 : std::abs(error) < integralThreshold ? integral + error : integral;
 
+    if(integral > maxIntegral)
+    {
+      integral = 0;
+    }
     //dee
     derivative = error - prevError;
     prevError = error;
@@ -207,7 +273,7 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   double linearVel = linearError*lkp;
 
   double currHeading =  robot::imu.degHeading(); //0-360
-  double targetHeading = 180-absoluteAngleToPoint(glb::pos, target); // -180-180
+  double targetHeading = absoluteAngleToPoint(glb::pos, target); // -180-180
   // targetHeading = targetHeading >= 0 ? targetHeading + -180 : targetHeading - 180;
   targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);  //conver to 0-360
 
@@ -224,12 +290,13 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   return std::vector<double> {lVel, rVel};
 }
 
-void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale)
+void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut)
 {
   //init
   util::timer timeoutTimer;
   double rotationVel, linearVel;
   double linearError = distToPoint(glb::pos,target);
+  double initError = linearError;
   double currHeading =  robot::imu.degHeading();
   double targetHeading = absoluteAngleToPoint(glb::pos, target);
   double rotationError = util::minError(targetHeading,currHeading);
@@ -239,7 +306,8 @@ void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lC
   util::pid rotationController(rConstants,rotationError);
 
   //maths for scaling the angular p
-  double scale = rConstants.p / log(linearError - lConstants.tolerance + 1);
+  double slope = (rConstants.p) / (linearError - rotationCut);
+  double initP = rConstants.p;
 
   while (timeoutTimer.time() < timeout)
   {
@@ -250,14 +318,16 @@ void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lC
     targetHeading = absoluteAngleToPoint(glb::pos, target);
     rotationError = util::minError(targetHeading,currHeading);
 
-    rConstants.p = scale * log(linearError - lConstants.tolerance + 1);
+    // rConstants.p = slope * log(linearError - lConstants.tolerance + 1);
+    rConstants.p = slope * (linearError - initError) + initP;
     rConstants.p = rConstants.p < 0 ? 0 : rConstants.p;
-    rotationController.update(rConstants);
+    rotationController.update(rConstants);  
 
     int dir = -util::dirToSpin(targetHeading,currHeading);
     double cre = cos(rotationError <= 90 ? util::dtr(rotationError) : PI/2);
+    // glb::controller.print(0, 0, "%f", linearError);
 
-    rotationVel = dir*rotationController.out(rotationError);
+    rotationVel = dir * rotationController.out(rotationError);
     linearVel = cre * linearController.out(linearError);
 
     double rVel = (linearVel - (fabs(rotationVel) * rotationBias)) + rotationVel;
@@ -315,6 +385,41 @@ void chas::moveToPose(util::bezier curve, double timeout, double lkp, double rkp
     }
   }
   // moveTo(lut[t], timeout, lkp, rkp, rotationBias);
+}
+
+void chas::timedSpin(double target, double speed,double timeout)
+{
+  // timers
+  util::timer timeoutTimer;
+
+  // general vars
+  bool end = false;
+
+  double currHeading = robot::imu.degHeading();
+  int initDir = -util::dirToSpin(target,currHeading);
+  // pid loop 
+  while (!end)
+  {
+
+    currHeading = robot::imu.degHeading();
+    int dir = -util::dirToSpin(target,currHeading);
+
+    double error = util::minError(target,currHeading);
+    
+
+    if (initDir != dir)
+    {
+      end = true;
+    }
+
+    end = timeoutTimer.time() >= timeout ? true : end;
+
+    // spin motors
+
+    robot::chass.spinDiffy(dir * speed,- speed*dir);
+
+  }
+  robot::chass.stop("b");
 }
 
 #endif
