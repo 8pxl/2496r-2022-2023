@@ -25,10 +25,10 @@ namespace util
 
 class util::timer
 {
-    private:
-        int startTime = 0;
 
     public:
+    
+        int startTime = 0;
 
         timer()
         {
@@ -168,8 +168,8 @@ class util::bezier
 class util::pidConstants
 {
     public:
-        double p,i,d,tolerance,integralThreshold;
-        pidConstants(double kp, double ki, double kd, double deviation, double threshold) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold) {}
+        double p,i,d,tolerance,integralThreshold, maxIntegral;
+        pidConstants(double kp, double ki, double kd, double deviation, double threshold, double maxI) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold), maxIntegral(maxI) {}
 };
 
 class util::pid
@@ -182,12 +182,17 @@ class util::pid
 
     public:
 
-        pid(util::pidConstants cons) : constants(cons){}
+        pid(util::pidConstants cons, double error) : constants(cons), prevError(error){}
 
         double out(double error)
         {
-            //eye
-            integral = error <= constants.tolerance ? 0 : fabs(error) < constants.integralThreshold ? integral += error : integral;
+            //eyes
+            integral = error <= constants.tolerance ? 0 : error < integralThreshold ? integral + error : integral;
+
+            if(integral > constants.maxIntegral)
+            {
+                integral = 0;
+            }
 
             //dee
             derivative = error - prevError;
@@ -196,9 +201,9 @@ class util::pid
             return(error * constants.p  + integral * constants.i + derivative * constants.d);
         }
 
-        void init(double error)
+        void update(util::pidConstants cons)
         {
-            prevError = error;
+            constants = cons;
         }
 };
 
@@ -264,6 +269,9 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
     // }
 
     //-180 - 180
+
+    t = 180-t;
+    t = t >= 0 ? t :  180 + fabs(t);
 
     return (t);
 }
