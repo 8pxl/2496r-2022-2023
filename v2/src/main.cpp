@@ -2,11 +2,13 @@
 #include "master.hpp"
 #include "global.hpp"
 #include "odom.hpp"
+#include "pros/misc.h"
 #include "util.hpp"
 #include "flywheel.hpp"
 
 //globals
 void (*auton)();
+bool control = true;
 
 void initialize() 
 {
@@ -34,7 +36,7 @@ void competition_initialize() {}
 
 void autonomous() 
 {
-	(*auton)();
+	auton();
 }
 
 void opcontrol() 
@@ -43,7 +45,12 @@ void opcontrol()
 
 	while (true) 
 	{
-		driveContol();
+		if (control) {keejControl();}
+
+		else {felixControl();}
+
+		if (glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {control = !control;}
+
 		pros::delay(20);
 	}
 }
