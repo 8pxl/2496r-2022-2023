@@ -20,7 +20,7 @@ void odom()
 
     while(1)
     {
-        glb::controller.print(1,1,"(%f, %f)\n", glb::pos.x,glb::pos.y);
+        // glb::controller.print(1,1,"%f", glb::imu.get_heading());
 
         // calcualting change in rotation
         double currRotation = robot::imu.degHeading();

@@ -143,12 +143,11 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
 void chas::drive(double target, double timeout, double tolerance)
 { 
   // timers
-  util::timer endTimer;
   util::timer timeoutTimer;
 
   // basic constants
   double kP = 0.3;
-  double kI = 0.1;
+  double kI = 0.2;
   double kD = 2.4;
   double endTime = 100000;
 
@@ -175,10 +174,10 @@ void chas::drive(double target, double timeout, double tolerance)
 
     //pee
     error = target - currRotation;
-    glb::controller.print(0, 0, "%f", error);
+    // glb::controller.print(0, 0, "%f", error);
 
     //eye
-    integral = error <= tolerance ? 0 : std::abs(error) < integralThreshold ? integral + error : integral;
+    // integral = error <= tolerance ? 0 : std::abs(error) < integralThreshold ? integral + error : integral;
 
     if(integral > maxIntegral)
     {
@@ -189,12 +188,8 @@ void chas::drive(double target, double timeout, double tolerance)
     prevError = error;
 
     //end conditions
-    if (error >= tolerance)
-    {
-      endTimer.start();
-    }
 
-    end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
+    end = timeoutTimer.time() >= timeout ? true : false;
 
     // spin motors
     double rVel = (error*kP + integral*kI + derivative*kD);
@@ -202,6 +197,7 @@ void chas::drive(double target, double timeout, double tolerance)
     robot::chass.spinDiffy(rVel,lVel);
 
     pros::delay(10);
+    glb::controller.print(0, 0, "%f", error);
   }
   robot::chass.stop("b");
 } 
@@ -322,10 +318,10 @@ void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lC
     rConstants.p = slope * (linearError - initError) + initP;
     rConstants.p = rConstants.p < 0 ? 0 : rConstants.p;
     rotationController.update(rConstants);  
-
     int dir = -util::dirToSpin(targetHeading,currHeading);
     double cre = cos(rotationError <= 90 ? util::dtr(rotationError) : PI/2);
-    // glb::controller.print(0, 0, "%f", linearError);
+    glb::controller.print(0, 0, "%f,%f", rotationError, linearError);
+    // glb::controller.print(0, 0, "%f,%f", currHeading, targetHeading);
 
     rotationVel = dir * rotationController.out(rotationError);
     linearVel = cre * linearController.out(linearError);

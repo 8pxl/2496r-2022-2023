@@ -2,6 +2,7 @@
 #define __GLOBAL__
 
 #include "main.h"
+#include "pros/adi.hpp"
 #include "util.hpp"
 #include <string>
 
@@ -27,6 +28,7 @@ namespace glb
 
     //pistons
     pros::ADIDigitalOut derrick(6);
+    pros::ADIDigitalOut expansion(5);
 
     // sensors
     pros::Imu imu(5);
@@ -38,7 +40,9 @@ namespace glb
 
     // variables
     util::coordinate pos = util::coordinate(0,0);
-    bool red = false;
+    util::timer matchTimer;
+    bool red;
+    bool driver;
 }
 
 
@@ -201,7 +205,7 @@ class group::pis
 
             for(int i = 0; i < pistons.size(); i++)
             {
-                pistons[i].set_value(iState);
+                pistons[i].set_value(state);
             }
         }
 };
@@ -241,12 +245,15 @@ namespace robot
     std::vector<pros::Motor> intakeMotors{glb::intake1,glb::intake2};
     std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
     std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
+    std::vector<pros::ADIDigitalOut> expansionPistons{glb::expansion};
     
     group::chassis chass(chassisMotors,"chass");
     group::mtrs intake(intakeMotors, "intake");
     group::mtrs flywheel(flywheelMotors, "flywheel");
     group::pis tsukasa(intakePistons,false);
+    group::pis expansion(expansionPistons, false);
     group::imu imu(glb::imu, 0);
+
 } 
 
 #endif

@@ -222,7 +222,6 @@ int util::dirToSpin(double target,double currHeading)
 {
     double d = (target - currHeading);
     double diff = d < 0 ? d + 360 : d;
-
     return(diff > 180 ? 1 : -1);
 }
 
@@ -270,9 +269,8 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
 
     //-180 - 180
 
-    t = 180-t;
-    t = t >= 0 ? t :  180 + fabs(t);
-
+    t = -t;
+    t = t >= 0 ? t :  180 + 180+t;
     return (t);
 }
 

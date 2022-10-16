@@ -16,6 +16,21 @@ namespace intake
         }
     }
 
+    void waitIndex(int speed)
+    {
+        while (true)
+        {
+            if(robot::flywheel.getSpeed() >= speed)
+            {
+                robot::intake.spin(-50);
+                pros::delay(250);
+                robot::intake.stop("b");
+                pros::delay(100);
+                return;
+            }
+        }
+    }
+
     // void index(int num)
     // {
     //     for (int i = 0; i < num; i++)
@@ -44,7 +59,6 @@ namespace intake
 
     void spinUntil(double color, double speed)
     {
-        robot::chass.spin(50);
 
         if(color == 200)
         {
@@ -73,16 +87,17 @@ namespace intake
                 }
             }
         }
-        robot::chass.stop("b");
     }
 
 
-    void toggle()
+    void toggle(double timeLimit = 3000)
     {
-
+        glb::optical.set_led_pwm(100);
+        robot::chass.spin(85);
+        pros::delay(100);
         double initColor = glb::optical.get_hue();
         // glb::controller.print(1, 1, "%f", glb::optical.get_hue());
-        bool initRed = initColor >= 200 ? false : true;
+        bool initRed = initColor >= 60 ? false : true;
 
         double red = 10;
         double blue = 200;
@@ -116,7 +131,11 @@ namespace intake
                 spinUntil(blue, speed);
             }
         }
+
+        glb::optical.set_led_pwm(0);
+        robot::chass.stop("b");
     }
+
 }
 
 

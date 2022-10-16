@@ -31,16 +31,17 @@ void curvature(double iThrottle, double iCurvature, double iThreshold){
     robot::chass.spinDiffy(left * 127,right*127);
 }
 
-void felixFw(int input) 
+void felixFw(double input) 
 {
     double kP = 0.8;
  
-    const int SCALE = 120;
-    int speed = robot::flywheel.getSpeed() / 6;
+    const double SCALE = 1.27;
+    double speed = robot::flywheel.getSpeed() / 6;
     if (speed < input) 
     {
         double error = input - speed;
         robot::flywheel.spin((input + error*kP) * SCALE);
+        // glb::controller.print(0, 0, "%f", input + error*kP);
     } 
     
     else 
@@ -92,31 +93,32 @@ void felixControl()
         robot::tsukasa.toggle();
     }
 
-    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
-    {
-        // robot::expans
-    }
+    // if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
+    // {
+    //     // robot::expans
+    // }
 
-    double lstick = pros::E_CONTROLLER_ANALOG_LEFT_Y;
-    double rstick = pros::E_CONTROLLER_ANALOG_RIGHT_X;
+    double lstick = -glb::controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y) * 0.7874015748;
+    double rstick = -glb::controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X) * 0.7874015748;
     double axis1pow;
 
-    if(lstick > 0)
+    if(rstick > 0)
     {
-        axis1pow = 0.01*(pow(lstick, 2));
+        axis1pow = 0.01*(pow(rstick, 2));
     }
 
     else
     {
-        axis1pow = -0.01*(pow(lstick, 2));
+        axis1pow = -0.01*(pow(rstick, 2));
     }
 
-    double leftMotorSpeed = rstick + axis1pow;
-    double rightMotorSpeed = rstick - axis1pow;  
+    double leftMotorSpeed = lstick + axis1pow;
+    double rightMotorSpeed = lstick - axis1pow;  
         
-    robot::chass.spinDiffy(rightMotorSpeed, leftMotorSpeed);
+    robot::chass.spinDiffy(rightMotorSpeed * 1.27, leftMotorSpeed*1.27);
     
 }
+
 
 void keejControl()
 {
@@ -135,7 +137,7 @@ void keejControl()
     {
         if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
         {
-            flywheel::target = 365;
+            flywheel::target = 380;
         }
 
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
@@ -145,7 +147,7 @@ void keejControl()
     
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
         {
-            flywheel::target = 430;
+            flywheel::target = 480;
         }
 
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
@@ -180,7 +182,7 @@ void keejControl()
             //     flywheel::target += flywheel::target/4;
             // }
 
-            robot::intake.spin(-60);
+            robot::intake.spin(-50);
             decelTimer.start();
             decelTimer.startTime += 3000;
         }
@@ -195,6 +197,14 @@ void keejControl()
             robot::tsukasa.toggle();
         }
     }
+
+    // if(glb::matchTimer.time() >= 50000)
+    // {
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+        {
+            robot::expansion.toggle();
+        }
+    // }
 
     //aut
 
@@ -214,62 +224,28 @@ void keejControl()
         robot::intake.spin(-127);
     }
 
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_X))
-    {
-        glb::pos = util::coordinate(103,675);
-        glb::red = false;
-        robot::imu.init(180);
 
-        util::pidConstants linearConstants(2.9,0,0,0,0,0);
-        util::pidConstants rotationConstants(1.3,0,0,30,0,0);
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+    // {
+    //     skills();
+    // }
 
-        flywheel::target = 420;
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+    // {
+    //     nearHalf();
+    // }
+
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+    // {
+    //     wp();
+    // }
+
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
+    // {
+    //     farHalf();
+    // }
     
-        //toggle roller
-        intake::toggle();
 
-        chas::drive(-500, 1000, 1);
-        chas::spinTo(176, 800);
-
-        intake::index(2);  
-        flywheel::target = 200; 
-        robot::tsukasa.toggle();
-        chas::spinTo(53, 1000);
-        // chas::spinTo((util::absoluteAngleToPoint(glb::pos, util::coordinate(167,600))), 10000, 4);
-        chas::drive(1300, 900, 10);
-        robot::tsukasa.toggle();
-        robot::intake.spin(127);
-        pros::delay(300);
-        flywheel::target = 420;
-        // double target = util::absoluteAngleToPoint(glb::pos, util::coordinate(0,0)) - 180-4;
-        chas::spinTo(165, 1300);
-        intake::index(3);
-
-    }
-
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-    {
-        skills();
-    }
-
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
-    {
-        nearHalf();
-    }
-
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-    {
-        wp();
-    }
-
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-    {
-        farHalf();
-    }
-    
-    // glb::controller.print(0,0, "%f", glb::imu.get_heading());
-    // util::coordinate a = util::coordinate(0,0);
-    // chas::moveToVel(a, 0, 0,  0);
 
     if (decelTimer.time() > 6000)
     {
@@ -299,50 +275,60 @@ void (*autonSelector())()
     int selectedAut = 0;
     bool autSelected = false;
     int color = 1;
+    int driver = 0;
 
     while(1)
     {   
-        glb::controller.clear();
+        // glb::controller.clear();
 
-        if(robot::flywheel.getRotation() >= 60 || glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
-        {
-            selectedAut = selectedAut == numAutons ? 0 : selectedAut++;
-            robot::flywheel.spin(-2);
-            pros::delay(100);
-            robot::flywheel.reset();
-        }
-
-        if(robot::flywheel.getRotation() <= -60 || glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-        {
-            selectedAut = selectedAut == 0 ? numAutons : selectedAut --;
-            robot::flywheel.spin(-2);
-            pros::delay(100);
-            robot::flywheel.reset();
-        }
-
-        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-        {
-            break;
-        }
-
-        glb::controller.print(0, 0, "%s", autonNames[selectedAut]);
-
-        // glb::controller.print(0, 0, "%f", robot::flywheel.getRotation());
-
-    }
-
-    while(1)
-    {   
-        glb::controller.clear();
-        
-        
         if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
         {
-            color += 1;
+            if (selectedAut != numAutons)
+            {
+                selectedAut++;
+            }
+            
+            else
+            {
+                selectedAut = 0;
+            }
+
+            // selectedAut = selectedAut == numAutons ? 0 : selectedAut++;
         }
 
         if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
         {
+            if (selectedAut != 0)
+            {
+                selectedAut--;
+            }
+
+            else
+            {
+                selectedAut = numAutons;
+            }
+
+            // selectedAut = selectedAut == 0 ? numAutons : selectedAut --;
+        }
+
+        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+        {
+            break;
+        }
+
+        glb::controller.print(0, 0, "%s         ", autonNames[selectedAut]);
+
+        pros::delay(50);
+
+    }
+
+    pros::delay(200);
+
+    while(1)
+    {   
+        
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT) || glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+        {
             color += 1;
         }
 
@@ -351,13 +337,45 @@ void (*autonSelector())()
             break;
         }
 
-        glb::controller.print(0, 0, "%s", (color % 2 == 0) ? "red" : "blue");
+        glb::controller.print(0, 0, "%s   ", (color % 2 == 0) ? "red" : "blue");
 
-        // glb::controller.print(0, 0, "%f", robot::flywheel.getRotation());
+        pros::delay(50);
+    }
+    
+    pros::delay(200);
 
+    while(1)
+    {   
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT) || glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+        {
+            driver += 1;
+        }
+
+        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+        {
+            break;
+        }
+
+        glb::controller.print(0, 0, "%s   ", (driver % 2 == 0) ? "keej" : "felix");
+
+        pros::delay(50);
+
+    }
+    
+    if (driver % 2 == 0)
+    {
+        glb::driver = true;
+        pros::Task fw(flywheel::spin);
+    }
+
+    else
+    {
+        glb::driver = false;
     }
 
     glb::red = color % 2 == 0 ? true : false;
+
+    pros::delay(200);
 
     return(autons[selectedAut]);
 }
