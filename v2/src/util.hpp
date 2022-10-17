@@ -35,6 +35,8 @@ class util::timer
             start();
         }
 
+        timer(int a){}
+
         void start()
         {
             startTime = pros::millis();

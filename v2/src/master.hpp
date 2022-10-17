@@ -73,14 +73,14 @@ void felixControl()
         felixFw(0);
     }
 
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
-    {//index
-        robot::intake.spin(-50.8);
-    }
-    
-    else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-    {// intake
+    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+    {
         robot::intake.spin(127);
+    }
+
+    else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
+    {
+        robot::intake.spin(-50.8);
     }
 
     else
@@ -88,10 +88,34 @@ void felixControl()
         robot::intake.stop("c");
     }
 
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2) && robot::tsukasa.state)
+    {
+        robot::tsukasa.toggle();
+    }
+    
+
+
     if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B))
     {
         robot::tsukasa.toggle();
     }
+
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT) || glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+    {
+        robot::cata.toggle();
+        robot::plane.toggle();
+    }
+
+    else if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+    {
+        robot::cata.toggle();
+    }
+
+    else if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+    {
+        robot::plane.toggle();
+    }
+    
 
     // if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
     // {
@@ -198,11 +222,13 @@ void keejControl()
         }
     }
 
+
     // if(glb::matchTimer.time() >= 50000)
     // {
         if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
         {
-            robot::expansion.toggle();
+            robot::plane.toggle();
+            robot::cata.toggle();
         }
     // }
 
@@ -365,7 +391,6 @@ void (*autonSelector())()
     if (driver % 2 == 0)
     {
         glb::driver = true;
-        pros::Task fw(flywheel::spin);
     }
 
     else

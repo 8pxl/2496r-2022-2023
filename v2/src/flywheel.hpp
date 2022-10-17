@@ -72,6 +72,14 @@ namespace flywheel
 
         while (true)
         {
+            if(glb::match)
+            {
+                if(!glb::driver)
+                {
+                    return;
+                }
+            }
+            
             //velocity sliding average
             double averageSpeed = 0;
             double currSpeed = robot::flywheel.getSpeed();

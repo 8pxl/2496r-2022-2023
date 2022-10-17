@@ -28,7 +28,8 @@ namespace glb
 
     //pistons
     pros::ADIDigitalOut derrick(6);
-    pros::ADIDigitalOut expansion(5);
+    pros::ADIDigitalOut cata(5);
+    pros::ADIDigitalOut plane(7);
 
     // sensors
     pros::Imu imu(5);
@@ -40,8 +41,9 @@ namespace glb
 
     // variables
     util::coordinate pos = util::coordinate(0,0);
-    util::timer matchTimer;
+    util::timer matchTimer(1);
     bool red;
+    bool match = false;
     bool driver;
 }
 
@@ -245,13 +247,15 @@ namespace robot
     std::vector<pros::Motor> intakeMotors{glb::intake1,glb::intake2};
     std::vector<pros::Motor> flywheelMotors{glb::fw1,glb::fw2};
     std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
-    std::vector<pros::ADIDigitalOut> expansionPistons{glb::expansion};
+    std::vector<pros::ADIDigitalOut> expansionPistons{glb::cata};
+    std::vector<pros::ADIDigitalOut> planePistons{glb::plane};
     
     group::chassis chass(chassisMotors,"chass");
     group::mtrs intake(intakeMotors, "intake");
     group::mtrs flywheel(flywheelMotors, "flywheel");
     group::pis tsukasa(intakePistons,false);
-    group::pis expansion(expansionPistons, false);
+    group::pis cata(expansionPistons, false);
+    group::pis plane(planePistons, false);
     group::imu imu(glb::imu, 0);
 
 } 

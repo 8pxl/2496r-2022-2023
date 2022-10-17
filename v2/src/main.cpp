@@ -2,6 +2,7 @@
 #include "master.hpp"
 #include "global.hpp"
 #include "odom.hpp"
+#include "pros/rtos.hpp"
 #include "util.hpp"
 #include "flywheel.hpp"
 
@@ -29,39 +30,42 @@ void initialize()
 	
 }
 
-void disabled() {}
+void disabled() 
+{
+}
+
+//hello keijay, :DDDD
+// lucy was here
+//cool code font :oooooo
 
 void competition_initialize() {}
 
 void autonomous() 
 {
+	glb::match = false;
+	pros::Task fw(flywheel::spin);
 	auton();
 }
 
 void opcontrol() 
 {
-	glb::matchTimer.start();
-	int count = 0;
-	int i = 6;
+	bool temp = glb::driver;
+	bool temp2 = glb::match;
+	glb::driver = false;
+	glb::match = true;
+	pros::delay(100);
 
+	glb::driver = temp;
+	glb::match = true;
+	pros::Task fwd(flywheel::spin);
+	
 	while (true) 
 	{
-
-        // if(count % 1000 == 0)
-        // {
-        //         i++;
-        // }
-
-		// flywheel::target = 50*i;
-
-		// count++;
-
-
 		if (glb::driver) {keejControl();}
 
-		// else {felixControl();}
+		else {felixControl();}
 
-		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
+		// if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
 
 		pros::delay(20);
 	}
