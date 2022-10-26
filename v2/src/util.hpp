@@ -3,6 +3,8 @@
 
 #include "main.h"
 #include <cmath>
+#include <vector>
+#include <queue>
 #define PI 3.14159265358979323846
 
 namespace util
@@ -13,6 +15,7 @@ namespace util
     class bezier;
     class pidConstants;
     class pid;
+    class slidingAverage;
     double dtr(double input);
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
@@ -209,6 +212,44 @@ class util::pid
         }
 };
 
+class util::slidingAverage
+{
+    private:
+        int size;
+        double sum;
+        std::vector<double> window;
+
+    public:
+        slidingAverage(int Size) : size(Size)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                window.push_back(0);
+            }
+        }
+        
+        void push(double val)
+        {
+            for (int i = 0; i < size-1; i++)
+            {
+                window[i] = window[i+1];
+            }
+
+            window[size - 1] = val;
+            
+        }
+
+        double average()
+        {
+            double average = 0;
+            for(int i = 0; i < size; i++)
+            {
+                average += window[i];
+            }
+            
+            return(average/size);
+        }
+};
 
 double util::dtr(double input)
 {

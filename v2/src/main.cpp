@@ -5,6 +5,7 @@
 #include "pros/rtos.hpp"
 #include "util.hpp"
 #include "flywheel.hpp"
+#include <algorithm>
 
 //globals
 void (*auton)();
@@ -23,7 +24,7 @@ void initialize()
 	
 	//tasks
 	pros::Task od(odom);
-	// pros::Task fw(flywheel::spin);
+	pros::Task fw(flywheel::spin);
 
 	//fw initial vel
 	flywheel::target = 0;
@@ -43,30 +44,26 @@ void competition_initialize() {}
 void autonomous() 
 {
 	glb::match = false;
-	pros::Task fw(flywheel::spin);
 	auton();
 }
 
 void opcontrol() 
 {
-	bool temp = glb::driver;
-	bool temp2 = glb::match;
-	glb::driver = false;
-	glb::match = true;
-	pros::delay(100);
-
-	glb::driver = temp;
-	glb::match = true;
-	pros::Task fwd(flywheel::spin);
-	
 	while (true) 
 	{
+		// for (int i = 7; i < 13; i ++)
+		// {
+		// 	flywheel::target = i*50;
+		// 	pros::delay(10000);
+		// }
+
 		if (glb::driver) {keejControl();}
 
 		else {felixControl();}
 
-		// if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
+		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
 
+		printf("pros::delay(20);\n");
 		pros::delay(20);
 	}
 }

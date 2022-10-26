@@ -5,6 +5,8 @@
 
 namespace intake
 {
+    util::timer inRange;
+
     void index(int num)
     {
         for (int i = 0; i < num; i++)
@@ -16,17 +18,32 @@ namespace intake
         }
     }
 
-    void waitIndex(int speed)
+    void waitIndex(int num, int tolerance = 5, int ff = -1, int time = 50, int ffTime = 0)
     {
-        while (true)
+        for (int i = 0; i < num; i++)
         {
-            if(robot::flywheel.getSpeed() >= speed)
+            while (true)
             {
-                robot::intake.spin(-50);
-                pros::delay(250);
-                robot::intake.stop("b");
-                pros::delay(100);
-                return;
+                if(flywheel::gError < tolerance)
+                {
+
+                    if(inRange.time() >= time)
+                    {
+                        flywheel::ff = ff;
+                        pros::delay(ffTime);
+                        robot::intake.spin(-50);
+                        pros::delay(250);
+                        robot::intake.stop("b");
+                        pros::delay(250);
+                        inRange.start();
+                        break;
+                    }
+                }
+                
+                else
+                {
+                    inRange.start();
+                }
             }
         }
     }
@@ -113,13 +130,13 @@ namespace intake
 
         double red = 10;
         double blue = 200;
-        double speed = 90;
+        double speed = 60;
 
         if (!glb::red)
         {
             if(initRed)
             {
-                spinUntil(blue, 127, timer, timeLimit);
+                spinUntil(blue, 100, timer, timeLimit);
                 spinUntil(red, speed, timer, timeLimit);
             }
 
@@ -139,7 +156,7 @@ namespace intake
 
             else
             {
-                spinUntil(red, 127, timer, timeLimit);
+                spinUntil(red, 100, timer, timeLimit);
                 spinUntil(blue, speed, timer, timeLimit);
             }
         }

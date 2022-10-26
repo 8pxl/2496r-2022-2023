@@ -70,7 +70,7 @@ class group::mtrs
 
         void spin(double volts = 127)
         {
-            // printf("%s.spin(%f);\n", name.c_str(),volts);
+            printf("robot::%s.spin(%f);\n", name.c_str(),volts);
 
             for (int i=0; i < motors.size(); i++)
             {
@@ -80,7 +80,7 @@ class group::mtrs
 
         void stop(std::string brakeMode)
         {
-            // printf("%s.stop(%s);\n", name.c_str(),"brakeMode");
+            printf("robot::%s.stop('%s');\n", name.c_str(),brakeMode.c_str());
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
             for (int i=0; i < motors.size(); i++)
@@ -136,7 +136,7 @@ class group::mtrs
         {
             this->reset();
 
-            while(deg < this->getRotation())
+            while(this->getRotation() < deg)
             {
                 this->spin(vel);
             }
@@ -159,6 +159,7 @@ class group::mtrs
 
 class group::chassis : public group::mtrs
 {
+
     public:
 
         // chassis(const std::initializer_list<pros::Motor> & motors) : mtrs(motors){}
@@ -166,7 +167,7 @@ class group::chassis : public group::mtrs
 
         void spinDiffy(double rvolt, double lvolt)
         {
-            // printf("%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
+            printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
             for (int i=0; i < motors.size()/2; i++)
             {
@@ -180,19 +181,20 @@ class group::chassis : public group::mtrs
 class group::pis
 {
     private:
-
+        std::string name;
         std::vector<pros::ADIDigitalOut> pistons;
     
     public:
         bool state;
         
-        pis(std::vector<pros::ADIDigitalOut> p, bool s) : pistons(p), state(s)
+        pis(std::vector<pros::ADIDigitalOut> p, bool s, std::string title) : pistons(p), state(s), name(title)
         {
             setState(s);
         }
 
         void toggle()
         {
+            printf("robot::%s.toggle();\n", name.c_str());
             state = !state;
 
             for(int i = 0; i < pistons.size(); i++)
@@ -203,6 +205,7 @@ class group::pis
 
         void setState(bool iState)
         {
+            printf("robot::%s.setState(%d);\n", name.c_str(), iState);
             state = iState;
 
             for(int i = 0; i < pistons.size(); i++)
@@ -253,9 +256,9 @@ namespace robot
     group::chassis chass(chassisMotors,"chass");
     group::mtrs intake(intakeMotors, "intake");
     group::mtrs flywheel(flywheelMotors, "flywheel");
-    group::pis tsukasa(intakePistons,false);
-    group::pis cata(expansionPistons, false);
-    group::pis plane(planePistons, false);
+    group::pis tsukasa(intakePistons,false, "tsukasa");
+    group::pis cata(expansionPistons, false, "cata");
+    group::pis plane(planePistons, false, "plane");
     group::imu imu(glb::imu, 0);
 
 } 
