@@ -4,6 +4,7 @@
 #include "global.hpp"
 #include "util.hpp"
 #include <cmath>
+#include <vector>
 
 namespace chas
 {
@@ -14,6 +15,7 @@ namespace chas
   void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
   void timedSpin(double target, double speed,double timeout);
+  void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
 }
 
 void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
@@ -415,7 +417,58 @@ void chas::timedSpin(double target, double speed,double timeout)
     robot::chass.spinDiffy(dir * speed,- speed*dir);
 
   }
+
   robot::chass.stop("b");
 }
+
+void chas::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout)
+{
+  util::timer timeoutTimer;
+
+  while (true)
+  {
+    if(util::minError(heading, robot::imu.degHeading()) < tolerance || timeoutTimer.time() >= timeout)
+    {
+      break;
+    }
+
+    robot::chass.spinDiffy(rvolt, lvolt);
+  }
+}
+
+// void chas::arcTurn(double target, double radius, double time, double timeout)
+// {
+//   util::timer timer;
+//   double curr;
+//   double currTime;
+//   double rError;
+//   double lError;
+//   double s;
+//   double dl;
+//   double dr;
+//   double dist;
+//   double vel;
+//   std::vector<double> rotations;
+
+//   while (true)
+//   {
+//     curr = robot::imu.degHeading();
+//     rError = util::minError(target, curr);
+//     s = rError/360 * 2 * PI * radius;
+
+//     rotations = robot::chass.getDiffy();
+//     dr = std::abs(rotations[0]);
+//     dl = std::abs(rotations[1]);
+
+//     dist += (dr + dl)/2;
+
+//     lError = s - dist;
+
+//     currTime = timer.time();
+//     vel = lError/(time - currTime);
+
+
+//   }
+// }
 
 #endif
