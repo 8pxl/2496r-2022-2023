@@ -22,10 +22,21 @@ namespace flywheel
             // inRange = true;
             if(error > 0)
             {
+                // if (std::abs(error) < 4)
+                // {
+                //     return (target + error * (kp/2) + integral * ki) * kv;
+                // }
+
                 return (target + error * kp + integral * ki) * kv;
             }
+
             else
             {
+                // if (std::abs(error) < 4)
+                // {
+                //     return (target + error * (kp/2) + integral * ki) * kv;
+                // }
+
                 return (target + (error * 0.7) * kp + integral * ki) * kv;
             }
         }
@@ -45,12 +56,12 @@ namespace flywheel
 
     void spin()
     {
-        const int velAverageSize = 50;
+        const int velAverageSize = 30;
         const double kv = 0.1913474101312919;
         const double integralThreshold = 5;
         double ki;
         double kp;
-        util::slidingAverage velAverage = util::slidingAverage(velAverageSize);
+        util::movingAverage velAverage = util::movingAverage(velAverageSize);
         util::timer forwardTimer;
         util::timer postForward;
         double speed;
@@ -68,7 +79,8 @@ namespace flywheel
 
             //velocity sliding average
             velAverage.push(robot::flywheel.getSpeed());
-            speed = velAverage.average();
+            // speed = velAverage.simpleAverage();
+            speed = velAverage.expAverage();
 
             // speed = 0;
 
@@ -85,8 +97,8 @@ namespace flywheel
 
             else if (target < 490)
             {
-                kp = 3;
-                ki = 0.07;
+                kp = 14;
+                ki = 0.7;
                 deadband = 50;
             }
 
@@ -94,7 +106,7 @@ namespace flywheel
             {
                 kp = 6;
                 ki = 0.01;
-                deadband = 50;
+                deadband = 30;
             }
 
             else
@@ -114,7 +126,7 @@ namespace flywheel
 
                 else
                 {
-                    integral += error/8;
+                    integral += error;
                 }
             }
 
@@ -159,7 +171,7 @@ namespace flywheel
                 case 3:
                     if(forwardTimer.time() >= 60)
                     {
-                        if(forwardTimer.time() >= 550)
+                        if(forwardTimer.time() >= 600)
                         {
                             ff = -1;
                         }
@@ -172,7 +184,7 @@ namespace flywheel
                     break;
             }
 
-            glb::controller.print(1, 1, "%f", voltage);
+            // glb::controller.print(1, 1, "%f", voltage);
 
 
             // else
@@ -197,7 +209,6 @@ namespace flywheel
 
             // voltage = voltageOut(kp, kv, ki, integral, target, error, deadband);
             robot::flywheel.spin(voltage);
-            // glb::controller.print(0, 0, "f", ff);
             
             pros::delay(10);
             // printf("%f,", speed);
@@ -211,7 +222,7 @@ namespace flywheel
             //     printf("%f,%f,", speed,voltage);
             // }
 
-            // printf("%f,%f,", speed,voltage);
+            printf("%f,%f,", speed,integral);
         }
     }
 }
@@ -432,7 +443,7 @@ namespace flywheel
 
     //         pros::delay(10);
     //         count++;
-    //         printf("%f,", averageSpeed);
+            // printf("%f,", averageSpeed);
     //     }
     // }
 
