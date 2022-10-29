@@ -5,6 +5,7 @@
 #include "pros/adi.hpp"
 #include "util.hpp"
 #include <string>
+#include <vector>
 
 namespace group
 {
@@ -42,6 +43,8 @@ namespace glb
     // variables
     util::coordinate pos = util::coordinate(0,0);
     util::timer matchTimer(1);
+    // double dl;
+    // double dr;
     bool red;
     bool match = false;
     bool driver;
@@ -70,7 +73,7 @@ class group::mtrs
 
         void spin(double volts = 127)
         {
-            printf("robot::%s.spin(%f);\n", name.c_str(),volts);
+            // printf("robot::%s.spin(%f);\n", name.c_str(),volts);
 
             for (int i=0; i < motors.size(); i++)
             {
@@ -80,7 +83,7 @@ class group::mtrs
 
         void stop(std::string brakeMode)
         {
-            printf("robot::%s.stop('%s');\n", name.c_str(),brakeMode.c_str());
+            // printf("robot::%s.stop('%s');\n", name.c_str(),brakeMode.c_str());
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
             for (int i=0; i < motors.size(); i++)
@@ -167,7 +170,7 @@ class group::chassis : public group::mtrs
 
         void spinDiffy(double rvolt, double lvolt)
         {
-            printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
+            // printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
             for (int i=0; i < motors.size()/2; i++)
             {
@@ -175,6 +178,20 @@ class group::chassis : public group::mtrs
                 motors[i+motors.size()/2].move(lvolt);
                 // glb::controller.print(0,0,"%f", rvolt);
             }
+        }
+
+        std::vector<double> getDiffy()
+        {
+            double dl = 0;
+            double dr = 0;
+            
+            for (int i=0; i < motors.size()/2; i++)
+            {
+                dl += motors[i].get_position();
+                dr += motors[i + motors.size()/2].get_position();
+            }
+            
+            return(std::vector<double> {dr,dl});
         }
 };
 
@@ -194,7 +211,7 @@ class group::pis
 
         void toggle()
         {
-            printf("robot::%s.toggle();\n", name.c_str());
+            // printf("robot::%s.toggle();\n", name.c_str());
             state = !state;
 
             for(int i = 0; i < pistons.size(); i++)
@@ -205,7 +222,7 @@ class group::pis
 
         void setState(bool iState)
         {
-            printf("robot::%s.setState(%d);\n", name.c_str(), iState);
+            // printf("robot::%s.setState(%d);\n", name.c_str(), iState);
             state = iState;
 
             for(int i = 0; i < pistons.size(); i++)
