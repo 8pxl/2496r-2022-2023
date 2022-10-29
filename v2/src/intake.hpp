@@ -29,13 +29,26 @@ namespace intake
 
                     if(inRange.time() >= time)
                     {
-                        flywheel::ff = ff;
-                        pros::delay(ffTime);
-                        robot::intake.spin(-50);
-                        pros::delay(250);
-                        robot::intake.stop("b");
-                        pros::delay(250);
-                        inRange.start();
+                        if (i == num-1)
+                        {
+                            flywheel::ff = ff;
+                            pros::delay(ffTime);
+                            robot::intake.spin(-80);
+                            pros::delay(200);
+                            inRange.start();
+                        }
+
+                        else
+                        {
+                            flywheel::ff = ff;
+                            pros::delay(ffTime);
+                            robot::intake.spin(-50);
+                            pros::delay(250);
+                            robot::intake.stop("b");
+                            pros::delay(250);
+                            inRange.start();
+                        }
+
                         break;
                     }
                 }
@@ -122,15 +135,15 @@ namespace intake
         util::timer timer;
 
         glb::optical.set_led_pwm(100);
-        robot::chass.spin(85);
-        pros::delay(100);
+        robot::chass.spin(45);
+        pros::delay(600);
         double initColor = glb::optical.get_hue();
         glb::controller.print(1, 1, "%f", glb::optical.get_hue());
         bool initRed = initColor >= 60 ? false : true;
 
         double red = 10;
         double blue = 200;
-        double speed = 60;
+        double speed = 70;
 
         if (!glb::red)
         {
