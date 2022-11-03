@@ -1,15 +1,8 @@
-#include "main.h"
-#include "master.hpp"
 #include "global.hpp"
-#include "odom.hpp"
-#include "pros/misc.h"
-#include "pros/rtos.hpp"
-#include "util.hpp"
-#include "flywheel.hpp"
+#include "master.hpp"
 
 // - globals
 void (*auton)();
-// bool control = true;
 
 void initialize() 
 {
@@ -19,13 +12,6 @@ void initialize()
 
 	// - autSelector
 	auton = autonSelector();
-	
-	// - tasks
-	pros::Task od(odom);
-	pros::Task fw(flywheel::spin);
-
-	//-  fw initial vel
-	flywheel::target = 0;
 	
 }
 
