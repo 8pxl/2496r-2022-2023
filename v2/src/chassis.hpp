@@ -1,6 +1,11 @@
 #ifndef __CHASSIS__
 #define __CHASSIS__
 
+// - chassis specific macros 
+#include "pros/rtos.hpp"
+#define DL 0
+#define DR 0
+
 #include "global.hpp"
 #include "util.hpp"
 #include <cmath>
@@ -10,12 +15,14 @@ namespace chas
 {
   void spinTo(double target, double timeout, util::pidConstants constants);
   void drive(double target, double timeout, double tolerance);
+  void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
   void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
   void timedSpin(double target, double speed,double timeout);
   void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
+  void arcTurn(double target, double radius, double time, double timeout);
 }
 
 void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
@@ -203,6 +210,48 @@ void chas::drive(double target, double timeout, double tolerance)
   }
   robot::chass.stop("b");
 } 
+
+void chas::autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons)
+{
+  // timers
+  util::timer timer = util::timer();
+
+  // general vars
+  double currHeading = robot::imu.degHeading();
+  double rot;
+  double vl;
+  double va;
+
+  int dir;
+
+  util::pid linearController = util::pid(lCons,util::minError(target, heading););
+  util::pid angularController = util::pid(acons,target);
+
+  robot::chass.reset();
+
+  while (true)
+  {
+    currHeading = robot::imu.degHeading();
+    rot = robot::chass.getRotation();
+
+    va = angularController.out(util::minError(target, currHeading));
+    vl = linearController.out(target - rot);
+    dir = -util::dirToSpin(target,currHeading);
+
+    robot::chass.spinDiffy(vl + dir * va,  vl - dir * va);
+
+    if(timer.time() >= timeout)
+    {
+      break;
+    }
+
+    pros::delay(10);
+  }
+
+  robot::chass.stop("b");
+
+}
+
 
 void chas::odomDrive(double distance, double timeout, double tolerance)
 { 
@@ -436,39 +485,57 @@ void chas::velsUntilHeading(double rvolt, double lvolt, double heading, double t
   }
 }
 
-// void chas::arcTurn(double target, double radius, double time, double timeout)
-// {
-//   util::timer timer;
-//   double curr;
-//   double currTime;
-//   double rError;
-//   double lError;
-//   double s;
-//   double dl;
-//   double dr;
-//   double dist;
-//   double vel;
-//   std::vector<double> rotations;
+void chas::arcTurn(double target, double radius, double time, double timeout)
+{
+  util::timer timer;
+  double curr;
+  double currTime;
+  double rError;
+  double lError;
+  double sl;
+  double sr;
+  double dl;
+  double dr;
+  double rvel;
+  double lvel;
+  double theta;
+  std::vector<double> rotations;
 
-//   while (true)
-//   {
-//     curr = robot::imu.degHeading();
-//     rError = util::minError(target, curr);
-//     s = rError/360 * 2 * PI * radius;
+  robot::chass.reset();
 
-//     rotations = robot::chass.getDiffy();
-//     dr = std::abs(rotations[0]);
-//     dl = std::abs(rotations[1]);
+  while (true)
+  {
+    curr = robot::imu.degHeading();
+    rotations = robot::chass.getDiffy();
+    currTime = timer.time();
 
-//     dist += (dr + dl)/2;
+    rError = util::minError(target, curr);
+    theta = rError/360 * 2 * PI;
+    sl = theta * (radius + DL);
+    sr = theta * (radius + DR);
 
-//     lError = s - dist;
+    dr += std::abs(rotations[0]);
+    dl += std::abs(rotations[1]);
 
-//     currTime = timer.time();
-//     vel = lError/(time - currTime);
+    lError = sl - dl;
+    rError = sr - dr;
 
+    currTime = timer.time();
 
-//   }
-// }
+    lvel = lError/(time - currTime);
+    rvel = lError/(time - currTime);
+
+    robot::chass.reset();
+    robot::chass.spinDiffy(rvel, lvel);
+    
+    if(currTime >= timeout)
+    {
+      break;
+    }
+
+    pros::delay(10);
+  }
+}
+
 
 #endif
