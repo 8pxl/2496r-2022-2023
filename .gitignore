@@ -4,9 +4,19 @@
 /v2/*
 !/v2/src
 
-
 /*
 !/.gitignore
-!/.github
-/.github/*
-!/.github/workflows
+!/v3
+/v3/*
+!/v3/src
+
+# /*
+# !/.gitignore
+# !/.github
+# /.github/*
+# !/.github/workflows
+
+# /*
+# !/v2/src/
+# !/v3/src/
+# !.gitignore
