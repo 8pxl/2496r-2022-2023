@@ -1,6 +1,7 @@
 #ifndef __GLOBAL__
 #define __GLOBAL__
 
+
 #include "main.h"
 #include "pros/adi.hpp"
 #include "util.hpp"
@@ -64,18 +65,19 @@ class group::mtrs
 
         std::vector<pros::Motor> motors;
         std::string name;
+        int size;
 
     public:
 
         // mtrs(const std::initializer_list<pros::Motor> & motorsList)
 
-        mtrs(const std::vector<pros::Motor> & motorsList, std::string title) : motors(motorsList) , name(title){}
+        mtrs(const std::vector<pros::Motor> & motorsList, std::string title) : motors(motorsList) , name(title), size(motorsList.size()){}
 
         void spin(double volts = 127)
         {
             // printf("robot::%s.spin(%f);\n", name.c_str(),volts);
 
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 motors[i].move(volts);
             }
@@ -86,7 +88,7 @@ class group::mtrs
             // printf("robot::%s.stop('%s');\n", name.c_str(),brakeMode.c_str());
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 motors[i].set_brake_mode(brakeType);
                 motors[i].brake();
@@ -97,7 +99,7 @@ class group::mtrs
         {
             pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 motors[i].set_brake_mode(brakeType);
             }
@@ -107,29 +109,29 @@ class group::mtrs
         {
             double vel = 0;
 
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 vel += motors[i].get_actual_velocity();
             }
             
-            return(vel/motors.size());
+            return(vel/size);
         }
 
         double getRotation()
         {
             double rotation = 0;
 
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 rotation += motors[i].get_position();
             }
             
-            return(rotation/motors.size());
+            return(rotation/size);
         }
 
         void reset()
         {
-            for (int i=0; i < motors.size(); i++)
+            for (int i=0; i < size; i++)
             {
                 motors[i].set_zero_position(0);
             }
@@ -170,12 +172,13 @@ class group::chassis : public group::mtrs
 
         void spinDiffy(double rvolt, double lvolt)
         {
+            int half = size/2;
             // printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
-            for (int i=0; i < motors.size()/2; i++)
+            for (int i=0; i < half; i++)
             {
                 motors[i].move(rvolt);
-                motors[i+motors.size()/2].move(lvolt);
+                motors[i + half].move(lvolt);
                 // glb::controller.print(0,0,"%f", rvolt);
             }
         }
@@ -184,14 +187,15 @@ class group::chassis : public group::mtrs
         {
             double dl = 0;
             double dr = 0;
+            int half = size/2;
             
-            for (int i=0; i < motors.size()/2; i++)
+            for (int i=0; i < half; i++)
             {
                 dl += motors[i].get_position();
-                dr += motors[i + motors.size()/2].get_position();
+                dr += motors[i + half.get_position();
             }
             
-            return(std::vector<double> {dr,dl});
+            return(std::vector<double> {dr/half, dl/half});
         }
 };
 
