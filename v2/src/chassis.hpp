@@ -3,8 +3,8 @@
 
 // - chassis specific macros 
 #include "pros/rtos.hpp"
-#define DL 0
-#define DR 0
+#define DL 368.2
+#define DR -362
 
 #include "global.hpp"
 #include "util.hpp"
@@ -22,7 +22,7 @@ namespace chas
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
   void timedSpin(double target, double speed,double timeout);
   void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
-  void arcTurn(double target, double radius, double time, double timeout);
+  void arcTurn(double theta, double radius, double timeout, util::pidConstants cons);
 }
 
 void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
@@ -82,7 +82,12 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
       endTimer.start();
     }
 
-    end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
+    // end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
+
+    if(timeoutTimer.time()>= timeout)
+    {
+      break;
+    }
 
     // spin motors
     double rVel = dir * (error*kP + integral*kI + derivative*kD);
@@ -90,7 +95,7 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
     robot::chass.spinDiffy(rVel,lVel);
 
     pros::delay(10);
-    glb::controller.print(0, 0, "%f", error);
+    // glb::controller.print(0, 0, "%f", error);
     // glb::controller.print(0, 0, "%f", integral);
   }
   robot::chass.stop("b");
@@ -206,12 +211,12 @@ void chas::drive(double target, double timeout, double tolerance)
     robot::chass.spinDiffy(rVel,lVel);
 
     pros::delay(10);
-    glb::controller.print(0, 0, "%f", error);
+    // glb::controller.print(0, 0, "%f", error);
   }
   robot::chass.stop("b");
 } 
 
-void chas::autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons)
+void chas::autoDrive(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
 {
   // timers
   util::timer timer = util::timer();
@@ -219,26 +224,44 @@ void chas::autoDrive(double target, double heading, double timeout, util::pidCon
   // general vars
   double currHeading = robot::imu.degHeading();
   double rot;
+  double error;
   double vl;
   double va;
+  double dl;
+  double dr;
+  double sgn = target > 0 ? 1 : -1;
 
   int dir;
 
-  util::pid linearController = util::pid(lCons,util::minError(target, heading););
+  util::pid linearController = util::pid(lCons,util::minError(heading, currHeading));
   util::pid angularController = util::pid(acons,target);
 
   robot::chass.reset();
 
   while (true)
   {
+    error = util::minError(heading, currHeading);
+    if (error < 0.5)
+    {
+      acons.p = 0;
+      angularController.update(acons);
+    }
+
     currHeading = robot::imu.degHeading();
     rot = robot::chass.getRotation();
 
-    va = angularController.out(util::minError(target, currHeading));
+    va = angularController.out(error);
     vl = linearController.out(target - rot);
-    dir = -util::dirToSpin(target,currHeading);
+    // vl = 0;
+    dir = -util::dirToSpin(heading,currHeading);
 
-    robot::chass.spinDiffy(vl + dir * va,  vl - dir * va);
+    if (vl + std::abs(va) > 127)
+    {
+      vl = 127 - std::abs(va);
+    }
+
+    robot::chass.spinDiffy(vl + (dir * va * sgn),  vl - (dir * va * sgn));
+    // robot::chass.spinDiffy(vl,vl);
 
     if(timer.time() >= timeout)
     {
@@ -246,6 +269,8 @@ void chas::autoDrive(double target, double heading, double timeout, util::pidCon
     }
 
     pros::delay(10);
+
+    glb::controller.print(0, 0, "%f", util::minError(heading, currHeading));
   }
 
   robot::chass.stop("b");
@@ -485,9 +510,9 @@ void chas::velsUntilHeading(double rvolt, double lvolt, double heading, double t
   }
 }
 
-void chas::arcTurn(double target, double radius, double time, double timeout)
+void chas::arcTurn(double theta, double radius, double timeout, util::pidConstants cons)
 {
-  util::timer timer;
+  util::timer timer = util::timer(); 
   double curr;
   double currTime;
   double rError;
@@ -498,36 +523,35 @@ void chas::arcTurn(double target, double radius, double time, double timeout)
   double dr;
   double rvel;
   double lvel;
-  double theta;
-  std::vector<double> rotations;
+  double vel;
+  double ratio;
 
-  robot::chass.reset();
+  sl = theta * (radius + DL);
+  sr = theta * (radius + DR);
+
+  theta = util::rtd(theta);
+  ratio = sl/sr;
+  curr = glb::imu.get_heading();
+  rError = util::minError(theta, curr);
+
+  util::pid controller = util::pid(cons, rError);
 
   while (true)
   {
-    curr = robot::imu.degHeading();
-    rotations = robot::chass.getDiffy();
+    curr = glb::imu.get_heading();
     currTime = timer.time();
 
-    rError = util::minError(target, curr);
-    theta = rError/360 * 2 * PI;
-    sl = theta * (radius + DL);
-    sr = theta * (radius + DR);
+    int dir = util::dirToSpin(theta,curr);
+    vel = controller.out(util::minError(theta, curr)) * dir;
 
-    dr += std::abs(rotations[0]);
-    dl += std::abs(rotations[1]);
+    vel = std::abs(vel) >= 127 ? (127 * util::sign(vel)) : vel;
 
-    lError = sl - dl;
-    rError = sr - dr;
+    rvel = (2 * vel) / (ratio+1);
+    lvel = ratio * rvel;
 
-    currTime = timer.time();
-
-    lvel = lError/(time - currTime);
-    rvel = lError/(time - currTime);
-
-    robot::chass.reset();
     robot::chass.spinDiffy(rvel, lvel);
     
+    glb::controller.print(0, 0, "%f", util::minError(theta, curr));
     if(currTime >= timeout)
     {
       break;
