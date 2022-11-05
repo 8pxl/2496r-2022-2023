@@ -1,11 +1,23 @@
 #include "global.hpp"
 #include "autons.hpp"
 
-void keejControl(){};
+void normal() //NOLINT
+{
+    double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
+    double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
-void felixControl(){};
+    robot::chassisMotors.spinDiffy(lStick+rStick,lStick-rStick);
+} 
 
-void (*autonSelector())()
+void tank() //NOLINT
+{
+    double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
+    double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
+
+    robot::chassisMotors.spinDiffy(rStick,lStick);
+}; 
+
+void (*autonSelector())() //NOLINT
 {
 
     int numAutons = autons.size() - 1;
@@ -80,34 +92,6 @@ void (*autonSelector())()
     }
     
     pros::delay(200);
-
-    while(1)
-    {   
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT) || glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-        {
-            driver += 1;
-        }
-
-        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-        {
-            break;
-        }
-
-        glb::controller.print(0, 0, "%s   ", (driver % 2 == 0) ? "keej" : "felix");
-
-        pros::delay(50);
-
-    }
-    
-    if (driver % 2 == 0)
-    {
-        glb::driver = true;
-    }
-
-    else
-    {
-        glb::driver = false;
-    }
 
     glb::red = color % 2 == 0 ? true : false;
 

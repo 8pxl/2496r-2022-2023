@@ -31,136 +31,125 @@ namespace lib
     };
 }
 
-void lib::chassis::updatePos(double rx, double ry)
+void lib::chassis::updatePos(double rx, double ry) //NOLINT
 {
     pos.x += rx;
     pos.y += ry;
 }
 
-void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
-{ 
-  // timers
-  util::timer endTimer;
-  util::timer timeoutTimer;
-  timeoutTimer.start();
-
-  // basic constants
-  double kP = constants.p;
-  double kI = constants.i;
-  double kD = constants.d;
-  double tolerance = constants.tolerance;
-  double endTime = 2000;
-
-  // general vars
-  double currHeading = imu.degHeading();
-  double prevHeading = currHeading;
-  double error;
-  double prevError;
-  bool end = false;
-
-  // eye vars
-  double integral = 0;
-  double integralThreshold = constants.integralThreshold;
-  double maxIntegral = constants.maxIntegral;
-
-  // dee vars
-  double derivative;
-  
-  // pid loop 
-  while (!end)
-  {
-
-    currHeading = imu.degHeading();
-    int dir = -util::dirToSpin(target,currHeading);
-
-    //pee
-    error = util::minError(target,currHeading);
-
-    //eye
-    integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
-
-    if(integral > maxIntegral)
-    {
-      integral = 0;
-    }
-
-    //dee
-    derivative = error - prevError;
-    prevError = error;
-
-    //end conditions
-    if (error >= tolerance)
-    {
-      endTimer.start();
-    }
-
-    end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
-
-    // spin motors
-    double rVel = dir * (error*kP + integral*kI + derivative*kD);
-    double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
-    chass.spinDiffy(rVel,lVel);
-
-    pros::delay(10);
-  }
-
-  chass.stop('b');
-} 
-
-// void lib::chassis::spinTo(double target, double timeout, double tolerance)
+// void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
 // { 
 //   // timers
+//   util::timer endTimer;
 //   util::timer timeoutTimer;
+//   timeoutTimer.start();
 
 //   // basic constants
-//   double kP = 2.1;
-//   double kI = 0.1;
-//   double kD = 7;
+//   double kP = constants.p;
+//   double kI = constants.i;
+//   double kD = constants.d;
+//   double tolerance = constants.tolerance;
+//   double endTime = 2000;
 
 //   // general vars
 //   double currHeading = imu.degHeading();
+//   double prevHeading = currHeading;
 //   double error;
-//   int dir;
-//   double vel;
+//   double prevError;
+//   bool end = false;
 
 //   // eye vars
 //   double integral = 0;
-//   double integralThreshold = 10;
+//   double integralThreshold = constants.integralThreshold;
+//   double maxIntegral = constants.maxIntegral;
 
 //   // dee vars
 //   double derivative;
   
-//   util::pidConstants constants(kP,kI,kD, tolerance, integralThreshold);
-//   error = util::minError(target,currHeading);
-//   util::pid pid(constants, error);
-
-//Gerald was here
 //   // pid loop 
-//   while (true)
+//   while (!end)
 //   {
-//     //end condition
-//     if(timeoutTimer.time() >= timeout)
-//     {
-//       break;
-//     }
 
-//     //error
 //     currHeading = imu.degHeading();
-//     dir = -util::dirToSpin(target,currHeading);
+//     int dir = -util::dirToSpin(target,currHeading);
+
+//     //pee
 //     error = util::minError(target,currHeading);
 
-//     //vel
-//     vel = pid.out(error);
+//     //eye
+//     integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
+
+//     if(integral > maxIntegral)
+//     {
+//       integral = 0;
+//     }
+
+//     //dee
+//     derivative = error - prevError;
+//     prevError = error;
+
+//     //end conditions
+//     if (error >= tolerance)
+//     {
+//       endTimer.start();
+//     }
+
+//     end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
 
 //     // spin motors
-//     chass.spinDiffy(vel * dir,-vel * dir);
+//     double rVel = dir * (error*kP + integral*kI + derivative*kD);
+//     double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
+//     chass.spinDiffy(rVel,lVel);
 
 //     pros::delay(10);
 //   }
-//   chass.stop("b");
+
+//   chass.stop('b');
 // } 
 
-void lib::chassis::drive(double target, double timeout, double tolerance)
+void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
+{ 
+  // timers
+  util::timer timeoutTimer;
+
+  // general vars
+  double currHeading = imu.degHeading();
+  double error;
+  int dir;
+  double vel;
+
+  
+  util::pidConstants cons(constants);
+  error = util::minError(target,currHeading);
+
+  util::pid pid(cons, error);
+
+  // pid loop 
+  while (true)
+  {
+    //end condition
+    if(timeoutTimer.time() >= timeout)
+    {
+      break;
+    }
+
+    //error
+    currHeading = imu.degHeading();
+    dir = -util::dirToSpin(target,currHeading);
+    error = util::minError(target,currHeading);
+
+    //vel
+    vel = pid.out(error);
+
+    // spin motors
+    chass.spinDiffy(vel * dir,-vel * dir);
+
+    pros::delay(10);
+  }
+  chass.stop('b');
+} 
+
+void lib::chassis::drive(double target, double timeout, double tolerance) //NOLINT
 { 
   // timers
   util::timer timeoutTimer;
@@ -221,7 +210,7 @@ void lib::chassis::drive(double target, double timeout, double tolerance)
   chass.stop('b');
 } 
 
-void lib::chassis::autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons)
+void lib::chassis::autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons) //NOLINT
 {
   // timers
   util::timer timer = util::timer();
@@ -263,7 +252,7 @@ void lib::chassis::autoDrive(double target, double heading, double timeout, util
 }
 
 
-void lib::chassis::odomDrive(double distance, double timeout, double tolerance)
+void lib::chassis::odomDrive(double distance, double timeout, double tolerance) //NOLINT
 { 
   
   // resetting timers
@@ -324,7 +313,7 @@ void lib::chassis::odomDrive(double distance, double timeout, double tolerance)
   chass.stop('b');
 }  
 
-std::vector<double> lib::chassis::moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias)
+std::vector<double> lib::chassis::moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias) //NOLINT
 {
   double linearError = distToPoint(pos,target);
   double linearVel = linearError*lkp;
@@ -347,7 +336,7 @@ std::vector<double> lib::chassis::moveToVel(util::coordinate target, double lkp,
   return std::vector<double> {lVel, rVel};
 }
 
-void lib::chassis::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut)
+void lib::chassis::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut) //NOLINT
 {
   //init
   util::timer timeoutTimer;
@@ -395,7 +384,7 @@ void lib::chassis::moveTo(util::coordinate target, double timeout, util::pidCons
   chass.stop('b');
 }
 
-void lib::chassis::moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias)
+void lib::chassis::moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias) //NOLINT
 {
   
   // resolution in which to sample points along the curve
@@ -442,7 +431,7 @@ void lib::chassis::moveToPose(util::bezier curve, double timeout, double lkp, do
 }
 
 
-void lib::chassis::timedSpin(double target, double speed,double timeout)
+void lib::chassis::timedSpin(double target, double speed,double timeout) //NOLINT
 {
   // timers
   util::timer timeoutTimer;
@@ -478,7 +467,7 @@ void lib::chassis::timedSpin(double target, double speed,double timeout)
   chass.stop('b');
 }
 
-void lib::chassis::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout)
+void lib::chassis::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout) //NOLINT
 {
   util::timer timeoutTimer;
 
@@ -493,7 +482,7 @@ void lib::chassis::velsUntilHeading(double rvolt, double lvolt, double heading, 
   }
 }
 
-void lib::chassis::arcTurn(double target, double radius, double time, double timeout)
+void lib::chassis::arcTurn(double target, double radius, double time, double timeout) //NOLINT 
 {
     util::timer timer;
     double curr;

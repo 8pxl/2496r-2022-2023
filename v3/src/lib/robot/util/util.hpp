@@ -257,31 +257,31 @@ class util::movingAverage
             double average = 0;
             for(int i = 1; i != size; i++)
             {
-                average += window[i] * pow(i * 1.0/size * 1.0,2);
+                average += window[i] * pow((i * 1.0)/(size * 1.0),2);
             }
             
             return(average/integral);
         }
 };
 
-double util::dtr(double input)
+double util::dtr(double input) //NOLINT
 {
   return(PI * input/180);
 }
 
-double util::rtd(double input)
+double util::rtd(double input) //NOLINT
 {
   return(input * 180/PI);
 }
 
-int util::dirToSpin(double target,double currHeading)
+int util::dirToSpin(double target,double currHeading) //NOLINT
 {
     double d = (target - currHeading);
     double diff = d < 0 ? d + 360 : d;
     return(diff > 180 ? 1 : -1);
 }
 
-double util::minError(double target, double current)
+double util::minError(double target, double current) //NOLINT
 {
     double b = std::max(target,current);
     double s = std::min(target,current);
@@ -290,16 +290,17 @@ double util::minError(double target, double current)
     return(diff <= 180 ? diff : (360-b) + s);
 }
 
-double util::distToPoint(util::coordinate p1, util::coordinate p2)
+double util::distToPoint(util::coordinate p1, util::coordinate p2) //NOLINT
 {
     return( sqrt( pow((p2.x-p1.x),2) + pow((p2.y-p1.y), 2)));
 }
 
-double util::mod(double a, double b){
+double util::mod(double a, double b) //NOLINT
+{
   return fmod(360-std::abs(a), b);
 }
 
-double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
+double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point) //NOLINT
 {
     double t;
 
@@ -330,7 +331,7 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
     return (t);
 }
 
-double util::imuToRad(double heading)
+double util::imuToRad(double heading) //NOLINT
 {
     // could be like shifted over? idk
     return (heading < 180) ? dtr(heading) : dtr(-(heading - 180));

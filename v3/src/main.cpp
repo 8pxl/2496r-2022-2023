@@ -21,7 +21,6 @@ void competition_initialize() {}
 
 void autonomous() 
 {
-	glb::match = false;
 	auton();
 }
 
@@ -29,13 +28,7 @@ void opcontrol()
 {
 	while (true) 
 	{
-		if (glb::driver) {keejControl();}
-
-		else {felixControl();}
-
-		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
-
-		// printf("pros::delay(20);\n");
+		normal();
 		pros::delay(20);
 	}
 }
