@@ -3,6 +3,8 @@
 #include "global.hpp"
 #include "chassis.hpp"
 #include "autons.hpp"
+#include "pros/misc.h"
+#include "pros/rtos.hpp"
 #include "util.hpp"
 
 util::timer decelTimer; 
@@ -220,7 +222,7 @@ void felixControl()
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
         {
             // flywheel::ff = true;
-            robot::intake.spin(-80);
+            robot::intake.spin(-60);
             // intake::waitIndex(3,3,1,600,50);
 
             // if(indexTimer.time() >= 150)
@@ -313,10 +315,10 @@ void felixControl()
 
     //aut
 
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
-    {
-        intake::toggle();
-    }
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
+    // {
+    //     intake::toggle();
+    // }
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_B))
     {
@@ -388,10 +390,6 @@ void keejControl()
     // robot::chass.spinDiffy(lStick, rStick);
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
 
-
-    // felixFw
-
-
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
     {
         if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
@@ -452,38 +450,7 @@ void keejControl()
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
         {
             // flywheel::ff = true;
-            robot::intake.spin(-80);
-            // intake::waitIndex(3,3,1,600,50);
-
-            // if(indexTimer.time() >= 150)
-            // {
-            //     flywheel::ff = true;
-            //     robot::intake.spin(-40);
-            // }
-            // else
-            // {
-            //     robot::intake.spin(-80);
-            // }
-
-
-            // if (flywheel::gError < 5)
-            // {
-            //     if(inRange.time() >= 150)
-            //     {
-            //         robot::intake.spin(-80);
-            //     }
-
-            //     else
-            //     {
-            //         robot::intake.stop("c");
-            //     }
-            // }
-            
-            // else
-            // {
-            //     inRange.start();
-            //     robot::intake.stop("c");
-            // }
+            robot::intake.spin(-60);
             decelTimer.start();
             decelTimer.startTime += 3000;
         }
@@ -541,14 +508,31 @@ void keejControl()
             robot::plane.toggle();
             robot::cata.toggle();
         }
+
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+        {
+            robot::plane.toggle();
+        }
+
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+        {
+            robot::cata.toggle();
+        }
     // }
 
     //aut
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
     {
-        intake::toggle();
+        intake::toggle(false);
+        // intake::toggle();
     }
+
+    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
+    {
+        intake::toggle(true);
+    }
+
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_B))
     {
