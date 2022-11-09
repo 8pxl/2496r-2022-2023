@@ -2,10 +2,12 @@
 #define __UTIL__
 
 #include "main.h"
+#include "pros/misc.h"
 #include <cmath>
 #include <vector>
 
 #define PI 3.14159265358979323846
+typedef void(*fptr)();
 
 namespace util
 {

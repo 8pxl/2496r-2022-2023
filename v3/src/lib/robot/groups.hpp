@@ -54,12 +54,12 @@ namespace lib
     };
 }
 
-pros::motor_brake_mode_e lib::mtrs::returnBrakeType(char brakeMode)
+pros::motor_brake_mode_e lib::mtrs::returnBrakeType(char brakeMode) //NOLINT
 {
     return brakeMode == 'c' ? pros::E_MOTOR_BRAKE_COAST : brakeMode == 'b' ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_HOLD;
 }
 
-void lib::mtrs::spin(double volts)
+void lib::mtrs::spin(double volts) //NOLINT
 {
     for (int i=0; i < size; i++)
     {
@@ -67,7 +67,7 @@ void lib::mtrs::spin(double volts)
     }
 }
 
-void lib::mtrs::stop(char brakeMode)
+void lib::mtrs::stop(char brakeMode) //NOLINT
 {
     pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
@@ -78,7 +78,7 @@ void lib::mtrs::stop(char brakeMode)
     }
 }
 
-void lib::mtrs::setBrake(char brakeMode)
+void lib::mtrs::setBrake(char brakeMode) //NOLINT
 {
     pros::motor_brake_mode_e brakeType = returnBrakeType(brakeMode);
 
@@ -88,7 +88,7 @@ void lib::mtrs::setBrake(char brakeMode)
     }
 }
 
-double lib::mtrs::getSpeed()
+double lib::mtrs::getSpeed() //NOLINT
 {
     double vel = 0;
 
@@ -100,7 +100,7 @@ double lib::mtrs::getSpeed()
     return(vel/size);
 }
 
-double lib::mtrs::getRotation()
+double lib::mtrs::getRotation() //NOLINT
 {
     double rotation = 0;
 
@@ -112,7 +112,7 @@ double lib::mtrs::getRotation()
     return(rotation/size);
 }
 
-void lib::mtrs::reset()
+void lib::mtrs::reset() //NOLINT
 {
     for (int i=0; i < size; i++)
     {
@@ -120,7 +120,7 @@ void lib::mtrs::reset()
     }
 }
 
-void lib::diffy::spinDiffy(double rvolt, double lvolt)
+void lib::diffy::spinDiffy(double rvolt, double lvolt) //NOLINT
 {
     int half = size/2;
     // printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
@@ -133,7 +133,7 @@ void lib::diffy::spinDiffy(double rvolt, double lvolt)
     }
 }
 
-std::vector<double> lib::diffy::getDiffy()
+std::vector<double> lib::diffy::getDiffy() //NOLINT
 {
     double dl = 0;
     double dr = 0;
@@ -149,7 +149,7 @@ std::vector<double> lib::diffy::getDiffy()
 }
 
 
-void lib::pis::toggle()
+void lib::pis::toggle() //NOLINT
 {
     // printf("robot::%s.toggle();\n", name.c_str());
     state = !state;
@@ -160,7 +160,7 @@ void lib::pis::toggle()
     }
 }
 
-void lib::pis::setState(bool iState)
+void lib::pis::setState(bool iState) //NOLINT
 {
     // printf("robot::%s.setState(%d);\n", name.c_str(), iState);
     state = iState;

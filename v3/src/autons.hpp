@@ -4,19 +4,16 @@
 #include "lib/lib.hpp"
 #include "global.hpp"
 
-typedef void(*fptr)();
-
 using namespace robot;
 
-void wp()
+void wp() //NOLINT
 {
     chass.drive(1, 1, 1);
     chass.spinTo(10, 4);
 }
 
-fptr WP = wp; 
-
-std::vector<fptr> autons{WP};
-std::vector<std::string> autonNames{"wp"};
+fptr WP = wp; //NOLINT 
+std::vector<fptr> autons{WP}; //NOLINT
+std::vector<std::string> autonNames{"wp"}; //NOLINT
 
 #endif

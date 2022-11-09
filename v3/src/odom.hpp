@@ -1,7 +1,7 @@
 #include "global.hpp"
 
 
-void odom()
+void odom() //NOLINT
 {
     glb::leftEncoder.reset();
     glb::horizEncoder.reset();

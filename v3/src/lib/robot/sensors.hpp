@@ -21,19 +21,19 @@ namespace lib
     };
 }
 
-double lib::imu::degHeading()
+double lib::imu::degHeading() //NOLINT
 {
     double t = inertial.get_heading() + initHeading;
     return(t <= 360 ? t : 0 + (t-360));
 }
 
-double lib::imu::radHeading()
+double lib::imu::radHeading() //NOLINT
 {
     double t = inertial.get_heading() + initHeading;
     return(t <= 360 ? util::dtr(t) : util::dtr((t-360)));
 }
 
-void lib::imu::init(double heading)
+void lib::imu::init(double heading) //NOLINT
 {
     initHeading = heading;
 }
