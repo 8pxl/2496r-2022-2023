@@ -32,6 +32,7 @@ namespace glb
     pros::ADIDigitalOut derrick(6);
     pros::ADIDigitalOut cata(5);
     pros::ADIDigitalOut plane(7);
+    pros::ADIDigitalOut angler(8);
 
     // sensors
     pros::Imu imu(5);
@@ -183,19 +184,30 @@ class group::chassis : public group::mtrs
             }
         }
 
-        std::vector<double> getDiffy()
+        double getLeft()
         {
             double dl = 0;
-            double dr = 0;
             int half = size/2;
             
             for (int i=0; i < half; i++)
             {
                 dl += motors[i].get_position();
-                dr += motors[i + half.get_position();
             }
             
-            return(std::vector<double> {dr/half, dl/half});
+            return(dl/half);
+        }
+
+        double getRight()
+        {
+            double dr = 0;
+            int half = size/2;
+            
+            for (int i = 0; i < half; i++)
+            {
+                dr+= motors[i+half].get_position();
+            }
+
+            return(dr/half);
         }
 };
 
@@ -273,6 +285,7 @@ namespace robot
     std::vector<pros::ADIDigitalOut> intakePistons{glb::derrick};
     std::vector<pros::ADIDigitalOut> expansionPistons{glb::cata};
     std::vector<pros::ADIDigitalOut> planePistons{glb::plane};
+    std::vector<pros::ADIDigitalOut> anglerPistons{glb::angler};
     
     group::chassis chass(chassisMotors,"chass");
     group::mtrs intake(intakeMotors, "intake");
@@ -280,6 +293,7 @@ namespace robot
     group::pis tsukasa(intakePistons,false, "tsukasa");
     group::pis cata(expansionPistons, false, "cata");
     group::pis plane(planePistons, false, "plane");
+    group::pis angler(anglerPistons, false, "angler");
     group::imu imu(glb::imu, 0);
 
 } 

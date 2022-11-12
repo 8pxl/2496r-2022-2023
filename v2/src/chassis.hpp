@@ -95,7 +95,7 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
     robot::chass.spinDiffy(rVel,lVel);
 
     pros::delay(10);
-    // glb::controller.print(0, 0, "%f", error);
+    glb::controller.print(0, 0, "%f", error);
     // glb::controller.print(0, 0, "%f", integral);
   }
   robot::chass.stop("b");

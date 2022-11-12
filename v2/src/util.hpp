@@ -4,6 +4,7 @@
 #include "main.h"
 #include <cmath>
 #include <vector>
+
 #define PI 3.14159265358979323846
 
 namespace util
@@ -23,6 +24,7 @@ namespace util
     double mod(double a, double b);
     double absoluteAngleToPoint(util::coordinate pos, util::coordinate point);
     double imuToRad(double heading);
+    double sign(double a);
 }
 
 class util::timer
@@ -333,6 +335,11 @@ double util::imuToRad(double heading)
 {
     // could be like shifted over? idk
     return (heading < 180) ? dtr(heading) : dtr(-(heading - 180));
+}
+
+double util::sign(double a)
+{
+    return(a > 0 ? 1 : -1);
 }
 
 #endif

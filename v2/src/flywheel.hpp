@@ -222,7 +222,7 @@ namespace flywheel
             //     printf("%f,%f,", speed,voltage);
             // }
 
-            printf("%f,%f,", speed,integral);
+            // printf("%f,%f,", speed,integral);
         }
     }
 }

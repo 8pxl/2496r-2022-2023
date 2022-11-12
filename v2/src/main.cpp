@@ -1,43 +1,36 @@
 #include "main.h"
+#include "chassis.hpp"
 #include "master.hpp"
 #include "global.hpp"
 #include "odom.hpp"
+#include "pros/misc.h"
 #include "pros/rtos.hpp"
 #include "util.hpp"
 #include "flywheel.hpp"
-#include <algorithm>
 
-//globals
+// - globals
 void (*auton)();
-bool control = true;
+// bool control = true;
 
 void initialize() 
 {
-	//calibration and sensor init
+	// - calibration and sensor init
 	glb::imu.reset();
-	// glb::optical.set_led_pwm(100);
 	glb::controller.clear();
-	// pros::delay(3000);
 
-	//autSelector
+	// - autSelector
 	auton = autonSelector();
 	
-	//tasks
+	// - tasks
 	pros::Task od(odom);
 	pros::Task fw(flywheel::spin);
 
-	//fw initial vel
+	//-  fw initial vel
 	flywheel::target = 0;
 	
 }
 
-void disabled() 
-{
-}
-
-//hello keijay, :DDDD
-// lucy was here
-//cool code font :oooooo
+void disabled() {}
 
 void competition_initialize() {}
 
@@ -49,13 +42,29 @@ void autonomous()
 
 void opcontrol() 
 {
+
 	while (true) 
 	{
-		// for (int i = 7; i < 13; i ++)
+
+		// double dl = 0;
+		// double dr = 0;
+		// flywheel::ff = -1;
+		// for (int i = 0; i < 10; i++)
 		// {
-		// 	flywheel::target = i*50;
-		// 	pros::delay(10000);
+		// 	double rotation = robot::imu.degHeading();
+		// 	robot::chass.reset();
+		// 	// pros::delay(1000);
+		// 	chas::spinTo(robot::imu.degHeading() + 90, 1400);
+		// 	double delta = util::minError(robot::imu.degHeading(), rotation);
+		// 	dl += (robot::chass.getLeft() * 360) / (delta * 2 * PI);
+		// 	dr += (robot::chass.getRight() * 360) / (delta * 2 * PI);
+
+		// 	printf("%f,%f", dl, dr);
+		// 	glb::controller.print(0,0,"%f,%f", dl, dr);
 		// }
+
+		// chas::arcTurn(PI/2, 500, 1500,util::pidConstants(0.5,0,0,0,0,0));
+
 
 		if (glb::driver) {keejControl();}
 
@@ -63,7 +72,7 @@ void opcontrol()
 
 		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
 
-		printf("pros::delay(20);\n");
+		// printf("pros::delay(20);\n");
 		pros::delay(20);
 	}
 }
