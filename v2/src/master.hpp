@@ -62,25 +62,26 @@ void felixControl()
 
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
 
-    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2) && doubleTap.time() <= 300)
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2) && (doubleTap.time() <= 150))
     {
+        glb::controller.rumble(".");
         robot::angler.toggle();
 
         if(robot::angler.state)
         {
-            flywheel::target -= 40;
+            flywheel::target += 40;
         }
 
         else
         {
-            flywheel::target += 40;
+            flywheel::target -= 40;
         }
     }
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
     {
         doubleTap.start();
-        if(robot::angler.state)
+        if(!robot::angler.state)
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
@@ -142,7 +143,6 @@ void felixControl()
             // flywheel::ff = true;
             robot::intake.spin(-60);
             decelTimer.start();
-            decelTimer.startTime += 3000;
         }
 
         else
@@ -279,25 +279,26 @@ void keejControl()
     // robot::chass.spinDiffy(lStick, rStick);
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
 
-    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2) && doubleTap.time() <= 200)
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2) && (doubleTap.time() <= 150))
     {
+        glb::controller.rumble(".");
         robot::angler.toggle();
 
         if(robot::angler.state)
         {
-            flywheel::target -= 40;
+            flywheel::target += 40;
         }
 
         else
         {
-            flywheel::target += 40;
+            flywheel::target -= 40;
         }
     }
 
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+    else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
     {
         doubleTap.start();
-        if(robot::angler.state)
+        if(!robot::angler.state)
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
@@ -533,12 +534,12 @@ void anthony()
 
         if(robot::angler.state)
         {
-            flywheel::target -= 40;
+            flywheel::target += 40;
         }
 
         else
         {
-            flywheel::target += 40;
+            flywheel::target -= 40;
         }
     }
 
@@ -701,12 +702,12 @@ void anthony()
 
         if(robot::angler.state)
         {
-            flywheel::target -= 40;
+            flywheel::target += 40;
         }
 
         else
         {
-            flywheel::target += 40;
+            flywheel::target -= 40;
         }
     }
 
