@@ -108,7 +108,7 @@ void felixControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 390;
+                flywheel::target = 375;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
@@ -325,7 +325,7 @@ void keejControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 390;
+                flywheel::target = 375;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))

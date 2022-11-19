@@ -170,7 +170,7 @@ namespace intake
         pros::delay(400);
         double initColor = glb::optical.get_hue();
         glb::controller.print(1, 1, "%f", glb::optical.get_hue());
-        robot::chass.stop("b");
+        // robot::chass.stop("b");
         bool initRed = initColor >= 60 ? false : true;
 
         double red = 10;

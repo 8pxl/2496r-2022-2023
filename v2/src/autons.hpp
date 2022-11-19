@@ -315,7 +315,7 @@ void skills()
     }
 
     chas::spinTo(200, 700);
-    chas::drive(2800, 1300, 5);
+    chas::drive(2850, 1300, 5);
     chas::spinTo(135, 700);
     chas::drive(-200,700,5);
     robot::cata.toggle();
@@ -357,7 +357,7 @@ void nearHalf()
     pros::delay(500);
 
     //aim and shoot discs
-    chas::spinTo(345.3, 1100);
+    chas::spinTo(346.7, 1100);
     robot::intake.stop("c");
     
     // intake::index(1);
@@ -371,17 +371,17 @@ void nearHalf()
     flywheel::target = 415;
 
     chas::spinTo(222, 800);
-    chas::drive(-650,650,5);
+    chas::drive(-600,650,5);
     chas::spinTo(135, 700);
     robot::tsukasa.toggle();
     robot::intake.spin(127);
-    chas::drive(380,500,5);
+    chas::drive(370,450,5);
     robot::tsukasa.toggle();
 
     flywheel::target = 470;
-    pros::delay(600);
+    pros::delay(670);
     chas::drive(-300,500,5);
-    chas::spinTo(347.3, 1100,bigTurn);
+    chas::spinTo(349, 1100,bigTurn);
     robot::intake.stop("B");
     // intake::waitIndex(3,5,true);
     intake::waitIndex(3,5,-1,150,0);
