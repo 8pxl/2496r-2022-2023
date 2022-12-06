@@ -2,7 +2,6 @@
 #define __GLOBAL__
 
 #include "lib/lib.hpp"
-#include "lib/robot/groups.hpp"
 #include "pros/adi.hpp"
 #include "pros/motors.hpp"
 #include <vector>
@@ -16,8 +15,15 @@ namespace glb
     pros::Motor frontRight(4, pros::E_MOTOR_GEARSET_06, false); //NOLINT
     pros::Motor backRight(10, pros::E_MOTOR_GEARSET_06, false); //NOLINT
     pros::Motor midRight(13, pros::E_MOTOR_GEARSET_06, true); //NOLINT
-    pros::Motor elegant(14, pros::E_MOTOR_GEARSET_06, false); //NOLINT
-    pros::Motor luncheon(20, pros::E_MOTOR_GEARSET_06, false); //NOLINT
+    pros::Motor yuuta(14, pros::E_MOTOR_GEARSET_06, false); //NOLINT
+    pros::Motor saki(20, pros::E_MOTOR_GEARSET_06, false); //NOLINT
+
+    // pistons
+    pros::ADIDigitalOut boostOne(1); //NOLINT
+    pros::ADIDigitalOut boostTwo(1); //NOLINT
+    pros::ADIDigitalOut passOne(1); //NOLINT
+    pros::ADIDigitalOut passTwo(1); //NOLINT
+
 
     // sensors
     pros::Imu imu(5); //NOLINT
@@ -35,12 +41,21 @@ namespace glb
 
 namespace robot
 {
+    //motors
     lib::diffy chassisMotors(std::vector<pros::Motor>{glb::frontLeft,glb::midLeft,glb::backLeft, glb::frontRight,glb::midRight,glb::backRight}); //NOLINT
-    lib::diffy sekai(std::vector<pros::Motor> {glb::elegant, glb::luncheon} ); //NOLINT
+    lib::diffy itsuki(std::vector<pros::Motor> {glb::yuuta, glb::saki} ); //NOLINT
 
+    //pistons
+    lib::pis boostOne({glb::boostOne}, true, ""); //NOLINT
+    lib::pis boostTwo({glb::boostOne}, true, ""); //NOLINT
+    lib::pis passOne({glb::passOne}, true, ""); //NOLINT
+    lib::pis passTwo({glb::passTwo}, true, ""); //NOLINT
+
+    //sensors
     lib::imu imu(glb::imu,0); //NOLINT
     lib::limit puncherLimit(glb::puncherLimit); //NOLINT
 
+    //subsytem objects
     lib::chassis chass(chassisMotors, imu, glb::pos); //NOLINT
 } 
 
