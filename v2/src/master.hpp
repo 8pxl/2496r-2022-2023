@@ -11,6 +11,7 @@ util::timer decelTimer;
 util::timer indexTimer;
 util::timer doubleTap;
 util::timer fowrardTimer;
+double prevSpeed;
 
 void curvature(double iThrottle, double iCurvature, double iThreshold){
     if(std::fabs(iThrottle) <= iThreshold){
@@ -70,6 +71,7 @@ void felixControl()
         if(robot::angler.state)
         {
             flywheel::target += 40;
+            
         }
 
         else
@@ -102,13 +104,18 @@ void felixControl()
             {
                 flywheel::target = 400;
             }
+
+            else
+            {
+                flywheel::target = prevSpeed;
+            }
         }
 
         else
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 375;
+                flywheel::target = 390;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
@@ -119,6 +126,11 @@ void felixControl()
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
             {
                 flywheel::target = 450;
+            }
+            
+            else
+            {
+                flywheel::target = prevSpeed;
             }
         }
         decelTimer.start();
@@ -163,7 +175,12 @@ void felixControl()
             flywheel::ff = 3;
         }
 
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+        // if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+        // {
+        //     robot::tsukasa.toggle();
+        // }
+
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))
         {
             robot::tsukasa.toggle();
         }
@@ -217,7 +234,7 @@ void felixControl()
 
         // // chas::spinTo(135, 1000, 1);
         // chas::spinTo(target, 5000, 1);
-        robot::intake.spin(-127);
+        // robot::intake.spin(-127);
     }
 
 
@@ -248,7 +265,7 @@ void felixControl()
     // }
     
 
-    if (decelTimer.time() > 6000)
+    if (decelTimer.time() > 9000)
     {
         if (flywheel::target > 300)
         {
@@ -267,14 +284,47 @@ void felixControl()
 
         // flywheel::target > 300 ? flywheel::target -= 0.5 : flywheel::target != 0 ? flywheel::target = 300 : flywheel::target = 0;
     }
+    
+    else if(flywheel::target != 0)
+    {
+        // glb::controller.rumble(".");
+        prevSpeed = flywheel::target;
+    }
 }
 
 void keejControl()
 {
     // chassis
+    int deadband = 1;
+
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
+    if(std::abs(lStick) < deadband)
+    {
+        // rStick = rStick/2;
+        // rStick = -11.2694276696 * sqrt(-rStick + 127);
+        // rStick = pow(rStick,2)/127;
+
+        // if(rStick < 78.49)
+        // {
+        //     rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
+        // }
+        // else
+        // {
+        //     rStick = pow(rStick,2)/127;
+        // }
+        // rStick = pow(rStick,2)/127 * util::sign(rStick);
+        if(rStick > 0)
+        {
+            rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
+        }
+
+        else
+        {
+            rStick = -pow(rStick/11.2694276696,2);
+        }
+    }
 
     // robot::chass.spinDiffy(lStick, rStick);
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
@@ -319,6 +369,11 @@ void keejControl()
             {
                 flywheel::target = 400;
             }
+
+            else
+            {
+                flywheel::target = prevSpeed;
+            }
         }
 
         else
@@ -337,10 +392,14 @@ void keejControl()
             {
                 flywheel::target = 450;
             }
-        }
-        decelTimer.start();
 
-        // robot::chass.spinDiffy(lStick + (rStick/2), lStick - (rStick/2));
+            else
+            {
+                flywheel::target = prevSpeed;
+            }
+        }
+
+        decelTimer.start();
     }
 
     else
@@ -357,21 +416,6 @@ void keejControl()
             robot::intake.spin(127);
         }
 
-        // else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
-        // {
-        //     if(flywheel::gError < 15)
-        //     {
-        //         robot::intake.spin(-80);
-        //     }
-
-        //     else
-        //     {
-        //         robot::intake.stop("c");
-        //     }
-        //     decelTimer.start();
-        //     decelTimer.startTime += 3000;
-        // }
-
         else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
         {
             // flywheel::ff = true;
@@ -380,26 +424,6 @@ void keejControl()
             decelTimer.startTime += 3000;
         }
 
-        // else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
-        // {
-        //     if(indexTimer.time() >= 150)
-        //     {
-        //         if (indexTimer.time() >= 200)
-        //         {
-        //             indexTimer.start();
-        //         }
-
-        //         robot::intake.stop("b");
-        //     }
-
-        //     else 
-        //     {
-        //         robot::intake.spin(-80);
-        //     }
-
-        //     decelTimer.start();
-        //     decelTimer.startTime += 3000;
-        // }
 
         else
         {
@@ -425,25 +449,21 @@ void keejControl()
         }
     }
 
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+    {
+        robot::plane.toggle();
+        robot::cata.toggle();
+    }
 
-    // if(glb::matchTimer.time() >= 50000)
-    // {
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
-        {
-            robot::plane.toggle();
-            robot::cata.toggle();
-        }
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+    {
+        robot::plane.toggle();
+    }
 
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-        {
-            robot::plane.toggle();
-        }
-
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-        {
-            robot::cata.toggle();
-        }
-    // }
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+    {
+        robot::cata.toggle();
+    }
 
     //aut
 
@@ -463,41 +483,12 @@ void keejControl()
         // double target = 180 - absoluteAngleToPoint(glb::pos, util::coordinate(0,0));
         // target = target >= 0 ? target : 180 + fabs(target); //conver to 0-360
         // glb::controller.print(0, 0, "%f", target);
-
-        // // chas::spinTo(135, 1000, 1);
-        // chas::spinTo(target, 5000, 1);
+        intake::hardToggle();
         robot::intake.spin(-127);
     }
-
-
-    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-    // {
-    //     skills();
-    // }
-
-    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
-    // {
-    //     nearHalf();
-    // }
-
-    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-    // {
-    //     wp();
-    // }
-
-    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-    // {
-    //     farHalf();
-    // }
     
 
-    // if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
-    // {
-    //     flywheel::ff = true;
-    // }
-    
-
-    if (decelTimer.time() > 6000)
+    if (decelTimer.time() > 9000)
     {
         if (flywheel::target > 300)
         {
@@ -515,6 +506,11 @@ void keejControl()
         }
 
         // flywheel::target > 300 ? flywheel::target -= 0.5 : flywheel::target != 0 ? flywheel::target = 300 : flywheel::target = 0;
+    }
+    else if(flywheel::target != 0)
+    {
+        // glb::controller.rumble(".");
+        prevSpeed = flywheel::target;
     }
 }
 

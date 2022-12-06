@@ -63,7 +63,7 @@ class group::mtrs
         }
 
     protected:
-
+ 
         std::vector<pros::Motor> motors;
         std::string name;
         int size;
@@ -76,8 +76,6 @@ class group::mtrs
 
         void spin(double volts = 127)
         {
-            // printf("robot::%s.spin(%f);\n", name.c_str(),volts);
-
             for (int i=0; i < size; i++)
             {
                 motors[i].move(volts);
@@ -174,13 +172,11 @@ class group::chassis : public group::mtrs
         void spinDiffy(double rvolt, double lvolt)
         {
             int half = size/2;
-            // printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
             for (int i=0; i < half; i++)
             {
                 motors[i].move(rvolt);
                 motors[i + half].move(lvolt);
-                // glb::controller.print(0,0,"%f", rvolt);
             }
         }
 
@@ -227,7 +223,6 @@ class group::pis
 
         void toggle()
         {
-            // printf("robot::%s.toggle();\n", name.c_str());
             state = !state;
 
             for(int i = 0; i < pistons.size(); i++)

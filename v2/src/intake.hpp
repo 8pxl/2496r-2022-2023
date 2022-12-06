@@ -17,7 +17,18 @@ namespace intake
             pros::delay(100);
         }
     }
-
+    
+    void hardToggle()
+    {
+        robot::intake.spin(127);
+        pros::delay(300);
+        robot::chass.spin(90);
+        pros::delay(180);
+        robot::intake.stop("C");
+        // robot::chass.spin(-90);
+        // pros::delay(300);
+        robot::chass.stop("b");
+    }
     void waitIndex(int num, int tolerance = 5, int ff = -1, int time = 50, int ffTime = 0)
     {
         for (int i = 0; i < num; i++)
@@ -42,8 +53,8 @@ namespace intake
                         {
                             flywheel::ff = ff;
                             pros::delay(ffTime);
-                            robot::intake.spin(-50);
-                            pros::delay(250);
+                            robot::intake.spin(-50);        
+                            pros::delay(200);
                             robot::intake.stop("b");
                             pros::delay(250);
                             inRange.start();
@@ -191,7 +202,6 @@ namespace intake
             }
             
         }
-
         else 
         {
             if(initRed)

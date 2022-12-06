@@ -66,11 +66,13 @@ void opcontrol()
 		// chas::arcTurn(PI/2, 500, 1500,util::pidConstants(0.5,0,0,0,0,0));
 
 
-		if (glb::driver) {keejControl();}
+		if (glb::driver) 
+		{
+			if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
+			keejControl();
+		}
 
 		else {felixControl();}
-
-		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){auton();}
 
 		// printf("pros::delay(20);\n");
 		pros::delay(20);

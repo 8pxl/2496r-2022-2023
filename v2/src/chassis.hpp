@@ -274,7 +274,6 @@ void chas::autoDrive(double target, double heading, double timeout, util::pidCon
   }
 
   robot::chass.stop("b");
-
 }
 
 
