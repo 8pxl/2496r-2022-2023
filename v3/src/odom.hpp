@@ -1,6 +1,8 @@
-#include "util.hpp"
+#include "global.hpp"
+#include "lib/lib.hpp"
+#include "lib/robot/util/util.hpp"
 
-void odom() //NOLINT
+void odom()
 {
     glb::leftEncoder.reset();
     glb::horizEncoder.reset();
@@ -22,7 +24,7 @@ void odom() //NOLINT
 
         // calcualting change in rotation
         double currRotation = robot::imu.degHeading();
-        double deltaRotation = currRotation - prevRotation;
+        double deltaRotation = util::dirToSpin(prevRotation, currRotation) * util::minError(currRotation, prevRotation);
 
         /* when angle difference jumps by more than 300, it can be assumed that it is caused by the imu rotating past
         0 to 360 or from 360 to 0. in order toget the absolute difference in rotation, the mod of bothvalues is taken.
@@ -30,10 +32,10 @@ void odom() //NOLINT
         in mathematics
         */
 
-        if (std::abs(deltaRotation) > 300)
-        {
-            deltaRotation = (util::mod(currRotation,360) - util::mod(prevRotation,360));
-        }
+        // if (std::abs(deltaRotation) > 300)
+        // {
+        //     deltaRotation = (util::mod(currRotation,360) - util::mod(prevRotation,360));
+        // }
 
         prevRotation = currRotation;
 
@@ -72,8 +74,7 @@ void odom() //NOLINT
 
         // updating global x and global y
         // glb::controller.print(0,0,"(%f, %f)\n", deltaX,deltaY);
-        glb::pos.x -= deltaX;
-        glb::pos.y += deltaY;
+        robot::chass.updatePos(deltaX,deltaY);
 
         // reset encoders
         glb::horizEncoder.reset();

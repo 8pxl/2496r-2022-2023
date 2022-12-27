@@ -16,7 +16,7 @@ namespace lib
 
         public:
             mtrs(const std::vector<pros::Motor> & motorsList) : motors(motorsList), size(motorsList.size()){}
-
+            
             void spin(double volts);
             void stop(char brakeMode);
             void setBrake(char brakeMode);
@@ -31,6 +31,10 @@ namespace lib
             diffy(const std::vector<pros::Motor> & motorsList) : mtrs(motorsList){}
 
             void spinDiffy(double rvolt, double lvolt);
+            // int size()
+            // {
+            //     return size;
+            // }
             std::vector<double> getDiffy();
     };
 
@@ -123,7 +127,6 @@ void lib::mtrs::reset() //NOLINT
 void lib::diffy::spinDiffy(double rvolt, double lvolt) //NOLINT
 {
     int half = size/2;
-    // printf("robot::%s.spinDiffy(%f,%f);\n", name.c_str(), rvolt, lvolt);
 
     for (int i=0; i < half; i++)
     {

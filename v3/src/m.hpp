@@ -6,69 +6,45 @@
 #include <vector>
 
 // lib::listener* con;
+lib::listener con(1);
+
+void spin(lib::mtrs* motors, int volt)
+{
+    motors->spin(volt);
+}
+
+void stop(lib::mtrs* motors, char brake)
+{
+    motors->stop(brake);
+}
+
+void controlsInit()
+{
+    //functions to call
+    std::function<void()> intake = [&] {spin(&robot::itsuki,127); };
+    std::function<void()> cata = [&] {spin(&robot::itsuki,-127); };
+    std::function<void()> stopItsuki = [&] {stop(&robot::itsuki, 'c'); };
+
+    //keys to listen to
+    lib::controllerButton R1(glb::controller, pros::E_CONTROLLER_DIGITAL_R1);
+    lib::controllerButton L1(glb::controller, pros::E_CONTROLLER_DIGITAL_L2);
+
+    //pair keys to a functiom
+    lib::action onR1(&R1, intake, stopItsuki);
+    lib::action onL1(&L1, cata, stopItsuki);
+    lib::action onLimit(&robot::limit, cata, stopItsuki);
+    // std::vector<lib::action> actions{onL1, onLimit};
+
+    con.init({onR1, onLimit, onL1});
+}
 
 void normal()
 {
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
+    robot::chassisMotors.spinDiffy(lStick + rStick,lStick - rStick);
 
-    bool L1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
-    bool L2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-    bool R1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
-    bool R2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
-    bool LIMIT = glb::limit.get_value();
-
-    double rvolt = lStick - rStick;
-    double lvolt = lStick + rStick;
-    // glb::controller.print(1, 1, "%f,%f", rvolt,lvolt);
-
-    robot::chassisMotors.spinDiffy(lvolt,rvolt);
-    // glb::frontRight.move_voltage(rvolt)
-
-    if(robot::pto.state)
-    // if(true)
-    {
-        if(R1)
-        {
-            robot::itsuki.spin(-100);
-        }
-
-        else if (L1) 
-        {
-            robot::itsuki.spin(100);
-        }
-
-        // else if (!LIMIT)
-        // {
-        //     robot::itsuki.spin(-100);
-        // }
-
-        else
-        {
-            robot::itsuki.stop('c');
-        }
-
-        if(R2)
-        {
-            robot::pto.toggle();
-        }
-    }
-
-    else
-    {
-        robot::itsuki.spinDiffy(rvolt, lvolt);
-
-        if(R1 || L1)
-        {
-            robot::pto.toggle();
-        }
-
-        if(R2)
-        {
-            robot::pto.toggle();
-        }
-    }
-
+    con.listen();
 }
 
 void (*autonSelector())() //NOLINT
