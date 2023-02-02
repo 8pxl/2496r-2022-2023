@@ -7,7 +7,6 @@ namespace lib
     {
         private:
           std::vector<util::action> actions;
-        //   std::unordered_map<util::action, util::pid> hash;
 
         public:
             stager(std::vector<util::action> a) : actions(a) {}
@@ -21,7 +20,7 @@ namespace lib
                     {
                         if(i.range.inRange(time))
                         {
-                        i.func(i.args);
+                            i.func(i.args);
                         }
                     }
                 }

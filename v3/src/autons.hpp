@@ -8,21 +8,34 @@ using namespace robot;
 using namespace lib;
 using namespace util;
 
+#define btwn(a, b, c) if(time.time() > a && time.time() < b) {c
+#define mv(c, d, e, f, g)  c(f + d, e);} else {int f = g;}
+#define sp(c) c;}
+
 void wp() 
 {
+    timer time;
     pidConstants driveConstants(10,2,3,4,5,6);
-    // stager wp
-    // ({
-    //     {&chassis::drive, {100,400}, {10, 1, pid(driveConstants, 10)}},
-    //     {&chassis::drive, {500,800}, {20, 1, pid(driveConstants, 20)}}
-    // });
+    const pid one(driveConstants, 0);
+    int first;
+    
+    while (true)
+    {
+        btwn(100, 400, mv(chass.drive, 10, one, first, chassisMotors.getRotation()));
+        btwn(300, 400, sp(itsuki.spin(127)));
+    }
 
-    // wp.run(util::timer());
+    //your mom
+    //ur mom
+    //ur birther
 }
     
 fptr WP = wp; 
 std::vector<fptr> autons{WP}; 
 std::vector<std::string> autonNames{"wp"};
 
+#undef btwn
+#undef mv
+#undef sp
 #endif
 

@@ -58,7 +58,7 @@ namespace robot
 
     //sensors
     lib::imu imu(glb::imu,0); //NOLINT
-    lib::limit limit(glb::limit); //NOLINT
+    // lib::limit limit(glb::limit); //NOLINT
 
     //subsytem objects
     lib::chassis chass(chassisMotors, imu, glb::pos, glb::DL, glb::DR); //NOLINT
