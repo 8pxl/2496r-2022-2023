@@ -63,7 +63,7 @@ pros::motor_brake_mode_e lib::mtrs::returnBrakeType(char brakeMode) //NOLINT
     return brakeMode == 'c' ? pros::E_MOTOR_BRAKE_COAST : brakeMode == 'b' ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_HOLD;
 }
 
-void lib::mtrs::spin(double volts) //NOLINT
+void lib::mtrs::spin(double volts) 
 {
     for (int i=0; i < size; i++)
     {
@@ -124,7 +124,7 @@ void lib::mtrs::reset() //NOLINT
     }
 }
 
-void lib::diffy::spinDiffy(double rvolt, double lvolt) //NOLINT
+void lib::diffy::spinDiffy(double rvolt, double lvolt) 
 {
     int half = size/2;
 
@@ -132,7 +132,6 @@ void lib::diffy::spinDiffy(double rvolt, double lvolt) //NOLINT
     {
         motors[i].move(rvolt);
         motors[i + half].move(lvolt);
-        // glb::controller.print(0,0,"%f", rvolt);
     }
 }
 
@@ -152,9 +151,8 @@ std::vector<double> lib::diffy::getDiffy() //NOLINT
 }
 
 
-void lib::pis::toggle() //NOLINT
+void lib::pis::toggle() 
 {
-    // printf("robot::%s.toggle();\n", name.c_str());
     state = !state;
 
     for(int i = 0; i < pistons.size(); i++)

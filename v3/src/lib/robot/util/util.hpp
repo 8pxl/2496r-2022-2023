@@ -18,6 +18,9 @@ namespace util
     class pidConstants;
     class pid;
     class movingAverage;
+    class timeRange;
+    struct args;
+    struct action;
     double dtr(double input);
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
@@ -266,6 +269,40 @@ class util::movingAverage
             return(average/integral);
         }
 };
+
+class util::timeRange
+{
+    private:
+        int start;
+        int end;
+    
+    public:
+        timeRange(int s, int e) : start(s), end(e) {}
+
+        bool inRange(int time)
+        {
+            return (time >= start && time <= end);
+        }
+
+        int getStart()
+        {
+            return (start);
+        }
+};
+
+struct util::args
+{
+    double target;
+    bool hasArgs = 1;
+    util::pid pid;
+};
+
+struct util::action 
+{
+    void(*func)(util::args);
+    util::timeRange range;
+    util::args args;
+}; 
 
 double util::dtr(double input) //NOLINT
 {

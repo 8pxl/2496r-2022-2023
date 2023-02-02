@@ -5,28 +5,31 @@
 #include <functional>
 #include <vector>
 
-// lib::listener* con;
-
 void normal()
 {
+
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
     bool L1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
     bool L2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+    bool NL2 = glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2);
     bool R1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
     bool R2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
-    bool LIMIT = glb::limit.get_value();
+    bool limit = glb::limit.get_value();
+    bool pto = robot::pto.state;
 
     double rvolt = lStick - rStick;
     double lvolt = lStick + rStick;
-    // glb::controller.print(1, 1, "%f,%f", rvolt,lvolt);
 
     robot::chassisMotors.spinDiffy(lvolt,rvolt);
-    // glb::frontRight.move_voltage(rvolt)
 
-    if(robot::pto.state)
-    // if(true)
+    if(NL2)
+    {
+        robot::boost.toggle();
+    }
+
+    if(pto)
     {
         if(R1)
         {
@@ -36,11 +39,12 @@ void normal()
         else if (L1) 
         {
             robot::itsuki.spin(100);
+            // robot::boost.setState(true);
         }
 
-        // else if (!LIMIT)
+        // else if (!limit)
         // {
-        //     robot::itsuki.spin(-100);
+        //     robot::itsuki.spin(100);
         // }
 
         else

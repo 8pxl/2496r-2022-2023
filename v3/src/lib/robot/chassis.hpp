@@ -22,7 +22,8 @@ namespace lib
             void updatePos(double rx, double ry);
             void spinTo(double target, double timeout, util::pidConstants constants);
             void aspin(double target, double timeout, util::pidConstants constants);
-            void drive(double target, double timeout, util::pidConstants constants);
+            // void drive(double target, double timeout, util::pidConstants constants);
+            void drive(util::args args);
             void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
             void odomDrive(double distance, double timeout, double tolerance);
             std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
@@ -203,23 +204,26 @@ void lib::chassis::aspin(double target, double timeout, util::pidConstants const
   chass.stop('b');
 }
 
-void lib::chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
+// void lib::chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
+// {
+//   util::timer timer;
+//   util::pid pidController(constants, target);
+//   chass.reset();
+
+//   while(timer.time() < timeout)
+//   {
+//     chass.spin(pidController.out(target - chass.getRotation()));
+//   }
+  
+//   chass.stop('b');
+// }
+
+void lib::chassis::drive(util::args args) 
 {
-  double error = target;
-  util::timer timer;
-  util::pid pidController(constants, target);
-  chass.reset();
-
-  while(timer.time() < timeout)
-  {
-    error = target - chass.getRotation();
-    chass.spin(pidController.out(error));
-  }
-
-  chass.stop('b');
+  chass.spin(args.pid.out(args.target - chass.getRotation()));
 }
 
-
+  
 // void lib::chassis::drive(double target, double timeout, double tolerance) //NOLINT
 // { 
 //   // timers
