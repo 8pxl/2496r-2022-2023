@@ -17,6 +17,8 @@ void initialize()
 	// - calibration and sensor init
 	glb::imu.reset();
 	glb::controller.clear();
+    pros::vision_signature_s_t GOAL = pros::Vision::signature_from_utility (2, -2307, -1597, -1952, 8373, 9299, 8836, 8.200, 1);
+    glb::vision.set_signature(2, &GOAL);
 
 	// - autSelector
 	auton = autonSelector();
@@ -48,14 +50,14 @@ void opcontrol()
 
 		// double dl = 0;
 		// double dr = 0;
-		// flywheel::ff = -1;
+		// double rotation;
+		// double delta;
 		// for (int i = 0; i < 10; i++)
 		// {
-		// 	double rotation = robot::imu.degHeading();
+		// 	rotation = robot::imu.degHeading();
 		// 	robot::chass.reset();
-		// 	// pros::delay(1000);
 		// 	chas::spinTo(robot::imu.degHeading() + 90, 1400);
-		// 	double delta = util::minError(robot::imu.degHeading(), rotation);
+		// 	delta = util::minError(robot::imu.degHeading(), rotation);
 		// 	dl += (robot::chass.getLeft() * 360) / (delta * 2 * PI);
 		// 	dr += (robot::chass.getRight() * 360) / (delta * 2 * PI);
 

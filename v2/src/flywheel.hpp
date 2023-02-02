@@ -13,30 +13,18 @@ namespace flywheel
     double target;
     double gError;
     int ff;
-    // bool inRange;
     
     double voltageOut(double kp, double kv, double ki, double integral, double target, double error, double deadband)
     {
         if (std::abs(error) < deadband)
         {
-            // inRange = true;
             if(error > 0)
             {
-                // if (std::abs(error) < 4)
-                // {
-                //     return (target + error * (kp/2) + integral * ki) * kv;
-                // }
-
                 return (target + error * kp + integral * ki) * kv;
             }
 
             else
             {
-                // if (std::abs(error) < 4)
-                // {
-                //     return (target + error * (kp/2) + integral * ki) * kv;
-                // }
-
                 return (target + (error * 0.7) * kp + integral * ki) * kv;
             }
         }
@@ -49,7 +37,6 @@ namespace flywheel
 
         else
         {
-            // inRange = false;
             return (target/1.5) * kv;
         }
     }
@@ -70,19 +57,13 @@ namespace flywheel
         double voltage;
         double integral;
         double deadband;
-        // const int slidingWindowSize = 50;
-        // double slidingWindow[slidingWindowSize] = {0};
-
 
         while (true)
         {
-
             //velocity sliding average
             velAverage.push(robot::flywheel.getSpeed());
             // speed = velAverage.simpleAverage();
             speed = velAverage.expAverage();
-
-            // speed = 0;
 
             error = target - speed;
             absError = std::abs(error);

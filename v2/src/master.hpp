@@ -6,12 +6,14 @@
 #include "pros/misc.h"
 #include "pros/rtos.hpp"
 #include "util.hpp"
+#include "autoaim.hpp"
 
 util::timer decelTimer; 
 util::timer indexTimer;
 util::timer doubleTap;
 util::timer fowrardTimer;
 double prevSpeed;
+bool toggled;
 
 void curvature(double iThrottle, double iCurvature, double iThreshold){
     if(std::fabs(iThrottle) <= iThreshold){
@@ -222,7 +224,7 @@ void felixControl()
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
     {
-        intake::toggle(true);
+        // intake::toggle(true);
     }
     
 
@@ -300,6 +302,11 @@ void keejControl()
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
+    // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
+    // {
+    //     autoAim();
+    // }
+
     if(std::abs(lStick) < deadband)
     {
         // rStick = rStick/2;
@@ -328,7 +335,39 @@ void keejControl()
 
     // robot::chass.spinDiffy(lStick, rStick);
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
+    
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+    {
+        toggled = !toggled;
+    }
+    if(std::abs(lStick) < 5 && std::abs(rStick) < 5 && decelTimer.time() <= 4000 && toggled)
+    {
+        double kp = 0.5;
+        pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 2);
+        int x = goal.left_coord;
+        if(std::abs(70-x) < 1)
+        {
+            kp = 0;
+        }
 
+        int vel = (70-x) * kp;
+        
+        robot::chass.spinDiffy(-vel, vel);
+    }
+    // if(std::abs(lStick) < 10 && std::abs(rStick) < 10)
+    // {
+    //     int kp = 0.6;
+    //     pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 2);
+    //     int x = goal.left_coord;
+    //     if(std::abs(66-x) < 3)
+    //     {
+    //         kp = 0;
+    //     }
+
+    //     int vel = (66-x) * kp;
+        
+    //     robot::chass.spinDiffy(-vel, vel);
+    // }
     if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2) && (doubleTap.time() <= 150))
     {
         glb::controller.rumble(".");
@@ -470,11 +509,6 @@ void keejControl()
     if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
     {
         flywheel::target = 0;
-    }
-
-    if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
-    {
-        intake::toggle(true);
     }
     
 

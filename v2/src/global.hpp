@@ -40,6 +40,7 @@ namespace glb
     pros::ADIEncoder leftEncoder(3,4,false);
     pros::ADIEncoder horizEncoder(1,2,false);
     pros::Optical optical(20);
+    pros::Vision vision (18);
     // pros::ADIEncoder rightEncoder(5,6,false);
 
     // variables
