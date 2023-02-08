@@ -6,6 +6,7 @@ void odom()
 {
     glb::leftEncoder.reset();
     glb::horizEncoder.reset();
+    //YM
 
     double prevRotation = glb::imu.get_heading();
     double deltaX = 0;
