@@ -21,6 +21,7 @@ void (*auton)();
 // vision::signature SIG_7 (7, 0, 0, 0, 0, 0, 0, 3.000, 0);
 // vex::vision vision1 ( vex::PORT1, 50, SIG_1, SIG_2, SIG_3, SIG_4, SIG_5, SIG_6, SIG_7 );
 
+//hi
 void initialize() 
 {
 	// - calibration and sensor init
