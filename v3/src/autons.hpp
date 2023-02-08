@@ -10,19 +10,29 @@ using namespace util;
 
 #define btwn(a, b, c) if(time.time() > a && time.time() < b) {c
 #define mv(c, d, e, f, g)  c(f + d, e);} else {int f = g;}
-#define sp(c) c;}
+#define _ ;}
 
 void wp() 
 {
     timer time;
     pidConstants driveConstants(10,2,3,4,5,6);
-    const pid one(driveConstants, 0);
     int first;
     
     while (true)
     {
-        btwn(100, 400, mv(chass.drive, 10, one, first, chassisMotors.getRotation()));
-        btwn(300, 400, sp(itsuki.spin(127)));
+        //default motor behavior
+        chassisMotors.stop('c');
+        itsuki.stop('c');
+        if (!glb::limit.get_value())
+        {
+            robot::itsuki.spin(127);
+        }
+
+        //time based auton code
+        btwn(100, 400, mv(chass.drive, 10, driveConstants, first, chassisMotors.getRotation()));
+        btwn(300, 400, itsuki.spin(-127)_);
+        
+        pros::delay(10);
     }
 
     //your mom
@@ -36,6 +46,6 @@ std::vector<std::string> autonNames{"wp"};
 
 #undef btwn
 #undef mv
-#undef sp
+#undef _
 #endif
 

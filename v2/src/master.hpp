@@ -8,6 +8,7 @@
 #include "util.hpp"
 #include "autoaim.hpp"
 
+
 util::timer decelTimer; 
 util::timer indexTimer;
 util::timer doubleTap;
@@ -80,6 +81,27 @@ void felixControl()
         {
             flywheel::target -= 40;
         }
+    }
+
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+    {
+        toggled = !toggled;
+    }
+
+    if(std::abs(lStick) < 9 && std::abs(rStick) < 9 && decelTimer.time() <= 8000 && toggled)
+    {
+        static util::pid pid(util::pidConstants(0.6, 0.1, 0, 0.1, 0.3, 1000), 1000);
+        pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 2);
+        int x = goal.left_coord;
+        int error = 66-x;
+        // if(std::abs(error) < 1)
+        // {
+        //     error = 0;
+        // }
+
+        int vel = pid.out(error);
+        
+        robot::chass.spinDiffy(-vel, vel);
     }
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
@@ -340,17 +362,36 @@ void keejControl()
     {
         toggled = !toggled;
     }
-    if(std::abs(lStick) < 5 && std::abs(rStick) < 5 && decelTimer.time() <= 4000 && toggled)
+    
+    if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
     {
-        double kp = 0.5;
-        pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 2);
-        int x = goal.left_coord;
-        if(std::abs(70-x) < 1)
+        glb::red = !glb::red;
+    }
+
+    if(std::abs(lStick) < 9 && std::abs(rStick) < 9 && decelTimer.time() <= 8000 && toggled)
+    {
+        static util::pid pid(util::pidConstants(0.6, 0.1, 0, 0.1, 0.3, 1000), 1000);
+        pros::vision_object_s_t goal;
+        int center;
+        if(glb::red)
         {
-            kp = 0;
+            pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 1);
+            center = 87;
+        }
+        else
+        {
+            pros::vision_object_s_t goal = glb::vision.get_by_sig(0, 2);
+            center = 68;
         }
 
-        int vel = (70-x) * kp;
+        int x = goal.left_coord;
+        int error = center-x;
+        // if(std::abs(error) < 1)
+        // {
+        //     error = 0;
+        // }
+
+        int vel = pid.out(error);
         
         robot::chass.spinDiffy(-vel, vel);
     }
@@ -375,12 +416,12 @@ void keejControl()
 
         if(robot::angler.state)
         {
-            flywheel::target += 40;
+            flywheel::target += 25;
         }
 
         else
         {
-            flywheel::target -= 40;
+            flywheel::target -= 25;
         }
     }
 
@@ -394,7 +435,7 @@ void keejControl()
                 flywheel::target = 350;
             }
 
-            else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+            else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
             {
                 flywheel::target = 580;
             }
@@ -466,7 +507,7 @@ void keejControl()
 
         else
         {
-            robot::intake.stop("c");
+            robot::intake.stop("c");    
         }
 
         if(!glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
@@ -517,8 +558,11 @@ void keejControl()
         // double target = 180 - absoluteAngleToPoint(glb::pos, util::coordinate(0,0));
         // target = target >= 0 ? target : 180 + fabs(target); //conver to 0-360
         // glb::controller.print(0, 0, "%f", target);
-        intake::hardToggle();
-        robot::intake.spin(-127);
+        // intake::hardToggle();
+        // robot::intake.spin(-127);
+        // autoAim(900,1);
+        chas::arcTurn(PI/2,400,1000, util::pidConstants(2.8,0.2,20,0.05,5,100));
+        // chas::arcTurn(-PI/4,400,1800, util::pidConstants(2.8,0.2,20,0.05,5,100));
     }
     
 

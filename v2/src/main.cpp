@@ -12,13 +12,24 @@
 void (*auton)();
 // bool control = true;
 
+// vision::signature SIG_1 (1, 1033, 1937, 1486, -4715, -4095, -4404, 3.000, 0);
+// vision::signature SIG_2 (2, 0, 0, 0, 0, 0, 0, 11.000, 0);
+// vision::signature SIG_3 (3, 0, 0, 0, 0, 0, 0, 7.900, 0);
+// vision::signature SIG_4 (4, 0, 0, 0, 0, 0, 0, 3.000, 0);
+// vision::signature SIG_5 (5, 0, 0, 0, 0, 0, 0, 3.000, 0);
+// vision::signature SIG_6 (6, 0, 0, 0, 0, 0, 0, 3.000, 0);
+// vision::signature SIG_7 (7, 0, 0, 0, 0, 0, 0, 3.000, 0);
+// vex::vision vision1 ( vex::PORT1, 50, SIG_1, SIG_2, SIG_3, SIG_4, SIG_5, SIG_6, SIG_7 );
+
 void initialize() 
 {
 	// - calibration and sensor init
 	glb::imu.reset();
 	glb::controller.clear();
-    pros::vision_signature_s_t GOAL = pros::Vision::signature_from_utility (2, -2307, -1597, -1952, 8373, 9299, 8836, 8.200, 1);
-    glb::vision.set_signature(2, &GOAL);
+	pros::vision_signature_s_t BLUE_GOAL = pros::Vision::signature_from_utility (2, -2307, -1597, -1952, 8373, 9299, 8836, 8.200, 1);
+	pros::vision_signature_s_t RED_GOAL = pros::Vision::signature_from_utility(1, 541, 11747, 6144, -841, 845, 2, 0.800, 0);
+	glb::vision.set_signature(2, &BLUE_GOAL);
+	glb::vision.set_signature(1, &RED_GOAL);
 
 	// - autSelector
 	auton = autonSelector();

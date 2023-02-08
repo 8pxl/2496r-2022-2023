@@ -2,7 +2,6 @@
 #define __CHASSIS__
 
 // - chassis specific macros 
-#include "pros/rtos.hpp"
 #define DL 368.2
 #define DR -362
 
@@ -511,7 +510,7 @@ void chas::velsUntilHeading(double rvolt, double lvolt, double heading, double t
 
 void chas::arcTurn(double theta, double radius, double timeout, util::pidConstants cons)
 {
-  util::timer timer = util::timer(); 
+  util::timer timer;
   double curr;
   double currTime;
   double rError;
@@ -531,17 +530,16 @@ void chas::arcTurn(double theta, double radius, double timeout, util::pidConstan
   theta = util::rtd(theta);
   ratio = sl/sr;
   curr = glb::imu.get_heading();
-  rError = util::minError(theta, curr);
 
-  util::pid controller = util::pid(cons, rError);
+
+  util::pid controller(cons, 1000);
 
   while (true)
   {
     curr = glb::imu.get_heading();
     currTime = timer.time();
 
-    int dir = util::dirToSpin(theta,curr);
-    vel = controller.out(util::minError(theta, curr)) * dir;
+    vel = controller.out(util::minError(theta, curr)) * util::dirToSpin(theta,curr);
 
     vel = std::abs(vel) >= 127 ? (127 * util::sign(vel)) : vel;
 
@@ -551,6 +549,7 @@ void chas::arcTurn(double theta, double radius, double timeout, util::pidConstan
     robot::chass.spinDiffy(rvel, lvel);
     
     glb::controller.print(0, 0, "%f", util::minError(theta, curr));
+
     if(currTime >= timeout)
     {
       break;
@@ -558,6 +557,7 @@ void chas::arcTurn(double theta, double radius, double timeout, util::pidConstan
 
     pros::delay(10);
   }
+  robot::chass.stop("b");
 }
 
 

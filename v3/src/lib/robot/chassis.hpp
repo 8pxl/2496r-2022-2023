@@ -20,9 +20,10 @@ namespace lib
             chassis(lib::diffy mtrs, lib::imu inertial, util::coordinate position, double dl = 0, double dr = 0) : chass(mtrs), imu(inertial), pos(position), DL(dl), DR(dr) {}
 
             void updatePos(double rx, double ry);
-            void spinTo(double target, double timeout, util::pidConstants constants);
+            // void spinTo(double target, double timeout, util::pidConstants constants);
+            void spinTo(double target, util::pidConstants constants);
             void aspin(double target, double timeout, util::pidConstants constants);
-            void drive(double target, util::pid);
+            void drive(double target, util::pidConstants constants);
             // void drive(util::args args);
             void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
             void odomDrive(double distance, double timeout, double tolerance);
@@ -111,47 +112,60 @@ void lib::chassis::updatePos(double rx, double ry) //NOLINT
 //   chass.stop('b');
 // } 
 
-void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
+void lib::chassis::spinTo(double target, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) 
 { 
-  // timers
-  util::timer timeoutTimer;
-
-  // general vars
   double currHeading = imu.degHeading();
   double error;
   int dir;
   double vel;
+  static util::pid pid(constants, error);
+  currHeading = imu.degHeading();
+  dir = -util::dirToSpin(target,currHeading);
+  vel = pid.out(util::minError(target,currHeading));
+  chass.spinDiffy(vel * dir,-vel * dir);
+}
+
+// void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
+// { 
+//   // timers
+//   util::timer timeoutTimer;
+
+//   // general vars
+//   double currHeading = imu.degHeading();
+//   double error;
+//   int dir;
+//   double vel;
 
   
-  util::pidConstants cons(constants);
-  error = util::minError(target,currHeading);
+//   util::pidConstants cons(constants);
+//   error = util::minError(target,currHeading);
 
-  util::pid pid(cons, error);
+//   util::pid pid(cons, error);
 
-  // pid loop 
-  while (true)
-  {
-    //end condition
-    if(timeoutTimer.time() >= timeout)
-    {
-      break;
-    }
+//   // pid loop 
+//   while (true)
+//   {
+//     //end condition
+//     if(timeoutTimer.time() >= timeout)
+//     {
+//       break;
+//     }
 
-    //error
-    currHeading = imu.degHeading();
-    dir = -util::dirToSpin(target,currHeading);
-    error = util::minError(target,currHeading);
+//     //error
+//     currHeading = imu.degHeading();
+//     dir = -util::dirToSpin(target,currHeading);
+//     error = util::minError(target,currHeading);
 
-    //vel
-    vel = pid.out(error);
+//     //vel
+//     vel = pid.out(error);
 
-    // spin motors
-    chass.spinDiffy(vel * dir,-vel * dir);
+//     // spin motors
+//     chass.spinDiffy(vel * dir,-vel * dir);
 
-    pros::delay(10);
-  }
-  chass.stop('b');
-} 
+//     pros::delay(10);
+//   }
+//   chass.stop('b');
+// } 
 
 void lib::chassis::aspin(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
 { 
@@ -232,8 +246,9 @@ void lib::chassis::aspin(double target, double timeout, util::pidConstants const
 //   chass.stop('b');
 // }
 
-void lib::chassis::drive(double target, util::pid pid) //NOLINT
+void lib::chassis::drive(double target, util::pidConstants constants) //NOLINT
 {
+  static util::pid pid(constants, target);
   chass.spin(pid.out(target - chass.getRotation()));
 }
 
