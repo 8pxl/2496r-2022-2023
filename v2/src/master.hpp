@@ -561,7 +561,9 @@ void keejControl()
         // intake::hardToggle();
         // robot::intake.spin(-127);
         // autoAim(900,1);
-        chas::arcTurn(PI/2,400,1000, util::pidConstants(2.8,0.2,20,0.05,5,100));
+        chas::arcTurn(PI/4,700,700, 1, util::pidConstants(2.8,0.4,20,0.05,5,100));
+        chas::arcTurn(0.000001,700,1200, -1, util::pidConstants(2.8,0.4,20,0.05,5,100));
+        // chas::arcTurn(PI/2,-400,1000, -1, util::pidConstants(2.8,0.4,20,0.05,5,100));
         // chas::arcTurn(-PI/4,400,1800, util::pidConstants(2.8,0.2,20,0.05,5,100));
     }
     

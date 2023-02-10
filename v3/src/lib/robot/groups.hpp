@@ -31,10 +31,7 @@ namespace lib
             diffy(const std::vector<pros::Motor> & motorsList) : mtrs(motorsList){}
 
             void spinDiffy(double rvolt, double lvolt);
-            // int size()
-            // {
-            //     return size;
-            // }
+
             std::vector<double> getDiffy();
     };
 

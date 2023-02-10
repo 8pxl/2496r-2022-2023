@@ -175,7 +175,7 @@ class util::pidConstants
 {
     public:
         double p,i,d,tolerance,integralThreshold, maxIntegral;
-        pidConstants(double kp, double ki, double kd, double deviation, double threshold, double maxI) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold), maxIntegral(maxI) {}
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral) {}
 };
 
 class util::pid
