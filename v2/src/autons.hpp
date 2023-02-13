@@ -75,7 +75,7 @@ void wp()
 }
 
 //Gerald was here
-//asdfghjklkjhgfdsasdfghjklkjhgfdsawertyuikmnbvcxsaqw34567uiop;l,mnbvcxzsdfghj
+//asdfghjklkjhgfdsasdfghjklkjhgfdsawertyuikmnbvcxsaqw34567uiop;l`,mnbvcxzsdfghj
 //KJKJKJ
 
 void skillsNew()
@@ -88,27 +88,30 @@ void skillsNew()
     util::pidConstants arc(2.8,0.2,20,0.05,5,100);
     //intake right is ++
     //starting heading is like, 90
-    // flywheel::target = 350;
-    // pros::delay(700);
-    // flywheel::ff = 3;
-    // robot::intake.spin(-40);
-    // pros::delay(500);
-    // flywheel::ff = -1;
 
-    // for (int i = 0; i < 7; i++)
-    // {
-    //     robot::intake.spin(127);
-    //     pros::delay(350);
-    //     robot::intake.stop("c");
-    //     pros::delay(100);
-    //     flywheel::ff = 3;
-    //     robot::intake.spin(-50);
-    //     pros::delay(250);
-    //     flywheel::ff = -1;
-    //     robot::intake.stop("c");
-    // }
-    // robot::intake.spin(-80);
-    // flywheel::target = 300;
+    flywheel::target = 340;
+    pros::delay(700);
+    flywheel::ff = 3;
+    robot::intake.spin(-40);
+    pros::delay(500);
+    flywheel::ff = -1;
+
+    for (int i = 0; i < 7; i++)
+    {
+        robot::intake.spin(127);
+        pros::delay(350);
+        robot::intake.stop("c");
+        pros::delay(100);
+        flywheel::ff = 3;
+        robot::intake.spin(-50);
+        pros::delay(250);
+        flywheel::ff = -1;
+        robot::intake.stop("c");
+    }
+
+    robot::intake.spin(-80);
+    flywheel::target = 300;
+
     // robot::tsukasa.toggle();
     // robot::chass.spinDiffy(127,-20);
     // pros::delay(550);
@@ -124,63 +127,99 @@ void skillsNew()
 
     // - go disc
     chas::arcTurn(util::dtr(240), 700,700,-1, arc);
-    chas::spinTo(312, 850);
+    chas::spinTo(305, 700);
     robot::intake.stop("c");
     robot::tsukasa.toggle();
     
     robot::intake.spin(127);
     flywheel::target = 350;
-    chas::drive(1340, 760, 3);
+    chas::drive(1400, 760, 3);
     robot::tsukasa.toggle();
     pros::delay(300);
     pros::delay(350);
-    chas::arcTurn(3*PI/2, 1000,1000,-1, arc);
+    chas::arcTurn(3*PI/2, 1410,1050,-1, arc);
     robot::intake.stop("c");
     // chas::drive(-1300, 650, 3);
     // robot::chass.spinDiffy(-70,70);
     // pros::delay(500);
-    autoAim(500, 1);
-    flywheel::target = 360;
+    // autoAim(340, 1);
+    chas::spinTo(273,340,smallTurn);
+    flywheel::target = 330;
     // chas::spinTo(300,100);
     flywheel::ff = 3;
 
     robot::intake.spin(-70);
     pros::delay(600);
-    chas::arcTurn(util::dtr(42), 540, 1000,-1, arc);
-    chas::spinTo(42,770);
+    robot::intake.stop("c");
+    pros::delay(150);
+    robot::intake.spin(-70);
+    // chas::arcTurn(util::dtr(18), 250, 1000,-1, arc);
+    chas::spinTo(358,800);
     robot::intake.spin(127);
-    chas::drive(4000,1800,5);
-    chas::spinTo(11,680);
-    chas::drive(-1300,1000,3);
-    autoAim(500, 1, 92);
+    chas::drive(2300,1700,1,80);
+    // chas::spinTo(315,1200);
+    // chas::arcTurn(util::dtr(325), 370, 1200,1, arc);
+    chas::spinTo(325,700);
+    robot::tsukasa.toggle();
+    robot::intake.stop("c");
+    // chas::drive(-599,400,1);
+    // autoAim(500, 1,50);
+    flywheel::target = 360;
+    flywheel::ff = 3;
+    robot::intake.spin(-70);
+    pros::delay(600);
+    robot::tsukasa.toggle();
+    robot::intake.spin(127);
+    // chas::drive(599,400,1);
+
+
+    //old
+    chas::arcTurn(util::dtr(60), 300, 840,-1, arc);
+    // chas::spinTo(42,770);
+    robot::intake.spin(127);
+    chas::drive(1800,1050,1);
+    flywheel::target = 350;
+    chas::spinTo(0,680);
+    chas::drive(-900,800,3);
+    robot::tsukasa.toggle();
+    autoAim(400, 1, 80);
     flywheel::ff = 3;
     robot::intake.spin(-70);
     pros::delay(720);
-    chas::spinTo(343,730);
-    chas::drive(1700,1000,1);
-
-    robot::intake.stop("c");
-    chas::spinTo(0, 900, smallTurn);
-    robot::tsukasa.toggle();    
+    chas::spinTo(345,690);
     robot::intake.spin(127);
-    chas::drive(800,800,5);
+    chas::drive(1800,900,5);
     robot::tsukasa.toggle();
-    pros::delay(200);
-    chas::drive(1970,1100,5);
-    robot::intake.stop("b");
-    pros::delay(800);
+    chas::spinTo(0,730);
+    chas::drive(1600,1100,1);
+    // chas::spinTo(335,730);
+    // chas::drive(1300,900,1);
+
+    // robot::intake.stop("c");
+    // chas::spinTo(0, 900);
+    // robot::tsukasa.toggle();    
+    // robot::intake.spin(127);
+    // chas::drive(800,800,5);
+    // robot::tsukasa.toggle();
+    // pros::delay(200);
+    // chas::drive(1400,700,5);
+    // robot::intake.stop("b");
+    // pros::delay(800);
     intake::toggle(false);
 
     // - roller #4
-    chas::drive(-200,700,5);
-    chas::spinTo(315, 650);
-    chas::drive(-1400, 850, 5);
+    chas::arcTurn(util::dtr(310), 740, 1000,-1, arc);
+    // chas::arcTurn(util::dtr(90), 300, 1000,-1, arc);
+    // chas::drive(-200,700,5);
+    // chas::spinTo(315, 650);
+    // chas::drive(-1400, 850, 5);
     chas::spinTo(90, 750);
      
-    robot::chass.spin(100);
-    pros::delay(200);
+    robot::chass.spin(127);
+    pros::delay(300);
     robot::chass.stop("c");
     intake::toggle(false);
+    robot::tsukasa.toggle();
 
     // - mathcloads
     flywheel::target = 350;
@@ -197,7 +236,8 @@ void skillsNew()
     robot::chass.spinDiffy(-30, -30);
     pros::delay(200);
     robot::chass.stop("b");
-    autoAim(600,2);
+    robot::tsukasa.toggle();
+    autoAim(600,2,71);
 
 
     flywheel::ff = 3;
@@ -220,7 +260,7 @@ void skillsNew()
 
     // - go disc
     chas::arcTurn(util::dtr(60), 700,700,-1, arc);
-    chas::spinTo(132, 850);
+    chas::spinTo(129, 670);
     robot::intake.stop("c");
     robot::tsukasa.toggle();
     
@@ -230,7 +270,7 @@ void skillsNew()
     robot::tsukasa.toggle();
     pros::delay(300);
     pros::delay(350);
-    chas::arcTurn(PI/2, 1000,1100,-1, arc);
+    chas::arcTurn(PI/2, 1000,1000,-1, arc);
     robot::intake.stop("c");
     // chas::drive(-1300, 650, 3);
     // robot::chass.spinDiffy(-70,70);
@@ -243,184 +283,214 @@ void skillsNew()
     robot::intake.spin(-70);
     pros::delay(600);
     chas::arcTurn(util::dtr(222), 540, 1000,-1, arc);
-    chas::spinTo(222,770);
+    chas::spinTo(222,400);
     robot::intake.spin(127);
     chas::drive(4000,1800,5);
     chas::spinTo(191,680);
-    chas::drive(-1300,1000,3);
-    autoAim(500, 2, 78);
+    chas::drive(-1400,1000,3);
+    // autoAim(500, 2, 68);
+    // chas::spinTo(165,680);
+    chas::spinTo(172,660);
     flywheel::ff = 3;
     robot::intake.spin(-70);
     pros::delay(720);
-    chas::spinTo(173,730);
-    chas::drive(1200,1000,1);
-
-    robot::intake.stop("c");
-    chas::spinTo(180, 900, smallTurn);
-    robot::tsukasa.toggle();    
     robot::intake.spin(127);
-    chas::drive(800,800,5);
     robot::tsukasa.toggle();
-    pros::delay(200);
-    chas::drive(1970,1100,5);
+    chas::spinTo(165,680);
+    chas::drive(1900,1200,1);
+    robot::tsukasa.toggle();
+
+    // chas::spinTo(162,730);
+    // chas::drive(1300,1000,1);
+
+    // robot::intake.stop("c");
+    chas::spinTo(184, 800, smallTurn);
+    // robot::tsukasa.toggle();    
+    robot::intake.spin(127);
+    // chas::drive(800,800,5);
+    // robot::tsukasa.toggle();
+    // pros::delay(200);
+    chas::drive(1700,950,5);
     robot::intake.stop("b");
-    pros::delay(800);
-    intake::toggle(false);
-
-    // - roller #4
-    chas::drive(-200,700,5);
-    chas::spinTo(135, 650);
-    chas::drive(-1400, 850, 5);
-    chas::spinTo(270, 750);
-     
-    robot::chass.spin(100);
-    pros::delay(200);
-    robot::chass.stop("c");
+    // pros::delay(800);
     intake::toggle(false);
 
 
-    robot::intake.spin(127);
-    chas::drive(2200,1200,1,90);
-    robot::chass.spinDiffy(-50,50);
-    pros::delay(300);
-    robot::chass.stop("b");
-    autoAim(800, 2);
-    flywheel::ff = 3;
-    robot::intake.spin(-70);
-    pros::delay(720);
-    robot::intake.spin(127);
-    chas::spinTo(272,800);
-    chas::drive(2000,1200,1,80);
-    chas::spinTo(180,800);
-    autoAim(800, 2);
-    flywheel::ff = 3;
-    robot::intake.spin(-70);
-    pros::delay(720);
-
-
-
-    chas::spinTo(175, 800);
-    chas::drive(3200, 1400, 1);
-    chas::spinTo(270, 300);
-    intake::toggle(false);
-    /// 
-    chas::drive(-300,750,5);
-    chas::spinTo(90, 1000,bigTurn);
-    robot::tsukasa.toggle();    
-    robot::intake.spin(127);
-    chas::drive(700,800,5);
-    robot::tsukasa.toggle();
-    pros::delay(200);
-    chas::drive(300,500,5);
-
-    // - toggler roller #2
-    chas::spinTo(0, 650);
-    robot::intake.stop("c");
-    chas::drive(1320,1000,5);
-    intake::toggle(false);
-    chas::drive(-680,600,1);
-    robot::intake.stop("c");
-    pros::delay(200);
-    robot::tsukasa.toggle(); 
-
-    // - shoot first volley
-    chas::spinTo(183, 730);
-    flywheel::target = 350;
-    robot::tsukasa.toggle(); 
-    chas::drive(-2700,1500,3);
-    autoAim(700,2);
-    flywheel::ff = 3;
-    robot::intake.spin(-80);
-    pros::delay(1000);
-    robot::intake.stop("c");
-
-    // - intake second round of three
-    chas::spinTo(87, 800);
-    robot::intake.spin(127);
-    flywheel::target = 350;
-    chas::drive(1000, 725, 5);
-    chas::spinTo(90, 500, smallTurn);
-    chas::drive(1200, 900, 5);
-
-    // - second volley of three
-    chas::spinTo(135, 400);
-    autoAim(400,2);
-    robot::intake.stop("c");
-    robot::tsukasa.toggle();
-    flywheel::ff = 3;
-    robot::intake.spin(-80);
-    pros::delay(900);
-    robot::intake.stop("c");
-    robot::tsukasa.toggle();
-
-    // - intake third round of three and roller #3
-    chas::spinTo(274, 1700,medTurn);
-    robot::intake.spin(-127);
-    chas::drive(-2740, 1400, 5);
-    robot::intake.stop("c");
-    chas::spinTo(0, 900);
-    robot::tsukasa.toggle();    
-    robot::intake.spin(127);
-    chas::drive(600,800,5);
-    robot::tsukasa.toggle();
-    pros::delay(200);
-    chas::drive(1970,1100,5);
-    robot::intake.stop("b");
-    pros::delay(800);
-    intake::toggle(false);
-
-    // - roller #4
-    chas::drive(-200,700,5);
-    chas::spinTo(315, 650);
-    chas::drive(-1400, 850, 5);
-    chas::spinTo(90, 750);
-     
-    robot::chass.spin(100);
-    pros::delay(200);
-    robot::chass.stop("c");
-    intake::toggle(false);
-
-    // - allign for matchloads
-    flywheel::target = 350;
-    robot::intake.stop("c");
-    chas::velsUntilHeading(-30, -127,202, 4, 5000);
-    robot::chass.spin(-95);
-    pros::delay(1380);
-    robot::chass.spin(-20);
-    pros::delay(1200);
-    robot::chass.spinDiffy(-20, 60);
-    pros::delay(300);
-    robot::chass.stop("b");
-    pros::delay(200);
-    robot::chass.spinDiffy(-30, -30);
-    pros::delay(200);
-    robot::chass.stop("b");
-    autoAim(400,2);
-
-
+    flywheel::target = 430;
+    chas::arcTurn(util::dtr(130), 740, 1000,-1, arc);
+    chas::spinTo(179,600);
     flywheel::ff = 3;
     robot::intake.spin(-60);
-    pros::delay(700);
+    pros::delay(500);
+    // chas::arcTurn(util::dtr(90), 300, 1000,-1, arc);
+    // chas::drive(-200,700,5);
+    // chas::spinTo(315, 650);
+    // chas::drive(-1400, 850, 5);
+    chas::spinTo(270, 680);
+    robot::intake.spin(127);
+     
+    robot::chass.spin(127);
+    pros::delay(200);
+    // robot::chass.stop("c");
+
+    // // - roller #4
+    // chas::drive(-200,700,5);
+    // chas::spinTo(135, 650);
+    // chas::drive(-1400, 850, 5);
+    // chas::spinTo(270, 750);
+     
+    // robot::chass.spin(100);
+    // pros::delay(200);
+    // robot::chass.stop("c");
+    intake::toggle(false);
 
 
-    for (int i = 0; i < 7; i++)
-    {
-        robot::intake.spin(127);
-        pros::delay(350);
-        robot::intake.stop("c");
-        pros::delay(100);
-        flywheel::ff = 3;
-        robot::intake.spin(-50);
-        pros::delay(250);
-        flywheel::ff = -1;
-        robot::intake.stop("c");
-    }
+    // robot::intake.spin(127);
+    // chas::drive(2200,1200,1,90);
+    // robot::chass.spinDiffy(-50,50);
+    // pros::delay(300);
+    // robot::chass.stop("b");
+    // autoAim(800, 2);
+    // flywheel::ff = 3;
+    // robot::intake.spin(-70);
+    // pros::delay(720);
+    // robot::intake.spin(127);
+    // chas::spinTo(272,800);
+    // chas::drive(2000,1200,1,80);
+    // chas::spinTo(180,800);
+    // autoAim(800, 2);
+    // flywheel::ff = 3;
+    // robot::intake.spin(-70);
+    // pros::delay(720);
 
-        chas::spinTo(200, 700);
-    chas::drive(2920, 1500, 5);
-    chas::spinTo(45, 700);
-    robot::cata.toggle();
-    pros::delay(700);
+
+
+    // chas::spinTo(175, 800);
+    // chas::drive(3200, 1400, 1);
+    // chas::spinTo(270, 300);
+    // intake::toggle(false);
+    // /// 
+    // chas::drive(-300,750,5);
+    // chas::spinTo(90, 1000,bigTurn);
+    // robot::tsukasa.toggle();    
+    // robot::intake.spin(127);
+    // chas::drive(700,800,5);
+    // robot::tsukasa.toggle();
+    // pros::delay(200);
+    // chas::drive(300,500,5);
+
+    // // - toggler roller #2
+    // chas::spinTo(0, 650);
+    // robot::intake.stop("c");
+    // chas::drive(1320,1000,5);
+    // intake::toggle(false);
+    // chas::drive(-680,600,1);
+    // robot::intake.stop("c");
+    // pros::delay(200);
+    // robot::tsukasa.toggle(); 
+
+    // // - shoot first volley
+    // chas::spinTo(183, 730);
+    // flywheel::target = 350;
+    // robot::tsukasa.toggle(); 
+    // chas::drive(-2700,1500,3);
+    // autoAim(700,2);
+    // flywheel::ff = 3;
+    // robot::intake.spin(-80);
+    // pros::delay(1000);
+    // robot::intake.stop("c");
+
+    // // - intake second round of three
+    // chas::spinTo(87, 800);
+    // robot::intake.spin(127);
+    // flywheel::target = 350;
+    // chas::drive(1000, 725, 5);
+    // chas::spinTo(90, 500, smallTurn);
+    // chas::drive(1200, 900, 5);
+
+    // // - second volley of three
+    // chas::spinTo(135, 400);
+    // autoAim(400,2);
+    // robot::intake.stop("c");
+    // robot::tsukasa.toggle();
+    // flywheel::ff = 3;
+    // robot::intake.spin(-80);
+    // pros::delay(900);
+    // robot::intake.stop("c");
+    // robot::tsukasa.toggle();
+
+    // // - intake third round of three and roller #3
+    // chas::spinTo(274, 1700,medTurn);
+    // robot::intake.spin(-127);
+    // chas::drive(-2740, 1400, 5);
+    // robot::intake.stop("c");
+    // chas::spinTo(0, 900);
+    // robot::tsukasa.toggle();    
+    // robot::intake.spin(127);
+    // chas::drive(600,800,5);
+    // robot::tsukasa.toggle();
+    // pros::delay(200);
+    // chas::drive(1970,1100,5);
+    // robot::intake.stop("b");
+    // pros::delay(800);
+    // intake::toggle(false);
+
+    // // - roller #4
+    // chas::drive(-200,700,5);
+    // chas::spinTo(315, 650);
+    // chas::drive(-1400, 850, 5);
+    // chas::spinTo(90, 750);
+     
+    // robot::chass.spin(100);
+    // pros::delay(200);
+    // robot::chass.stop("c");
+    // intake::toggle(false);
+
+    // // - allign for matchloads
+    // flywheel::target = 350;
+    // robot::intake.stop("c");
+    // chas::velsUntilHeading(-30, -127,202, 4, 5000);
+    // robot::chass.spin(-95);
+    // pros::delay(1380);
+    // robot::chass.spin(-20);
+    // pros::delay(1200);
+    // robot::chass.spinDiffy(-20, 60);
+    // pros::delay(300);
+    // robot::chass.stop("b");
+    // pros::delay(200);
+    // robot::chass.spinDiffy(-30, -30);
+    // pros::delay(200);
+    // robot::chass.stop("b");
+    // autoAim(400,2);
+
+
+    // flywheel::ff = 3;
+    // robot::intake.spin(-60);
+    // pros::delay(700);
+
+
+    // for (int i = 0; i < 7; i++)
+    // {
+    //     robot::intake.spin(127);
+    //     pros::delay(350);
+    //     robot::intake.stop("c");
+    //     pros::delay(100);
+    //     flywheel::ff = 3;
+    //     robot::intake.spin(-50);
+    //     pros::delay(250);
+    //     flywheel::ff = -1;
+    //     robot::intake.stop("c");
+    // }
+
+    //     chas::spinTo(200, 700);
+    // chas::drive(2920, 1500, 5);
+    // chas::spinTo(45, 700);
+
+    chas::arcTurn(util::dtr(320), 565, 600,1, arc);
+    chas::spinTo(225, 600);
+    robot::chass.spin(127);
+    pros::delay(300);
+    robot::chass.stop("c");
     robot::plane.toggle();
 }
 

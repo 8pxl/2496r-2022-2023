@@ -11,10 +11,6 @@ void autoAim(int timeout, int color = 2, int center = 0, util::pidConstants cons
     util::timer timer;
     util::pid pid(constants, 0);
     int CENTER;
-    if (center)
-    {
-        CENTER = center;
-    }
     if (color == 1)
     {
         CENTER = 83;
@@ -22,6 +18,10 @@ void autoAim(int timeout, int color = 2, int center = 0, util::pidConstants cons
     else
     {
         CENTER = 68;
+    }
+    if (center)
+    {
+        CENTER = center;
     }
     int x;
     int vel;
