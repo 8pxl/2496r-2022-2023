@@ -14,7 +14,7 @@ namespace chas
 {
   void spinTo(double target, double timeout, util::pidConstants constants);
   void drive(double target, double timeout, double tolerance, double max);
-  void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
+  void driveAngle(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
   void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
@@ -220,10 +220,10 @@ void chas::drive(double target, double timeout, double tolerance, double max = 1
   robot::chass.stop("b");
 } 
 
-void chas::autoDrive(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
+void chas::driveAngle(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
 {
   // timers
-  util::timer timer = util::timer();
+  util::timer timer;
 
   // general vars
   double currHeading = robot::imu.degHeading();
@@ -237,7 +237,7 @@ void chas::autoDrive(double target, double heading, double timeout, util::pidCon
 
   int dir;
 
-  util::pid linearController = util::pid(lCons,util::minError(heading, currHeading));
+  util::pid linearController = util::pid(lCons, 0);
   util::pid angularController = util::pid(acons,target);
 
   robot::chass.reset();
