@@ -2,7 +2,7 @@
 #define __GLOBAL__
 
 
-#include "main.h"
+#include "../include/main.h"
 #include "pros/adi.hpp"
 #include "util.hpp"
 #include <string>
