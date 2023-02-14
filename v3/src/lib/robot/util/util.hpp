@@ -2,10 +2,12 @@
 #define __UTIL__
 
 #include "main.h"
+#include "pros/misc.h"
 #include <cmath>
 #include <vector>
 
 #define PI 3.14159265358979323846
+typedef void(*fptr)();
 
 namespace util
 {
@@ -16,6 +18,9 @@ namespace util
     class pidConstants;
     class pid;
     class movingAverage;
+    class timeRange;
+    struct args;
+    struct action;
     double dtr(double input);
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
@@ -174,13 +179,10 @@ class util::bezier
 class util::pidConstants
 {
     public:
-        //decel and acel = volts/msec / msec
-        double p,i,d,tolerance,integralThreshold, maxIntegral, decel, acel;
-        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral) {}
-
-        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral, double decel, double acel) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral), decel(decel), acel(acel) {}
+        double p,i,d,tolerance,integralThreshold, maxIntegral;
+        pidConstants(double kp, double ki, double kd, double deviation, double threshold, double maxI) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold), maxIntegral(maxI) {}
 };
-        
+
 class util::pid
 {
     private:
@@ -261,31 +263,65 @@ class util::movingAverage
             double average = 0;
             for(int i = 1; i != size; i++)
             {
-                average += window[i] * pow(i * 1.0/size * 1.0,2);
+                average += window[i] * pow((i * 1.0)/(size * 1.0),2);
             }
             
             return(average/integral);
         }
 };
 
-double util::dtr(double input)
+class util::timeRange
+{
+    private:
+        int start;
+        int end;
+    
+    public:
+        timeRange(int s, int e) : start(s), end(e) {}
+
+        bool inRange(int time)
+        {
+            return (time >= start && time <= end);
+        }
+
+        int getStart()
+        {
+            return (start);
+        }
+};
+
+struct util::args
+{
+    double target;
+    bool hasArgs = 1;
+    util::pid pid;
+};
+
+struct util::action 
+{
+    void(*func)(util::args);
+    util::timeRange range;
+    util::args args;
+}; 
+
+double util::dtr(double input) //NOLINT
 {
   return(PI * input/180);
 }
 
-double util::rtd(double input)
+double util::rtd(double input) //NOLINT
 {
   return(input * 180/PI);
 }
 
-int util::dirToSpin(double target,double currHeading)
+int util::dirToSpin(double target,double currHeading) //NOLINT
 {
     double d = (target - currHeading);
     double diff = d < 0 ? d + 360 : d;
     return(diff > 180 ? 1 : -1);
 }
 
-double util::minError(double target, double current)
+double util::minError(double target, double current) //NOLINT
 {
     double b = std::max(target,current);
     double s = std::min(target,current);
@@ -294,16 +330,17 @@ double util::minError(double target, double current)
     return(diff <= 180 ? diff : (360-b) + s);
 }
 
-double util::distToPoint(util::coordinate p1, util::coordinate p2)
+double util::distToPoint(util::coordinate p1, util::coordinate p2) //NOLINT
 {
     return( sqrt( pow((p2.x-p1.x),2) + pow((p2.y-p1.y), 2)));
 }
 
-double util::mod(double a, double b){
+double util::mod(double a, double b) //NOLINT
+{
   return fmod(360-std::abs(a), b);
 }
 
-double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
+double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point) //NOLINT
 {
     double t;
 
@@ -334,7 +371,7 @@ double util::absoluteAngleToPoint(util::coordinate pos, util::coordinate point)
     return (t);
 }
 
-double util::imuToRad(double heading)
+double util::imuToRad(double heading) //NOLINT
 {
     // could be like shifted over? idk
     return (heading < 180) ? dtr(heading) : dtr(-(heading - 180));
