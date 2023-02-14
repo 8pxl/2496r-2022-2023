@@ -12,8 +12,8 @@
 
 namespace chas
 {
-  void spinTo(double target, double timeout, util::pidConstants constants);
-  void drive(double target, double timeout, double tolerance, double max);
+  void spinTo(double target, double timeout, util::pidConstants constants); 
+  void drive(double target, double timeout, double tolerance, double max); //target = encoder units 
   void driveAngle(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
@@ -21,7 +21,7 @@ namespace chas
   void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
   void timedSpin(double target, double speed,double timeout);
   void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
-  void arcTurn(double theta, double radius, double timeout, int dir, util::pidConstants cons);
+  void arcTurn(double theta, double radius, double timeout, int dir, util::pidConstants cons); 
 }
 
 void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
