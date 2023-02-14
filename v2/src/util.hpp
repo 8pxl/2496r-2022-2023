@@ -174,10 +174,13 @@ class util::bezier
 class util::pidConstants
 {
     public:
-        double p,i,d,tolerance,integralThreshold, maxIntegral;
-        pidConstants(double kp, double ki, double kd, double deviation, double threshold, double maxI) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold), maxIntegral(maxI) {}
-};
+        //decel and acel = volts/msec / msec
+        double p,i,d,tolerance,integralThreshold, maxIntegral, decel, acel;
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral) {}
 
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral, double decel, double acel) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral), decel(decel), acel(acel) {}
+};
+        
 class util::pid
 {
     private:

@@ -150,7 +150,7 @@ namespace flywheel
                     break;
                 
                 case 3:
-                    if(forwardTimer.time() >= 80)
+                    if(forwardTimer.time() >= 50)
                     {
                         if(forwardTimer.time() >= 600)
                         {

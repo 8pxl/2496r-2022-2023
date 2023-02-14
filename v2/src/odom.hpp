@@ -25,7 +25,7 @@ void odom()
 
         // calcualting change in rotation
         double currRotation = robot::imu.degHeading();
-        double deltaRotation = currRotation - prevRotation;
+        // double deltaRotation = currRotation - prevRotation;
 
         /* when angle difference jumps by more than 300, it can be assumed that it is caused by the imu rotating past
         0 to 360 or from 360 to 0. in order toget the absolute difference in rotation, the mod of bothvalues is taken.
@@ -33,10 +33,12 @@ void odom()
         in mathematics
         */
 
-        if (std::abs(deltaRotation) > 300)
-        {
-            deltaRotation = (util::mod(currRotation,360) - util::mod(prevRotation,360));
-        }
+        // if (std::abs(deltaRotation) > 300)
+        // {
+        //     deltaRotation = (util::mod(currRotation,360) - util::mod(prevRotation,360));
+        // }
+
+        double deltaRotation = util::minError(currRotation, prevRotation) * util::dirToSpin(currRotation,prevRotation);
 
         prevRotation = currRotation;
 
