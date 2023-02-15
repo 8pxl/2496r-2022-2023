@@ -1133,7 +1133,7 @@ void nearHalfTest()
     util::pidConstants arc(2.8,0.2,20,0.05,5,100);
 
     //chas::driveAngle(2300, 0, 2000, lcons, acons); //target, angle hold, timeout
-    // chas::arcTurn(util::dtr(310), 740, 1000,-1, arc); //angle (radians) radius, timeout, direction, constants 
+    chas::arcTurn(util::dtr(310), 740, 1000,-1, arc); //angle (radians) radius, timeout, direction, constants 
     // the robot is ~730 arbitrary units wide
     chas::drive(300, 200, 5);
     intake::toggle(false);
@@ -1141,8 +1141,51 @@ void nearHalfTest()
     chas::spinTo(135, 500);
 }
 
-// std::vector<void (*)()> autons{wp,a};
-fptr WP = wp; fptr SKILLSNEW = skillsNew; fptr SKILLS = skills; fptr NEARHALF = nearHalf; fptr FARHALF = farHalf; fptr FIVENEARHALF = fiveNearHalf; fptr SKILLSREACH = skillsReach; fptr NEARHALFTEST = nearHalfTest;
+void eleven()
+{
+	
+    util::pidConstants lcons(0.3,0.2,2.4,5,30,1000); 
+    util::pidConstants acons(4, 0.7, 4, 0, 190, 20);
+    util::pidConstants smallTurn(6, 1.6, 2, 0.05, 7, 10);
+    util::pidConstants bigTurn(6.3, 1.74, 40, 0.05, 2.7, 30);
+    util::pidConstants medTurn(9, 1.2, 70, 0.05, 2.4, 30);
+    util::pidConstants drive(0.3,0.2,2.4,5,30,1000);
+    util::pidConstants autoStriaght(4, 0.7, 4, 0, 190, 20);
+    util::pidConstants arc(2.8,0.2,20,0.05,5,100);
 
-std::vector<fptr> autons{WP, SKILLSNEW, SKILLS, NEARHALF, FARHALF, FIVENEARHALF, SKILLSREACH, NEARHALFTEST};
-std::vector<std::string> autonNames{"wp","skillsNew", "skills","nearHalf", "farHalf", "fiveNearHalf", "skillsReach", "nearHalfTest" };
+    flywheel::target = 540;
+    pros::delay(1500);
+    flywheel::ff = 3;
+    robot::intake.spin(-50);
+    pros::delay(700);
+    chas::spinTo(0,1200, bigTurn);
+    robot::intake.spin(127);
+    chas::drive(2000,2000,1,80);
+    //chas::arcTurn(util::dtr(150), 280, 1000,1, arc);
+    chas::spinTo(170,900);
+    flywheel::ff = 3;
+    robot::intake.spin(-60);
+    pros::delay(700);
+    chas::spinTo(240,900);
+    robot::intake.spin(127);
+    robot::tsukasa.toggle();
+    chas::drive(1300,800,1);
+    robot::tsukasa.toggle();
+    chas::spinTo(170, 900);
+    flywheel::ff = 3;
+    robot::intake.spin(-60);
+    pros::delay(700);
+    chas::spinTo(270,900);
+    chas::drive(1300,900,1);
+    chas::spinTo(0,900);
+    robot::tsukasa.toggle();
+    robot::intake.spin(127);
+    chas::drive(1300,900,1);
+
+
+}
+// std::vector<void (*)()> autons{wp,a};
+fptr WP = wp; fptr SKILLSNEW = skillsNew; fptr SKILLS = skills; fptr NEARHALF = nearHalf; fptr FARHALF = farHalf; fptr FIVENEARHALF = fiveNearHalf; fptr SKILLSREACH = skillsReach; fptr NEARHALFTEST = nearHalfTest; fptr ELEVEN = eleven;
+
+std::vector<fptr> autons{WP, SKILLSNEW, SKILLS, NEARHALF, FARHALF, FIVENEARHALF, SKILLSREACH, NEARHALFTEST, ELEVEN};
+std::vector<std::string> autonNames{"wp","skillsNew", "skills","nearHalf", "farHalf", "fiveNearHalf", "skillsReach", "nearHalfTest", "eleven" };
