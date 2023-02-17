@@ -29,13 +29,21 @@ namespace intake
         // pros::delay(300);
         robot::chass.stop("b");
     }
-    void waitIndex(int num, int tolerance = 5, int ff = -1, int time = 50, int ffTime = 0)
+
+    void waitIndex(int num, int tolerance = 5, int time = 50, int ff = -1, int ffTime = 0)
     {
+        double derivative;
+        double prevError = 0;
+        double error;
         for (int i = 0; i < num; i++)
         {
             while (true)
             {
-                if(flywheel::gError < tolerance)
+                error = flywheel::gError;
+                derivative = error - prevError;
+                prevError = error;
+
+                if(derivative < tolerance)
                 {
 
                     if(inRange.time() >= time)
@@ -71,6 +79,49 @@ namespace intake
             }
         }
     }
+    
+    // void waitIndex(int num, int tolerance = 5, int ff = -1, int time = 50, int ffTime = 0)
+    // {
+    //     for (int i = 0; i < num; i++)
+    //     {
+    //         while (true)
+    //         {
+    //             if(flywheel::gError < tolerance)
+    //             {
+
+    //                 if(inRange.time() >= time)
+    //                 {
+    //                     if (i == num-1)
+    //                     {
+    //                         flywheel::ff = ff;
+    //                         pros::delay(ffTime);
+    //                         robot::intake.spin(-80);
+    //                         pros::delay(200);
+    //                         inRange.start();
+    //                     }
+
+    //                     else
+    //                     {
+    //                         flywheel::ff = ff;
+    //                         pros::delay(ffTime);
+    //                         robot::intake.spin(-50);        
+    //                         pros::delay(200);
+    //                         robot::intake.stop("b");
+    //                         pros::delay(250);
+    //                         inRange.start();
+    //                     }
+
+    //                     break;
+    //                 }
+    //             }
+                
+    //             else
+    //             {
+    //                 inRange.start();
+    //             }
+    //         }
+    //     }
+    // }
 
     // void index(int num)
     // {
