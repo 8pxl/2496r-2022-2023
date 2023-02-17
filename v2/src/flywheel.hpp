@@ -14,18 +14,18 @@ namespace flywheel
     double gError;
     int ff;
     
-    double voltageOut(double kp, double kv, double ki, double integral, double target, double error, double deadband)
+    double voltageOut(double kp, double kv, double ki, double kd, double derivitave, double integral, double target, double error, double deadband)
     {
         if (std::abs(error) < deadband)
         {
             if(error > 0)
             {
-                return (target + error * kp + integral * ki) * kv;
+                return (target + error * kp + integral * ki + derivitave * kd) * kv;
             }
 
             else
             {
-                return (target + (error * 0.7) * kp + integral * ki) * kv;
+                return (target + (error * 0.7) * kp + integral * ki + derivitave * kd) * kv;
             }
         }
 
@@ -43,11 +43,14 @@ namespace flywheel
 
     void spin()
     {
-        const int velAverageSize = 30;
-        const double kv = 0.1913474101312919;
-        const double integralThreshold = 5;
+        constexpr int velAverageSize = 30;
+        constexpr double kv = 0.1913474101312919;
+        constexpr double integralThreshold = 5;
+        constexpr double derivitaveThreshold = 5;
+        double prevError = 0;
         double ki;
         double kp;
+        double kd;
         util::movingAverage velAverage = util::movingAverage(velAverageSize);
         util::timer forwardTimer;
         util::timer postForward;
@@ -57,6 +60,7 @@ namespace flywheel
         double voltage;
         double integral;
         double deadband;
+        double derivitave;
 
         while (true)
         {
@@ -116,11 +120,23 @@ namespace flywheel
                 integral = 0;
             }
             
+            if(absError < derivitaveThreshold)
+            {
+                derivitave = error - prevError;
+            }
+
+            else
+            {
+                derivitave = 0;
+            }
+
+            prevError = error;
+
             switch (ff)
             {
                 case -1:
 
-                    voltage = voltageOut(kp, kv, ki, integral, target, error, deadband);
+                    voltage = voltageOut(kp, kv, ki, kd, derivitave, integral, target, error, deadband);
                     forwardTimer.start();
                     break;
 
