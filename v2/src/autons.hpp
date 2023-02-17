@@ -1123,7 +1123,7 @@ void skillsReach()
 
 void nearSafe()
 {
-
+    
     util::pidConstants smallTurn = util::pidConstants(8, 1.6, 2, 0.05, 7, 10);
     util::pidConstants bigTurn = util::pidConstants(3.7, 1.5, 35, 0.05, 2.4, 20);
     util::pidConstants medTurn = util::pidConstants(4, 1.5, 20, 0.05, 2.4, 20);
@@ -1200,10 +1200,69 @@ void driverAut()
     intake::waitIndex(3,5,-1,150,0);
 }
 
+void JTAuton()
+{
+    util::pidConstants smallTurn = util::pidConstants(8, 1.6, 2, 0.05, 7, 10);
+    util::pidConstants bigTurn = util::pidConstants(3.7, 1.5, 35, 0.05, 2.4, 20);
+    util::pidConstants medTurn = util::pidConstants(4, 1.5, 20, 0.05, 2.4, 20);
+
+    flywheel::target = 474.1;
+
+   
+    pros::delay(700);
+    intake::toggle(true);
+
+    chas::drive(-415, 700, 1);
+    chas::spinTo(357.2, 700,smallTurn);
+
+    //shoot preload
+    
+    intake::waitIndex(2,5,-1,20,0);
+    pros::delay(500);
+    robot::intake.stop("c");
+    
+
+    //turn and intake 3 stack
+    chas::spinTo(233, 900,medTurn);
+    robot::intake.spin(127); 
+    robot::tsukasa.toggle();
+    chas::drive(1300, 700, 5);
+    robot::tsukasa.toggle();
+    flywheel::target = 454.6;
+    pros::delay(1200);
+
+    //aim and shoot first 3 stack
+    chas::spinTo(345.4, 1100);
+    robot::intake.stop("c");
+    intake::waitIndex(3,5,-1,13,0);
+    
+    //intake second 3 stack
+    chas::spinTo(222, 800);
+    chas::drive(-550,650,5);
+    chas::spinTo(135, 700);
+    robot::tsukasa.toggle();
+    robot::intake.spin(127);
+    chas::drive(435,450,5);
+    robot::tsukasa.toggle();
+
+    flywheel::target = 466.1;
+    pros::delay(1200);
+
+    
+    chas::drive(-275,400,5);
+    chas::spinTo(349.4, 1100,bigTurn);
+    //shoot 2nd 3 stack
+    robot::intake.stop("B");
+    intake::waitIndex(3, 5, -1, 10, 0);
+    
+    
+
+}
+
 
 
 // std::vector<void (*)()> autons{wp,a};
-fptr WP = wp; fptr SKILLSNEW = skillsNew; fptr SKILLS = skills; fptr NEARHALF = nearHalf; fptr FARHALF = farHalf; fptr FIVENEARHALF = fiveNearHalf; fptr DRIVER = driverAut; fptr SKILLSREACH = skillsReach; fptr NEARSAFE = nearSafe;
+fptr WP = wp; fptr SKILLSNEW = skillsNew; fptr SKILLS = skills; fptr NEARHALF = nearHalf; fptr FARHALF = farHalf; fptr FIVENEARHALF = fiveNearHalf; fptr DRIVER = driverAut; fptr SKILLSREACH = skillsReach; fptr NEARSAFE = nearSafe; fptr JTAUTON = JTAuton;
 
-std::vector<fptr> autons{WP, SKILLSNEW, SKILLS, NEARHALF, FARHALF, FIVENEARHALF, DRIVER, SKILLSREACH, NEARSAFE};
-std::vector<std::string> autonNames{"wp","skillsNew", "skills","nearHalf", "farHalf", "fiveNearHalf", "driverAut", "skillsReach", "nearSafe" };
+std::vector<fptr> autons{WP, SKILLSNEW, SKILLS, NEARHALF, FARHALF, FIVENEARHALF, DRIVER, SKILLSREACH, NEARSAFE, JTAUTON};
+std::vector<std::string> autonNames{"wp","skillsNew", "skills","nearHalf", "farHalf", "fiveNearHalf", "driverAut", "skillsReach", "nearSafe" , "JTAuton"};
