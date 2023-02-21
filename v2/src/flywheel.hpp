@@ -12,6 +12,7 @@ namespace flywheel
 {
     double target;
     double gError;
+    double aError;
     int ff;
     
     double voltageOut(double kp, double kv, double ki, double kd, double derivitave, double integral, double target, double error, double deadband)
@@ -25,7 +26,7 @@ namespace flywheel
 
             else
             {
-                return (target + (error * 0.7) * kp + integral * ki + derivitave * kd) * kv;
+                return (target + error * kp + integral * ki + derivitave * kd) * kv;
             }
         }
 
@@ -45,7 +46,7 @@ namespace flywheel
     {
         constexpr int velAverageSize = 30;
         constexpr double kv = 0.1913474101312919;
-        constexpr double integralThreshold = 5;
+        constexpr double integralThreshold = 10;
         constexpr double derivitaveThreshold = 5;
         double prevError = 0;
         double ki;
@@ -72,19 +73,29 @@ namespace flywheel
             error = target - speed;
             absError = std::abs(error);
             gError = absError;
+            aError = error;
+            
+            if(target < 300)
+            {
+                kp = 2;
+                ki = 0.1;
+                deadband = 20;
+            }
 
             if (target < 390)
             {
-                kp = 4;
-                ki = 0.07;
+                kp = 6.6;
+                ki = 0.13;
+                kd = 1;
                 deadband = 40;
             }
 
             else if (target < 490)
             {
-                kp = 14;
+                kp = 9;
                 ki = 0.7;
-                deadband = 50;
+                kd = 0;
+                deadband = 30;
             }
 
             else if(target < 530)
@@ -125,10 +136,10 @@ namespace flywheel
                 derivitave = error - prevError;
             }
 
-            else
-            {
-                derivitave = 0;
-            }
+            // else
+            // {
+            //     derivitave = 0;
+            // }
 
             prevError = error;
 
@@ -166,9 +177,24 @@ namespace flywheel
                     break;
                 
                 case 3:
-                    if(forwardTimer.time() >= 50)
+                    if(forwardTimer.time() >= 100)
                     {
-                        if(forwardTimer.time() >= 600)
+                        if(forwardTimer.time() >= 660)
+                        {
+                            ff = -1;
+                        }
+
+                        else
+                        {
+                            voltage = 127;
+                        }
+                    }
+                    break;
+                
+                case 4:
+                    if(forwardTimer.time() >= 160)
+                    {
+                        if(forwardTimer.time() >= 500)
                         {
                             ff = -1;
                         }
@@ -216,7 +242,8 @@ namespace flywheel
 
             // else
             // {
-            //     printf("%f,%f,", speed,voltage);
+                printf("%f,%f,", speed,voltage);
+                glb::controller.print(0,0, "%f", target);
             // }
 
             // printf("%f,%f,", speed,integral);
