@@ -177,7 +177,7 @@ namespace flywheel
                     break;
                 
                 case 3:
-                    if(forwardTimer.time() >= 100)
+                    if(forwardTimer.time() >= 50)
                     {
                         if(forwardTimer.time() >= 660)
                         {
@@ -243,7 +243,7 @@ namespace flywheel
             // else
             // {
                 printf("%f,%f,", speed,voltage);
-                glb::controller.print(0,0, "%f", target);
+                glb::controller.print(0,0, "%f", speed);
             // }
 
             // printf("%f,%f,", speed,integral);
