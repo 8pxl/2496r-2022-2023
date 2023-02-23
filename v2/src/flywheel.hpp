@@ -38,8 +38,8 @@ namespace flywheel
 
         else
         {
-            // return (target/1.5) * kv;
-            return 50;
+            return (target/1.9) * kv;
+            // return 50;
         }
     }
 
@@ -180,7 +180,7 @@ namespace flywheel
                 case 3:
                     if(forwardTimer.time() >= 50)
                     {
-                        if(forwardTimer.time() >= 660)
+                        if(forwardTimer.time() >= 710)
                         {
                             ff = -1;
                         }
