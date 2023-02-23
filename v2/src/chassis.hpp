@@ -24,81 +24,105 @@ namespace chas
   void arcTurn(double theta, double radius, double timeout, int dir, util::pidConstants cons); 
 }
 
+// void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
+// { 
+//   // timers
+//   util::timer endTimer;
+//   util::timer timeoutTimer;
+//   timeoutTimer.start();
+
+//   // basic constants
+//   double kP = constants.p;
+//   double kI = constants.i;
+//   double kD = constants.d;
+//   double tolerance = constants.tolerance;
+//   double endTime = 2000;
+
+//   // general vars
+//   double currHeading = robot::imu.degHeading();
+//   double prevHeading = currHeading;
+//   double error;
+//   double prevError;
+//   bool end = false;
+
+//   // eye vars
+//   double integral = 0;
+//   double integralThreshold = constants.integralThreshold;
+//   double maxIntegral = constants.maxIntegral;
+
+//   // dee vars
+//   double derivative;
+  
+//   // pid loop 
+//   while (!end)
+//   {
+
+//     currHeading = robot::imu.degHeading();
+//     int dir = -util::dirToSpin(target,currHeading);
+
+//     //pee
+//     error = util::minError(target,currHeading);
+
+//     //eye
+//     integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
+
+//     if(integral > maxIntegral)
+//     {
+//       integral = 0;
+//     }
+
+//     //dee
+//     derivative = error - prevError;
+//     prevError = error;
+
+//     //end conditions
+//     if (error >= tolerance)
+//     {
+//       endTimer.start();
+//     }
+
+//     if(timeoutTimer.time()>= timeout)
+//     {
+//       break;
+//     }
+
+//     // spin motors
+//     double rVel = dir * (error*kP + integral*kI + derivative*kD);
+//     double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
+//     robot::chass.spinDiffy(rVel,lVel);
+
+//     pros::delay(10);
+//     glb::controller.print(0, 0, "%f", error);
+//     // glb::controller.print(0, 0, "%f", integral);
+//   }
+//   robot::chass.stop("b");
+// } 
+
+
 void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
 { 
-  // timers
-  util::timer endTimer;
   util::timer timeoutTimer;
-  timeoutTimer.start();
-
-  // basic constants
-  double kP = constants.p;
-  double kI = constants.i;
-  double kD = constants.d;
-  double tolerance = constants.tolerance;
-  double endTime = 2000;
-
-  // general vars
-  double currHeading = robot::imu.degHeading();
-  double prevHeading = currHeading;
-  double error;
-  double prevError;
-  bool end = false;
-
-  // eye vars
-  double integral = 0;
-  double integralThreshold = constants.integralThreshold;
-  double maxIntegral = constants.maxIntegral;
-
-  // dee vars
-  double derivative;
+  util::pid pid(constants, 0);
+  double currHeading;
+  double vel;
+  int dir;
   
-  // pid loop 
-  while (!end)
+  while (true)
   {
-
     currHeading = robot::imu.degHeading();
-    int dir = -util::dirToSpin(target,currHeading);
-
-    //pee
-    error = util::minError(target,currHeading);
-
-    //eye
-    integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
-
-    if(integral > maxIntegral)
-    {
-      integral = 0;
-    }
-
-    //dee
-    derivative = error - prevError;
-    prevError = error;
-
-    //end conditions
-    if (error >= tolerance)
-    {
-      endTimer.start();
-    }
-
-    // end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
+    dir = -util::dirToSpin(target,currHeading);
+    vel = dir * pid.out(util::minError(target,currHeading));
+    robot::chass.spinDiffy(vel,-vel);
 
     if(timeoutTimer.time()>= timeout)
     {
       break;
     }
-
-    // spin motors
-    double rVel = dir * (error*kP + integral*kI + derivative*kD);
-    double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
-    robot::chass.spinDiffy(rVel,lVel);
-
-    pros::delay(10);
-    glb::controller.print(0, 0, "%f", error);
-    // glb::controller.print(0, 0, "%f", integral);
+     pros::delay(10);
   }
   robot::chass.stop("b");
 } 
+
 
 // void chas::spinTo(double target, double timeout, double tolerance)
 // { 

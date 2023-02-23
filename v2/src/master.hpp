@@ -323,6 +323,12 @@ void keejControl()
 
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
+    // double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
+    // double rStick = glb::controller.get_analog(ANALOG_RIGHT_Y);
+
+
+    // robot::chass.spinDiffy(lStick, rStick);
+    // robot::chass.spinDiffy(lStick,rStick);
 
     // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
     // {
@@ -432,12 +438,12 @@ void keejControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 330;
+                flywheel::target = 350;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
             {
-                flywheel::target = 580;
+                flywheel::target = 700;
             }
         
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))

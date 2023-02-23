@@ -38,7 +38,8 @@ namespace flywheel
 
         else
         {
-            return (target/1.5) * kv;
+            // return (target/1.5) * kv;
+            return 50;
         }
     }
 
@@ -78,15 +79,15 @@ namespace flywheel
             if(target < 300)
             {
                 kp = 2;
-                ki = 0.1;
-                deadband = 20;
+                ki = 0.07;
+                deadband = 40;
             }
 
-            if (target < 390)
+            else if (target < 390)
             {
                 kp = 6.6;
                 ki = 0.13;
-                kd = 1;
+                kd = 0;
                 deadband = 40;
             }
 
@@ -244,6 +245,7 @@ namespace flywheel
             // {
                 printf("%f,%f,", speed,voltage);
                 glb::controller.print(0,0, "%f", speed);
+                // glb::controller.print(3,0, "%f", target);
             // }
 
             // printf("%f,%f,", speed,integral);

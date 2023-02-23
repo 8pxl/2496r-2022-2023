@@ -16,7 +16,7 @@ void wp()
     util::pidConstants bigTurn = util::pidConstants(3.7, 1.5, 35, 0.05, 2.4, 20);
     util::pidConstants medTurn = util::pidConstants(4, 1.5, 20, 0.05, 2.4, 20);
 
-    flywheel::target = 475;
+    flywheel::target = 468;
     // robot::tsukasa.toggle();
     // pros::delay(300);
     // intake::toggle();
@@ -32,8 +32,10 @@ void wp()
     //flywheel::target = 450;
     //pros::delay(300);
     //intake::index(2);
-    intake::waitIndex(2,5,-1,150,0);
-    flywheel::target = 415; 
+    // intake::waitIndex(2,5,-1,150,0);
+    flywheel::target = 475;
+    intake::waitIndex(2,5,20,4,0,5);
+    flywheel::target = 455; 
 
     // - turn to 3 stack
     chas::spinTo(233, 1000,medTurn);
@@ -41,22 +43,26 @@ void wp()
     
     // - intake 3 stack
     robot::tsukasa.toggle();
-    chas::drive(1300, 800, 5);
+    chas::drive(1400, 800, 5);
     robot::tsukasa.toggle();
+    chas::drive(1800, 800, 5);
     flywheel::target = 455;
     pros::delay(500);
 
     // - aim and shoot discs
-    chas::spinTo(347.4, 1100);
-    robot::intake.stop("c");
+    // chas::spinTo(347.4, 1100);
+    chas::spinTo(315, 1100);
+    robot::intake.stop("b");
     //intake::index(1);
     // flywheel::target = 460;
-    pros::delay(300);
     // intake::index(1);
     // flywheel::target = 450;
     // pros::delay(300);
     // intake::index(1);
-    intake::waitIndex(3,5,-1,150,0);
+    flywheel::ff = 3;
+    robot::intake.spin(-40);
+    pros::delay(900);
+    // intake::waitIndex(3,5,20,4,0,5);
 
     // - allign with discs
     chas::drive(500, 600, 1);
@@ -809,7 +815,7 @@ void nearHalf()
     chas::spinTo(345, 1100,bigTurn);
     robot::intake.stop("B");
     // intake::waitIndex(3,5,true);
-    intake::waitIndex(3,4,26,4,0,2);
+    intake::waitIndex(3,4,50,4,0,2);
     // intake::index(1);
     // pros::delay(200);
     // intake::index(1);

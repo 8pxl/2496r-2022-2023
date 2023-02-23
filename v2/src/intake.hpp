@@ -39,6 +39,7 @@ namespace intake
         pros::delay(90);
         for (int i = 0; i < num; i++)
         {
+            inRange.start();
             while (true)
             {
                 error = flywheel::aError;
