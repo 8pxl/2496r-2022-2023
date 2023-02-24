@@ -529,7 +529,22 @@ void keejControl()
             flywheel::ff = 3;
         }
 
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+        {
+            robot::angler.toggle();
+
+            if(robot::angler.state)
+            {
+                flywheel::target += 35;
+            }
+
+            else
+            {
+                flywheel::target -= 35;
+            }
+        }
+
+        else if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
         {
             robot::tsukasa.toggle();
         }
