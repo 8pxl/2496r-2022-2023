@@ -19,10 +19,10 @@ namespace group
 namespace glb
 {
     // motors
-    pros::Motor frontLeft(3, pros::E_MOTOR_GEARSET_06, true);
-    pros::Motor frontRight(2, pros::E_MOTOR_GEARSET_06, false);
-    pros::Motor backLeft(4, pros::E_MOTOR_GEARSET_06, true);
-    pros::Motor backRight(1, pros::E_MOTOR_GEARSET_06, false);
+    pros::Motor frontLeft(3, pros::E_MOTOR_GEARSET_18, true);
+    pros::Motor frontRight(2, pros::E_MOTOR_GEARSET_18, false);
+    pros::Motor backLeft(4, pros::E_MOTOR_GEARSET_18, true);
+    pros::Motor backRight(1, pros::E_MOTOR_GEARSET_18, false);
     pros::Motor intake1(15, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor intake2(14, pros::E_MOTOR_GEARSET_06, false);
     pros::Motor fw1(12, pros::E_MOTOR_GEARSET_06, true);
