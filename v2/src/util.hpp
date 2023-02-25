@@ -175,10 +175,10 @@ class util::pidConstants
 {
     public:
         //decel and acel = volts/msec / msec
-        double p,i,d,tolerance,integralThreshold, maxIntegral, decel, acel;
+        double p,i,d,tolerance,integralThreshold, maxIntegral, kv;
         pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral) {}
 
-        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral, double decel, double acel) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral), decel(decel), acel(acel) {}
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral, double kv) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral), kv(kv) {}
 };
         
 class util::pid
@@ -190,8 +190,8 @@ class util::pid
         util::pidConstants constants;
 
     public:
-
-        pid(util::pidConstants cons, double error) : constants(cons), prevError(error){}
+        
+        pid(util::pidConstants cons = {0, 0, 0, 0, 0, 0}, double error = 0) : constants(cons), prevError(error){}
 
         double out(double error)
         {
