@@ -73,13 +73,13 @@ void felixControl()
 
         if(robot::angler.state)
         {
-            flywheel::target += 40;
+            flywheel::target += 35;
             
         }
 
         else
         {
-            flywheel::target -= 40;
+            flywheel::target -= 35;
         }
     }
 
@@ -111,7 +111,7 @@ void felixControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 350;
+                flywheel::target = 340;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
@@ -139,7 +139,7 @@ void felixControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 390;
+                flywheel::target = 375;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
@@ -432,7 +432,7 @@ void keejControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 330;
+                flywheel::target = 340;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
@@ -570,14 +570,14 @@ void keejControl()
 
     if (decelTimer.time() > 9000)
     {
-        if (flywheel::target > 320)
+        if (flywheel::target > 340)
         {
             flywheel::target -= 0.5;
         }
 
         else if (flywheel::target != 0)
         {
-            flywheel::target = 320;
+            flywheel::target = 340;
         }
 
         else
