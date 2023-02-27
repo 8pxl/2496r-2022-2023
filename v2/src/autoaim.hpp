@@ -1,13 +1,10 @@
 #ifndef __AUTOAIM__
 #define __AUTOAIM__
 
-#include "global.hpp"
-//vision::signature SIG_1 (1, 0, 0, 0, 0, 0, 0, 11.000, 1);
-// vision::signature SIG_2 (2, -2307, -1597, -1952, 8373, 9299, 8836, 8.200, 1);    
+#include "global.hpp"  
 
 void autoAim(int timeout, int color = 2, int center = 0, util::pidConstants constants = util::pidConstants(0.6, 0.2, 0, 0.1, 0.3, 1000))
 {
-    //66
     util::timer timer;
     util::pid pid(constants, 0);
     int CENTER;
@@ -19,6 +16,7 @@ void autoAim(int timeout, int color = 2, int center = 0, util::pidConstants cons
     {
         CENTER = 68;
     }
+    
     if (center)
     {
         CENTER = center;

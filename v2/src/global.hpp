@@ -16,7 +16,7 @@ namespace group
     class imu;
 }
 
-namespace glb
+namespace glb 
 {
     // motors
     pros::Motor frontLeft(3, pros::E_MOTOR_GEARSET_18, true);

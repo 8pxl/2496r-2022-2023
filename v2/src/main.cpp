@@ -21,7 +21,6 @@ void (*auton)();
 // vision::signature SIG_7 (7, 0, 0, 0, 0, 0, 0, 3.000, 0);
 // vex::vision vision1 ( vex::PORT1, 50, SIG_1, SIG_2, SIG_3, SIG_4, SIG_5, SIG_6, SIG_7 );
 
-//hi
 void initialize() 
 {
 	// - calibration and sensor init
@@ -46,7 +45,7 @@ void initialize()
 
 void disabled() {}
 
-void competition_initialize() {}
+void competition_initialize() {}	
 
 void autonomous() 
 {
@@ -59,6 +58,12 @@ void opcontrol()
 
 	while (true) 
 	{
+		// flywheel::target = 475;
+
+		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+    		intake::waitIndex(2,5,20,4,0,5);
+		}
 
 		// double dl = 0;
 		// double dr = 0;

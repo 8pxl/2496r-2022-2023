@@ -323,6 +323,12 @@ void keejControl()
 
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
+    // double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
+    // double rStick = glb::controller.get_analog(ANALOG_RIGHT_Y);
+
+
+    // robot::chass.spinDiffy(lStick, rStick);
+    // robot::chass.spinDiffy(lStick,rStick);
 
     // if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
     // {
@@ -437,7 +443,7 @@ void keejControl()
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
             {
-                flywheel::target = 580;
+                flywheel::target = 700;
             }
         
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
@@ -523,7 +529,22 @@ void keejControl()
             flywheel::ff = 3;
         }
 
-        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+        if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+        {
+            robot::angler.toggle();
+
+            if(robot::angler.state)
+            {
+                flywheel::target += 35;
+            }
+
+            else
+            {
+                flywheel::target -= 35;
+            }
+        }
+
+        else if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
         {
             robot::tsukasa.toggle();
         }
