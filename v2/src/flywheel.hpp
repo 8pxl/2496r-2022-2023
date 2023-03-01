@@ -45,7 +45,7 @@ namespace flywheel
 
     void spin()
     {
-        constexpr int velAverageSize = 30;
+        constexpr int velAverageSize = 20;
         constexpr double kv = 0.1913474101312919;
         constexpr double integralThreshold = 10;
         constexpr double derivitaveThreshold = 5;
@@ -93,8 +93,8 @@ namespace flywheel
 
             else if (target < 490)
             {
-                kp = 9;
-                ki = 0.7;
+                kp = 5;
+                ki = 0.3;
                 kd = 0;
                 deadband = 30;
             }
@@ -193,9 +193,9 @@ namespace flywheel
                     break;
                 
                 case 4:
-                    if(forwardTimer.time() >= 160)
+                    if(forwardTimer.time() >= 180)
                     {
-                        if(forwardTimer.time() >= 500)
+                        if(forwardTimer.time() >= 470)
                         {
                             ff = -1;
                         }
@@ -243,7 +243,7 @@ namespace flywheel
 
             // else
             // {
-                printf("%f,%f,", speed,voltage);
+                // printf("%f,%f,", speed, voltage);
                 glb::controller.print(0,0, "%f", speed);
                 // glb::controller.print(3,0, "%f", target);
             // }
