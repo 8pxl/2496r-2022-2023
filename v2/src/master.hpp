@@ -466,7 +466,7 @@ void keejControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 375;
+                flywheel::target = 390;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
