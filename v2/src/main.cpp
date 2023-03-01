@@ -58,11 +58,13 @@ void opcontrol()
 
 	while (true) 
 	{
-		// flywheel::target = 475;
+		// flywheel::target = 470;
+		// printf("%f\n", robot::chass.getRotation());
 
 		if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-    		intake::waitIndex(2,5,20,4,0,5);
+    		// intake::waitIndex(3,5,20,4,0,5);
+			    intake::waitIndex(3,5,30,4,0,3);
 		}
 
 		// double dl = 0;
@@ -83,7 +85,7 @@ void opcontrol()
 		// }
 
 		// chas::arcTurn(PI/2, 500, 1500,util::pidConstants(0.5,0,0,0,0,0));
-
+		// glb::controller.print(1,1,"%f", robot::chass.getRotation());
 
 		if (glb::driver) 
 		{
