@@ -12,6 +12,7 @@
 util::timer decelTimer; 
 util::timer indexTimer;
 util::timer doubleTap;
+util::timer tsdelay;
 util::timer fowrardTimer;
 double prevSpeed;
 bool toggled;
@@ -63,6 +64,8 @@ void felixControl()
     // chassis
     double lStick = -glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
+    // double t = 9;
+    // rStick = (pow(2.71828183,( (std::abs(rStick) - 127) * t) / 1000)) * rStick;
 
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
 
@@ -73,13 +76,13 @@ void felixControl()
 
         if(robot::angler.state)
         {
-            flywheel::target += 35;
+            flywheel::target += 50;
             
         }
 
         else
         {
-            flywheel::target -= 35;
+            flywheel::target -= 50;
         }
     }
 
@@ -106,6 +109,7 @@ void felixControl()
 
     if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
     {
+        tsdelay.start();
         doubleTap.start();
         if(!robot::angler.state)
         {
@@ -139,7 +143,7 @@ void felixControl()
         {
             if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
             {
-                flywheel::target = 375;
+                flywheel::target = 390;
             }
 
             else if(glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
@@ -205,6 +209,11 @@ void felixControl()
         // }
 
         if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))
+        {
+            robot::tsukasa.toggle();
+        }
+
+        if(glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1) && tsdelay.time() >= 200)
         {
             robot::tsukasa.toggle();
         }
@@ -335,31 +344,35 @@ void keejControl()
     //     autoAim();
     // }
 
-    if(std::abs(lStick) < deadband)
-    {
-        // rStick = rStick/2;
-        // rStick = -11.2694276696 * sqrt(-rStick + 127);
-        // rStick = pow(rStick,2)/127;
+    // if(std::abs(lStick) < deadband)
+    // {
+    //     // rStick = rStick/2;
+    //     // rStick = -11.2694276696 * sqrt(-rStick + 127);
+    //     // rStick = pow(rStick,2)/127;
 
-        // if(rStick < 78.49)
-        // {
-        //     rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
-        // }
-        // else
-        // {
-        //     rStick = pow(rStick,2)/127;
-        // }
-        // rStick = pow(rStick,2)/127 * util::sign(rStick);
-        if(rStick > 0)
-        {
-            rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
-        }
+    //     // if(rStick < 78.49)
+    //     // {
+    //     //     rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
+    //     // }
+    //     // else
+    //     // {
+    //     //     rStick = pow(rStick,2)/127;
+    //     // }
+    //     // rStick = pow(rStick,2)/127 * util::sign(rStick);
+    //     if(rStick > 0)
+    //     {
+    //         rStick = (-11.2694276696 * sqrt(-rStick + 127)) + 127;
+    //     }
 
-        else
-        {
-            rStick = -pow(rStick/11.2694276696,2);
-        }
-    }
+    //     else
+    //     {
+    //         rStick = -pow(rStick/11.2694276696,2);
+    //     }
+    // }
+    
+    double t = 4.2;
+    rStick = (pow(2.71828183,( (std::abs(rStick) - 127) * t) / 1000)) * rStick;
+    // lStick = (pow(2.71828183,( (std::abs(lStick) - 127) * t) / 1000)) * lStick;
 
     // robot::chass.spinDiffy(lStick, rStick);
     robot::chass.spinDiffy(lStick+rStick,lStick-rStick);
@@ -487,7 +500,7 @@ void keejControl()
 
         decelTimer.start();
     }
-
+    //skills is hitting on friday
     else
     {
         // robot::chass.spinDiffy(lStick+rStick,lStick-rStick);

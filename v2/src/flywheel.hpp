@@ -83,9 +83,9 @@ namespace flywheel
                 deadband = 40;
             }
 
-            else if (target < 390)
+            else if (target <= 390)
             {
-                kp = 6.6;
+                kp = 6.2;
                 ki = 0.13;
                 kd = 0;
                 deadband = 40;

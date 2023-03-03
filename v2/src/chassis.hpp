@@ -624,6 +624,8 @@ void chas::arcTurn(double theta, double radius, double timeout, int dir, util::p
 
   while (timer.time() < timeout)
   {
+    // - s = r*θ
+    // - (l + r)/2 = V
     curr = glb::imu.get_heading();
     vel = controller.out(util::minError(theta, curr)) * util::dirToSpin(theta,curr);
     vel = std::abs(vel) >= 127 ? (127 * util::sign(vel)) : vel;
