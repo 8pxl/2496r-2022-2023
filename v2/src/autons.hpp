@@ -17,7 +17,7 @@ void wp()
     util::pidConstants medTurn = util::pidConstants(4, 1.5, 20, 0.05, 2.4, 20);
     util::pidConstants arc(2.8,0.2,20,0.05,5,100);
 
-    flywheel::target = 478;
+    flywheel::target = 464;
     // robot::tsukasa.toggle();
     // pros::delay(300);
     // intake::toggle();
@@ -26,7 +26,7 @@ void wp()
     // - drive and aim
     chas::drive(-300, 500, 1);
     // robot::tsukasa.toggle();
-    chas::spinTo(357.7, 500,smallTurn);
+    chas::spinTo(358, 500,smallTurn);
 
     // - shoot discs
     //intake::index(1);
@@ -35,7 +35,8 @@ void wp()
     //intake::index(2);
     // intake::waitIndex(2,5,-1,150,0);
     intake::waitIndex(2,5,20,4,0,5);
-    flywheel::target = 435; 
+    pros::delay(200);
+    flywheel::target = 429; 
 
     // - turn to 3 stack
     chas::spinTo(229, 800,medTurn);
@@ -48,12 +49,17 @@ void wp()
     robot::tsukasa.toggle();
     // chas::driveAngle(1980,226,1400);
     chas::drive(1980,1400,1);
+    robot::intake.stop("b");
+    robot::tsukasa.toggle();
 
     // - aim and shoot discs
     // chas::spinTo(347.4, 1100);
     chas::spinTo(327, 800);
+<<<<<<< Updated upstream
     robot::intake.stop("b");
     robot::tsukasa.toggle();
+=======
+>>>>>>> Stashed changes
     chas::drive(-300, 600, 1);   
     //intake::index(1);
     // flywheel::target = 460;
@@ -67,17 +73,17 @@ void wp()
     intake::waitIndex(3,5,30,4,0,3);
     robot::tsukasa.toggle();
     robot::intake.spin(127);
-    flywheel::target = 468; 
+    flywheel::target = 460; 
     // intake::waitIndex(3,5,20,4,0,5);
 
     // - allign with discs
-    chas::spinTo(223, 750);
+    chas::spinTo(225, 750);
     // chas::arcTurn(util::dtr(218), 300,750,1, arc);
 
     //intake discs
     robot::intake.spin(127); 
     // chas::drive(5000, 2300, 20);
-    chas::driveAngle(3880,223,2000);
+    chas::driveAngle(3600,225,2300);
     // chas::spinTo(287,700);
     // robot::intake.stop("c");
     // intake::waitIndex(3,5,30,4,0,3);
@@ -88,6 +94,9 @@ void wp()
     //toggle roller
     // robot::tsukasa.toggle();
     chas::spinTo(270, 700);
+    robot::chass.spin(127);
+    pros::delay(300);
+    robot::chass.stop("c");
     intake::toggle(true);
     // intake::hardToggle();
 }
@@ -156,7 +165,11 @@ void skillsNew()
     flywheel::target = 330;
     pros::delay(300);
     pros::delay(350);
+<<<<<<< Updated upstream
     chas::arcTurn(3*PI/2, 1050,1050,-1, arc);
+=======
+    chas::arcTurn(3*PI/2, 1120,1050,-1, arc);
+>>>>>>> Stashed changes
     robot::intake.stop("c");
     // chas::drive(-1300, 650, 3);
     // robot::chass.spinDiffy(-70,70);
@@ -172,7 +185,7 @@ void skillsNew()
     pros::delay(150);
     robot::intake.spin(-70);
     // chas::arcTurn(util::dtr(18), 250, 1000,-1, arc);
-    chas::spinTo(3,800);
+    chas::spinTo(6,800);
     robot::intake.spin(127);
     chas::drive(2300,1700,1,80);
     // chas::spinTo(315,1200);
@@ -301,13 +314,24 @@ void skillsNew()
     // pros::delay(500);
     // autoAim(500, 2,75);
     chas::spinTo(100,600);
+<<<<<<< Updated upstream
     flywheel::target = 330;
+=======
+    robot::tsukasa.toggle();
+    flywheel::target = 335;
+>>>>>>> Stashed changes
     flywheel::ff = 3;
 
     robot::intake.spin(-60);
     pros::delay(600);
+<<<<<<< Updated upstream
     chas::arcTurn(util::dtr(222), 540, 1000,-1, arc);
     chas::spinTo(222,400);
+=======
+    chas::arcTurn(util::dtr(221), 540, 1000,-1, arc);
+    robot::tsukasa.toggle();
+    chas::spinTo(221,530);
+>>>>>>> Stashed changes
     robot::intake.spin(127);
     chas::drive(4000,1800,5);
     chas::spinTo(191,680);
@@ -315,15 +339,25 @@ void skillsNew()
     chas::drive(-1000,1000,3);
     // autoAim(500, 2, 68);
     // chas::spinTo(165,680);
+<<<<<<< Updated upstream
     chas::spinTo(173,660);
+=======
+    chas::spinTo(175,660);
+    robot::tsukasa.toggle();
+>>>>>>> Stashed changes
     flywheel::ff = 3;
     robot::intake.spin(-70);
     pros::delay(720);
     robot::intake.spin(127);
     flywheel::target = 390;
+<<<<<<< Updated upstream
     robot::tsukasa.toggle();
     chas::spinTo(161,680);
     chas::drive(1830,1200,1);
+=======
+    chas::spinTo(165,680);
+    chas::drive(1700,1100,1);
+>>>>>>> Stashed changes
     robot::tsukasa.toggle();
 
     // chas::spinTo(162,730);
@@ -347,12 +381,14 @@ void skillsNew()
 
 
     flywheel::target = 430;
+    robot::tsukasa.toggle();
     chas::arcTurn(util::dtr(130), 710, 1000,-1, arc);
     // chas::arcTurn(util::dtr(90), 300, 1000,-1, arc);
     // chas::drive(-200,700,5);
     // chas::spinTo(315, 650);
     // chas::drive(-1400, 850, 5);
     chas::spinTo(267, 680);
+    robot::tsukasa.toggle();
     robot::intake.spin(127);
      
     robot::chass.spin(127);
@@ -779,7 +815,7 @@ void nearHalf()
     util::pidConstants medTurn = util::pidConstants(4, 1.5, 20, 0.05, 2.4, 20);
     util::pidConstants arc(2.8,0.2,20,0.05,5,100);
 
-    flywheel::target = 478;
+    flywheel::target = 464;
     // robot::tsukasa.toggle();
     // pros::delay(300);
     // intake::toggle();
@@ -788,7 +824,8 @@ void nearHalf()
     // - drive and aim
     chas::drive(-300, 500, 1);
     // robot::tsukasa.toggle();
-    chas::spinTo(357.6, 600,smallTurn);
+    chas::spinTo(358.4, 600,smallTurn);
+    pros::delay(250);
 
     // - shoot discs
     //intake::index(1);
@@ -798,7 +835,7 @@ void nearHalf()
     // intake::waitIndex(2,5,-1,150,0);
     intake::waitIndex(2,5,20,4,0,5);
     robot::intake.stop("c");
-    flywheel::target = 451; 
+    flywheel::target = 445; 
 
     //turn to 3 stack
     chas::spinTo(231, 900,medTurn);
@@ -806,7 +843,7 @@ void nearHalf()
     
     //intake 3 stack
     robot::tsukasa.toggle();
-    chas::drive(1700, 1300, 5);
+    chas::drive(1500, 1300, 5);
     robot::tsukasa.toggle();
     pros::delay(500);
 
@@ -822,7 +859,7 @@ void nearHalf()
     // flywheel::target = 465;
     // intake::waitIndex(3,5,true);
     intake::waitIndex(3,5,30,4,0,3);
-    flywheel::target = 462;
+    flywheel::target = 453;
     chas::arcTurn(util::dtr(130), 310,900,-1, arc);
     // chas::spinTo(135, 900);
 
@@ -831,12 +868,12 @@ void nearHalf()
     // chas::spinTo(135, 700);
     robot::tsukasa.toggle();
     robot::intake.spin(127);
-    chas::drive(710,600,5);
+    chas::drive(760,640,5); 
     robot::tsukasa.toggle();
 
     pros::delay(680);
     chas::drive(-200,400,5);
-    chas::spinTo(346.9, 1100,bigTurn);
+    chas::spinTo(346.1, 1100,bigTurn);
     robot::intake.stop("B");
     // intake::waitIndex(3,5,true);
     intake::waitIndex(3,4,50,4,0,2);
@@ -875,14 +912,14 @@ void farHalf()
     // intake::toggle();
     
     robot::tsukasa.toggle();
-    flywheel::target = 460;
+    flywheel::target = 450;
     chas::drive(1200, 750, 5);
     robot::intake.spin(127);
     robot::tsukasa.toggle();
     pros::delay(600);
     chas::drive(-400, 800, 5);
-    chas::spinTo(23.1, 890);
-    intake::waitIndex(3,5,-1,150,0);
+    chas::spinTo(19, 890);
+    intake::waitIndex(3,5,20,4,0,5);
     // intake::index(1);
     // pros::delay(250);
     // intake::index(1);
@@ -891,22 +928,25 @@ void farHalf()
     robot::intake.spin(127);
     chas::spinTo(10, 890);
     robot::tsukasa.toggle();
-    chas::drive(680 , 700, 5);
+    chas::drive(730 , 700, 5);
     robot::tsukasa.toggle();
     pros::delay(500);
     chas::drive(-680, 890, 5);
-    flywheel::target = 455;
-    chas::spinTo(27.1, 890);
-    intake::waitIndex(2,5,-1,150,0);
+    flywheel::target = 445;
+    chas::spinTo(23, 890);
+    intake::waitIndex(2,5,20,4,0,5);
+    pros::delay(200);
     // robot::tsukasa.toggle();
     // intake::index(1);
     // pros::delay(250);
     // intake::index(1);
-    chas::spinTo(325, 900);
-    robot::chass.spin(127);
-    pros::delay(1000);
-    chas::spinTo(0, 600);
-    intake::toggle(true);
+    robot::intake.stop("c");
+    chas::spinTo(323, 700);
+    chas::drive(970,600,1);
+    chas::spinTo(352, 600);
+    robot::chass.spin(45);
+    pros::delay(400);
+    intake::oppositeToggle();
 }
 
 void fiveNearHalf()

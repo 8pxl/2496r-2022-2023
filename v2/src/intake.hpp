@@ -30,18 +30,32 @@ namespace intake
         robot::chass.stop("b");
     }
 
-    void waitIndex(int num, int tolerance = 5, int time = 50, int ff = -1, int ffTime = 0, int dTolerance = 5)
+    void waitIndex(int num, int tolerance = 5, int time = 50, int ff = -1, int ffTime = 0, int dTolerance = 5, int timeout = 1200)
     {
         double derivative;
         double prevError = 0;
         double error;
+        util::timer timer;
         robot::intake.stop("b");
         pros::delay(90);
         for (int i = 0; i < num; i++)
         {
+            timer.start();
             inRange.start();
             while (true)
             {
+                if(timer.time() > 1200)
+                {
+                    flywheel::ff = ff;
+                    pros::delay(ffTime);
+                    robot::intake.spin(-50);        
+                    pros::delay(210);
+                    robot::intake.stop("b");
+                    pros::delay(50);
+                    inRange.start();
+                    break;
+                }
+                
                 error = flywheel::aError;
                 derivative = error - prevError;
                 prevError = error;
@@ -56,7 +70,7 @@ namespace intake
                             flywheel::ff = ff;
                             pros::delay(ffTime);
                             robot::intake.spin(-50);
-                            pros::delay(180);
+                            pros::delay(190);
                         }
 
                         else
@@ -64,7 +78,7 @@ namespace intake
                             flywheel::ff = ff;
                             pros::delay(ffTime);
                             robot::intake.spin(-50);        
-                            pros::delay(180);
+                            pros::delay(210);
                             robot::intake.stop("b");
                             pros::delay(50);
                             inRange.start();
@@ -227,51 +241,64 @@ namespace intake
 
     void toggle(bool ym, double timeLimit = 1000)
     {
-        util::timer timer;
-
-        glb::optical.set_led_pwm(100);
-        robot::chass.spin(45);
-        pros::delay(400);
-        double initColor = glb::optical.get_hue();
-        glb::controller.print(1, 1, "%f", glb::optical.get_hue());
-        // robot::chass.stop("b");
-        bool initRed = initColor >= 60 ? false : true;
-
-        double red = 10;
-        double blue = 200;
-        double speed = 110;
-
-        if (!glb::red)
+        if (!ym)
         {
-            if(initRed)
-            {
-                spinUntil(blue, 127, timer, timeLimit);
-                spinUntil(red, speed, timer, timeLimit);
-            }
-
-            else
-            {
-                spinUntil(red, speed, timer, timeLimit);
-            }
-            
+            robot::intake.spin(127);
+            pros::delay(100);
+            robot::chass.spin(127);
+            pros::delay(300);
+            robot::intake.stop("c");
+            robot::chass.stop("c");
         }
-        else 
+        else
         {
-            if(initRed)
+            util::timer timer;
+
+            glb::optical.set_led_pwm(100);
+            robot::chass.spin(45);
+            pros::delay(400);
+            double initColor = glb::optical.get_hue();
+            glb::controller.print(1, 1, "%f", glb::optical.get_hue());
+            // robot::chass.stop("b");
+            bool initRed = initColor >= 60 ? false : true;
+
+            double red = 10;
+            double blue = 200;
+            double speed = 110; 
+            robot::chass.spin(5);
+
+            if (!glb::red)
             {
-                spinUntil(blue, speed, timer, timeLimit);
+                if(initRed)
+                {
+                    spinUntil(blue, 127, timer, timeLimit);
+                    spinUntil(red, speed, timer, timeLimit);
+                }
+
+                else
+                {
+                    spinUntil(red, speed, timer, timeLimit);
+                }
+                
+            }
+            else 
+            {
+                if(initRed)
+                {
+                    spinUntil(blue, speed, timer, timeLimit);
+                }
+
+                else
+                {
+                    spinUntil(red, speed, timer, timeLimit);
+                    spinUntil(blue, speed, timer, timeLimit);
+                }
             }
 
-            else
-            {
-                spinUntil(red, speed, timer, timeLimit);
-                spinUntil(blue, speed, timer, timeLimit);
-            }
+            glb::optical.set_led_pwm(0);
+            robot::chass.stop("b");
+            robot::intake.stop("b");
         }
-
-        glb::optical.set_led_pwm(0);
-        robot::chass.stop("b");
-        robot::intake.stop("b");
     }
 
     // void toggle(bool half)
@@ -292,6 +319,37 @@ namespace intake
     //         robot::chass.stop("c");
     //     }
     // }
+
+    void oppositeToggle(int timeLimit = 1000)
+    {
+        util::timer timer;
+
+        glb::optical.set_led_pwm(100);
+        robot::chass.spin(45);
+        pros::delay(400);
+        robot::chass.stop("b");
+        pros::delay(300);
+        // robot::chass.stop("b");
+
+        double red = 10;
+        double blue = 200;
+        double speed = -110; 
+        robot::chass.spin(5);
+
+        if (!glb::red)
+        {
+            spinUntil(red, speed, timer, timeLimit);
+        }
+
+        else 
+        {
+            spinUntil(blue, speed, timer, timeLimit);
+        }
+
+        glb::optical.set_led_pwm(0);
+        robot::chass.stop("b");
+        robot::intake.stop("b");
+    }
 
 }
 
