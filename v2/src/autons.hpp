@@ -55,11 +55,8 @@ void wp()
     // - aim and shoot discs
     // chas::spinTo(347.4, 1100);
     chas::spinTo(327, 800);
-<<<<<<< Updated upstream
     robot::intake.stop("b");
     robot::tsukasa.toggle();
-=======
->>>>>>> Stashed changes
     chas::drive(-300, 600, 1);   
     //intake::index(1);
     // flywheel::target = 460;
@@ -165,11 +162,7 @@ void skillsNew()
     flywheel::target = 330;
     pros::delay(300);
     pros::delay(350);
-<<<<<<< Updated upstream
     chas::arcTurn(3*PI/2, 1050,1050,-1, arc);
-=======
-    chas::arcTurn(3*PI/2, 1120,1050,-1, arc);
->>>>>>> Stashed changes
     robot::intake.stop("c");
     // chas::drive(-1300, 650, 3);
     // robot::chass.spinDiffy(-70,70);
@@ -314,24 +307,13 @@ void skillsNew()
     // pros::delay(500);
     // autoAim(500, 2,75);
     chas::spinTo(100,600);
-<<<<<<< Updated upstream
     flywheel::target = 330;
-=======
-    robot::tsukasa.toggle();
-    flywheel::target = 335;
->>>>>>> Stashed changes
     flywheel::ff = 3;
 
     robot::intake.spin(-60);
     pros::delay(600);
-<<<<<<< Updated upstream
     chas::arcTurn(util::dtr(222), 540, 1000,-1, arc);
     chas::spinTo(222,400);
-=======
-    chas::arcTurn(util::dtr(221), 540, 1000,-1, arc);
-    robot::tsukasa.toggle();
-    chas::spinTo(221,530);
->>>>>>> Stashed changes
     robot::intake.spin(127);
     chas::drive(4000,1800,5);
     chas::spinTo(191,680);
@@ -339,25 +321,15 @@ void skillsNew()
     chas::drive(-1000,1000,3);
     // autoAim(500, 2, 68);
     // chas::spinTo(165,680);
-<<<<<<< Updated upstream
     chas::spinTo(173,660);
-=======
-    chas::spinTo(175,660);
-    robot::tsukasa.toggle();
->>>>>>> Stashed changes
     flywheel::ff = 3;
     robot::intake.spin(-70);
     pros::delay(720);
     robot::intake.spin(127);
     flywheel::target = 390;
-<<<<<<< Updated upstream
     robot::tsukasa.toggle();
     chas::spinTo(161,680);
     chas::drive(1830,1200,1);
-=======
-    chas::spinTo(165,680);
-    chas::drive(1700,1100,1);
->>>>>>> Stashed changes
     robot::tsukasa.toggle();
 
     // chas::spinTo(162,730);
