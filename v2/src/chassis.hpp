@@ -174,6 +174,7 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
   util::pid pid(constants, 0);
   double currHeading;
   double vel;
+
   while (timeoutTimer.time() <= timeout)
   {
     currHeading = robot::imu.degHeading();
@@ -327,7 +328,7 @@ void chas::driveAngle(double target, double heading, double timeout, util::pidCo
 
   robot::chass.reset();
 
-  while (true)
+  while (timer.time() <= timeout)
   {
     error = util::minError(heading, currHeading);
     if (error < 0.5)
@@ -350,12 +351,6 @@ void chas::driveAngle(double target, double heading, double timeout, util::pidCo
     }
 
     robot::chass.spinDiffy(vl + (dir * va * sgn),  vl - (dir * va * sgn));
-    // robot::chass.spinDiffy(vl,vl);
-
-    if(timer.time() >= timeout)
-    {
-      break;
-    }
 
     pros::delay(10);
 
@@ -434,8 +429,7 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
 
   double currHeading =  robot::imu.degHeading(); //0-360
   double targetHeading = absoluteAngleToPoint(glb::pos, target); // -180-180
-  // targetHeading = targetHeading >= 0 ? targetHeading + -180 : targetHeading - 180;
-  targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading);  //conver to 0-360
+  targetHeading = targetHeading >= 0 ? targetHeading :  180 + fabs(targetHeading); 
 
   int dir = -util::dirToSpin(targetHeading,currHeading);
 
@@ -446,7 +440,6 @@ std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double 
   double lVel = (linearVel - (fabs(rotationVel) * rotationBias)) - rotationVel;
   double rVel = (linearVel - (fabs(rotationVel) * rotationBias)) + rotationVel;
 
-  // glb::controller.print(0,0,"(%f, %f)\n", linearError,targetHeading);
   return std::vector<double> {lVel, rVel};
 }
 
@@ -478,14 +471,11 @@ void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lC
     targetHeading = absoluteAngleToPoint(glb::pos, target);
     rotationError = util::minError(targetHeading,currHeading);
 
-    // rConstants.p = slope * log(linearError - lConstants.tolerance + 1);
     rConstants.p = slope * (linearError - initError) + initP;
     rConstants.p = rConstants.p < 0 ? 0 : rConstants.p;
     rotationController.update(rConstants);  
     int dir = -util::dirToSpin(targetHeading,currHeading);
     double cre = cos(rotationError <= 90 ? util::dtr(rotationError) : PI/2);
-    glb::controller.print(0, 0, "%f,%f", rotationError, linearError);
-    // glb::controller.print(0, 0, "%f,%f", currHeading, targetHeading);
 
     rotationVel = dir * rotationController.out(rotationError);
     linearVel = cre * linearController.out(linearError);
