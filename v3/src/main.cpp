@@ -1,4 +1,5 @@
 #include "global.hpp"
+#include "cata.hpp"
 #include "master.hpp"
 
 // - globals
@@ -11,8 +12,11 @@ void initialize()
 	glb::controller.clear();
 
 	// - autSelector
-	auton = autonSelector();
-	
+	// auton = autonSelector();
+
+	// - tasks
+	pros::Task intake(intake::control);
+	pros::Task cata(cata::control);
 }
 
 void disabled() {}
@@ -26,6 +30,8 @@ void autonomous()
 
 void opcontrol() 
 {
+	cata::curr = cata::reloading;
+	intake::curr = intake::idling;
 	while (true) 
 	{
 		normal();
