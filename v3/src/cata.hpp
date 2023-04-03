@@ -1,5 +1,6 @@
+#ifndef __CATA__
+#define __CATA__
 #include "global.hpp"
-#include <mutex>
 
 namespace cata
 {
@@ -11,18 +12,20 @@ namespace cata
     {
         while(true)
         {
-            smtx.take();
+            smtx.lock();
             bool limit = glb::limit.get_value();
 
             switch(curr)
             {
                 case idle:
+                    std::cout << "cata idle!" << std::endl;
                     break;
 
                 case firing:
-                    if(limit)
+                    std::cout << "cata firing! limit: " << limit << std::endl;
+                    if(!limit)
                     {
-                        robot::itsuki.spin(-127);
+                        robot::itsuki.spin(-30);
                     }
 
                     else
@@ -32,9 +35,10 @@ namespace cata
                     break;
                 
                 case reloading:
-                    if(!limit)
+                    std::cout << "cata reloading! liimt: " << limit << std::endl;
+                    if(limit)
                     {
-                        robot::itsuki.spin(-127);
+                        robot::itsuki.spin(-30);
                     }
 
                     else
@@ -46,26 +50,30 @@ namespace cata
 
                 case paused:
                     // pausing should be called in a loop
+                    std::cout << "cata paused!" << std::endl;
+                    robot::itsuki.stop('b');
                     curr = reloading;
                     break;
             }
 
-            smtx.give();
+            smtx.unlock();
             pros::delay(20);
         }
     }
 
     void fire()
     {
-        smtx.take();
+        smtx.lock();
         curr = firing;
-        smtx.give();
+        smtx.unlock();
     }  
 
     void pause()
     {
-        smtx.take();
+        smtx.lock();
         curr = paused;
-        smtx.give();
+        smtx.unlock();
     }
 } 
+
+#endif
