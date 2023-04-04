@@ -2,8 +2,17 @@
 #include "autons.hpp"
 #include "main.h"
 #include "pros/misc.h"
+#include "cata.hpp"
+#include "intake.hpp"
 #include <functional>
+
 #include <vector>
+
+
+void test()
+{
+    robot::itsuki.spin(-127);
+}
 
 void normal()
 {
@@ -12,67 +21,48 @@ void normal()
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
     bool L1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
+    bool NL1 = glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
     bool L2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-    bool NL2 = glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2);
     bool R1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
     bool R2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
     bool limit = glb::limit.get_value();
-    bool pto = robot::pto.state;
+    std::cout << glb::limit.get_value() << std::endl;
 
     double rvolt = lStick - rStick;
     double lvolt = lStick + rStick;
 
-    robot::chassisMotors.spinDiffy(lvolt,rvolt);
+    robot::chass.spinDiffy(lvolt,rvolt);
 
-    if(NL2)
+    if(R1)
     {
-        robot::boost.toggle();
+        robot::itsuki.spin(127);
     }
 
-    if(pto)
+    // else if(R2)
+    // {
+    //     robot::itsuki.spin(-127);
+    // }
+
+    // else
+    // {
+    //     robot::itsuki.stop('c');
+    // }
+
+    else if(cata::curr == cata::idle)
     {
-        if(R1)
-        {
-            robot::itsuki.spin(-100);
-        }
-
-        else if (L1) 
-        {
-            robot::itsuki.spin(100);
-            // robot::boost.setState(true);
-        }
-
-        // else if (!limit)
-        // {
-        //     robot::itsuki.spin(100);
-        // }
-
-        else
-        {
-            robot::itsuki.stop('c');
-        }
-
-        if(R2)
-        {
-            robot::pto.toggle();
-        }
+        robot::itsuki.stop('c');
+        std::cout << "curr state: idle, stopping intake!" << std::endl;
+    }
+    
+    if(NL1)
+    {
+        cata::fire();
     }
 
-    else
+    if(R2)
     {
-        robot::itsuki.spinDiffy(rvolt, lvolt);
-
-        if(R1 || L1)
-        {
-            robot::pto.toggle();
-        }
-
-        if(R2)
-        {
-            robot::pto.toggle();
-        }
+        cata::pause();
     }
-
 }
 
 void (*autonSelector())() //NOLINT
