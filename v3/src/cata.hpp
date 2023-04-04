@@ -23,9 +23,9 @@ namespace cata
 
                 case firing:
                     std::cout << "cata firing! limit: " << limit << std::endl;
-                    if(!limit)
+                    if(limit)
                     {
-                        robot::itsuki.spin(-30);
+                        robot::itsuki.spin(-127);
                     }
 
                     else
@@ -36,9 +36,9 @@ namespace cata
                 
                 case reloading:
                     std::cout << "cata reloading! liimt: " << limit << std::endl;
-                    if(limit)
+                    if(!limit)
                     {
-                        robot::itsuki.spin(-30);
+                        robot::itsuki.spin(-127);
                     }
 
                     else
