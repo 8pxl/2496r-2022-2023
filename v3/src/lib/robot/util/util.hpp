@@ -19,6 +19,7 @@ namespace util
     class pid;
     class movingAverage;
     class timeRange;
+    class controller;
     struct args;
     struct action;
     double dtr(double input);
@@ -290,6 +291,59 @@ class util::timeRange
         }
 };
 
+class util::controller
+{
+    private:
+        pros::Controller* cont;
+
+    public:
+        controller(pros::Controller& cont) : cont(&cont) {}
+
+        int select(int num, std::vector<std::string> names)
+        {
+            int curr = 0;
+            while(1)
+            {   
+                cont -> clear();
+
+                if(cont -> get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+                {
+                    if (curr != num-1)
+                    {
+                        curr++;
+                    }
+                    
+                    else
+                    {
+                        curr = 0;
+                    }
+                }
+
+                if(cont -> get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+                {
+                    if (curr != 0)
+                    {
+                        curr--;
+                    }
+
+                    else
+                    {
+                        curr = num;
+                    }
+                }
+
+                if(cont -> get_digital(pros::E_CONTROLLER_DIGITAL_A))
+                {
+                    pros::delay(200);
+                    return(curr);
+                }
+
+                cont -> print(0, 0, "%s         ", names[curr]);
+                pros::delay(50);
+            }
+        }
+};
+
 struct util::args
 {
     double target;
@@ -321,7 +375,7 @@ int util::dirToSpin(double target,double currHeading) //NOLINT
     return(diff > 180 ? 1 : -1);
 }
 
-double util::minError(double target, double current) //NOLINT
+double util::minError(double target, double current)
 {
     double b = std::max(target,current);
     double s = std::min(target,current);
