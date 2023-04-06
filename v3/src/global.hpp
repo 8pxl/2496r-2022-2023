@@ -56,6 +56,7 @@ namespace robot
 
     //sensors
     lib::imu imu(glb::imu,0); //NOLINT
+    util::controller selector(glb::controller);
     // lib::limit limit(glb::limit); //NOLINT
 
     //subsytem objects
