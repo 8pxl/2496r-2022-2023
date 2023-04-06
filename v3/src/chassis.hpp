@@ -1,173 +1,61 @@
 #ifndef __CHASSIS__
 #define __CHASSIS__
 
-#include "groups.hpp"
-#include "sensors.hpp"
-#include "util/util.hpp"
+#include "global.hpp"
 
-namespace lib
+namespace chassis
 {
-    class chassis
-    {
-        private:
-            lib::diffy chass;
-            lib::imu imu;
-            util::coordinate pos;
-            double DL;
-            double DR;
+  util::coordinate pos;
+  double DL;
+  double DR;
 
-        public:
-            chassis(lib::diffy mtrs, lib::imu inertial, util::coordinate position, double dl = 0, double dr = 0) : chass(mtrs), imu(inertial), pos(position), DL(dl), DR(dr) {}
-
-            void updatePos(double rx, double ry);
-            // void spinTo(double target, double timeout, util::pidConstants constants);
-            void spinTo(double target, util::pidConstants constants);
-            void aspin(double target, double timeout, util::pidConstants constants);
-            void drive(double target, util::pidConstants constants);
-            // void drive(util::args args);
-            void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
-            void odomDrive(double distance, double timeout, double tolerance);
-            std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
-            void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
-            void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
-            void timedSpin(double target, double speed,double timeout);
-            void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
-            void arcTurn(double theta, double radius, double timeout, util::pidConstants cons);
-    };
+  void updatePos(double rx, double ry);
+  void spinTo(double target, double timeout, util::pidConstants constants);
+  void aspin(double target, double timeout, util::pidConstants constants);
+  void drive(double target, util::pidConstants constants);
+  // void drive(util::args args);
+  void autoDrive(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
+  void odomDrive(double distance, double timeout, double tolerance);
+  std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
+  void moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut);
+  void moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias);
+  void timedSpin(double target, double speed,double timeout);
+  void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
+  void arcTurn(double theta, double radius, double timeout, util::pidConstants cons);
 }
 
-void lib::chassis::updatePos(double rx, double ry) //NOLINT
+void chassis::updatePos(double rx, double ry)
 {
     pos.x += rx;
     pos.y += ry;
 }
 
-// void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
-// { 
-//   // timers
-//   util::timer endTimer;
-//   util::timer timeoutTimer;
-//   timeoutTimer.start();
-
-//   // basic constants
-//   double kP = constants.p;
-//   double kI = constants.i;
-//   double kD = constants.d;
-//   double tolerance = constants.tolerance;
-//   double endTime = 2000;
-
-//   // general vars
-//   double currHeading = imu.degHeading();
-//   double prevHeading = currHeading;
-//   double error;
-//   double prevError;
-//   bool end = false;
-
-//   // eye vars
-//   double integral = 0;
-//   double integralThreshold = constants.integralThreshold;
-//   double maxIntegral = constants.maxIntegral;
-
-//   // dee vars
-//   double derivative;
-  
-//   // pid loop 
-//   while (!end)
-//   {
-
-//     currHeading = imu.degHeading();
-//     int dir = -util::dirToSpin(target,currHeading);
-
-//     //pee
-//     error = util::minError(target,currHeading);
-
-//     //eye
-//     integral = error <= tolerance ? 0 : error < integralThreshold ? integral + error : integral;
-
-//     if(integral > maxIntegral)
-//     {
-//       integral = 0;
-//     }
-
-//     //dee
-//     derivative = error - prevError;
-//     prevError = error;
-
-//     //end conditions
-//     if (error >= tolerance)
-//     {
-//       endTimer.start();
-//     }
-
-//     end = endTimer.time() >= endTime ? true : timeoutTimer.time() >= timeout ? true : false;
-
-//     // spin motors
-//     double rVel = dir * (error*kP + integral*kI + derivative*kD);
-//     double lVel = dir * -1 * (error*kP + integral*kI + derivative*kD);
-//     chass.spinDiffy(rVel,lVel);
-
-//     pros::delay(10);
-//   }
-
-//   chass.stop('b');
-// } 
-
-void lib::chassis::spinTo(double target, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) 
+void chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
 { 
-  double currHeading = imu.degHeading();
+  // timers
+  util::timer timeoutTimer;
+
+  // general vars
+  double currHeading = robot::imu.degHeading();
   double error;
-  int dir;
   double vel;
-  static util::pid pid(constants, error);
-  currHeading = imu.degHeading();
-  dir = -util::dirToSpin(target,currHeading);
-  vel = pid.out(util::minError(target,currHeading));
-  chass.spinDiffy(vel * dir,-vel * dir);
-}
 
-// void lib::chassis::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
-// { 
-//   // timers
-//   util::timer timeoutTimer;
+  util::pid pid(constants, 0);
 
-//   // general vars
-//   double currHeading = imu.degHeading();
-//   double error;
-//   int dir;
-//   double vel;
+  // pid loop 
+  while (timeoutTimer.time() <= timeout)
+  {
+    currHeading = robot::imu.degHeading();
+    vel = pid.out(util::minError(target,currHeading)) * -util::dirToSpin(target,currHeading);
+    // spin motors
+    robot::chass.spinDiffy(vel ,-vel);
 
-  
-//   util::pidConstants cons(constants);
-//   error = util::minError(target,currHeading);
+    pros::delay(10);
+  }
+  robot::chass.stop('b');
+} 
 
-//   util::pid pid(cons, error);
-
-//   // pid loop 
-//   while (true)
-//   {
-//     //end condition
-//     if(timeoutTimer.time() >= timeout)
-//     {
-//       break;
-//     }
-
-//     //error
-//     currHeading = imu.degHeading();
-//     dir = -util::dirToSpin(target,currHeading);
-//     error = util::minError(target,currHeading);
-
-//     //vel
-//     vel = pid.out(error);
-
-//     // spin motors
-//     chass.spinDiffy(vel * dir,-vel * dir);
-
-//     pros::delay(10);
-//   }
-//   chass.stop('b');
-// } 
-
-void lib::chassis::aspin(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
+void chassis::aspin(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20)) //NOLINT
 { 
   // timers
   util::timer timeoutTimer;
@@ -218,7 +106,7 @@ void lib::chassis::aspin(double target, double timeout, util::pidConstants const
   chass.stop('b');
 }
 
-// void lib::chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
+// void chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
 // {
 //   util::timer timer;
 //   util::pid pidController(constants, target);
@@ -232,7 +120,7 @@ void lib::chassis::aspin(double target, double timeout, util::pidConstants const
 //   chass.stop('b');
 // }
 
-// void lib::chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
+// void chassis::drive(double target, double timeout, util::pidConstants constants) //NOLINT
 // {
 //   util::timer timer;
 //   util::pid pidController(constants, target);
@@ -246,7 +134,7 @@ void lib::chassis::aspin(double target, double timeout, util::pidConstants const
 //   chass.stop('b');
 // }
 
-void lib::chassis::drive(double target, util::pidConstants constants) //NOLINT
+void chassis::drive(double target, util::pidConstants constants) //NOLINT
 {
   static util::pid pid(constants, target);
   chass.spin(pid.out(target - chass.getRotation()));
@@ -254,7 +142,7 @@ void lib::chassis::drive(double target, util::pidConstants constants) //NOLINT
 
 
   
-// void lib::chassis::drive(double target, double timeout, double tolerance) //NOLINT
+// void chassis::drive(double target, double timeout, double tolerance) //NOLINT
 // { 
 //   // timers
 //   util::timer timeoutTimer;
@@ -314,7 +202,7 @@ void lib::chassis::drive(double target, util::pidConstants constants) //NOLINT
 //   chass.stop('b');
 // } 
 
-void lib::chassis::autoDrive(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
+void chassis::autoDrive(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
 {
   // timers
   util::timer timer;
@@ -373,7 +261,7 @@ void lib::chassis::autoDrive(double target, double heading, double timeout, util
 }
 
 
-void lib::chassis::odomDrive(double distance, double timeout, double tolerance) //NOLINT
+void chassis::odomDrive(double distance, double timeout, double tolerance) //NOLINT
 { 
   
   // resetting timers
@@ -434,7 +322,7 @@ void lib::chassis::odomDrive(double distance, double timeout, double tolerance) 
   chass.stop('b');
 }  
 
-std::vector<double> lib::chassis::moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias) //NOLINT
+std::vector<double> chassis::moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias) //NOLINT
 {
   double linearError = distToPoint(pos,target);
   double linearVel = linearError*lkp;
@@ -457,7 +345,7 @@ std::vector<double> lib::chassis::moveToVel(util::coordinate target, double lkp,
   return std::vector<double> {lVel, rVel};
 }
 
-void lib::chassis::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut) //NOLINT
+void chassis::moveTo(util::coordinate target, double timeout, util::pidConstants lConstants, util::pidConstants rConstants, double rotationBias, double rotationScale, double rotationCut) //NOLINT
 {
   //init
   util::timer timeoutTimer;
@@ -505,7 +393,7 @@ void lib::chassis::moveTo(util::coordinate target, double timeout, util::pidCons
   chass.stop('b');
 }
 
-void lib::chassis::moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias) //NOLINT
+void chassis::moveToPose(util::bezier curve, double timeout, double lkp, double rkp, double rotationBias) //NOLINT
 {
   
   // resolution in which to sample points along the curve
@@ -552,7 +440,7 @@ void lib::chassis::moveToPose(util::bezier curve, double timeout, double lkp, do
 }
 
 
-void lib::chassis::timedSpin(double target, double speed,double timeout) //NOLINT
+void chassis::timedSpin(double target, double speed,double timeout) //NOLINT
 {
   // timers
   util::timer timeoutTimer;
@@ -588,7 +476,7 @@ void lib::chassis::timedSpin(double target, double speed,double timeout) //NOLIN
   chass.stop('b');
 }
 
-void lib::chassis::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout) //NOLINT
+void chassis::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout) //NOLINT
 {
   util::timer timeoutTimer;
 
@@ -603,7 +491,7 @@ void lib::chassis::velsUntilHeading(double rvolt, double lvolt, double heading, 
   }
 }
 
-void lib::chassis::arcTurn(double theta, double radius, double timeout, util::pidConstants cons)
+void chassis::arcTurn(double theta, double radius, double timeout, util::pidConstants cons)
 {
   util::timer timer = util::timer(); 
   double curr;

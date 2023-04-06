@@ -23,7 +23,6 @@ namespace intake
                     break;
 
                 case idling:
-                    robot::itsuki.stop('c');
                     break;
                 
                 case awaiting:
@@ -50,6 +49,7 @@ namespace intake
     void stop()
     {
         smtx.take();
+        robot::itsuki.stop('c');
         curr = idling;
         smtx.give();
     }
