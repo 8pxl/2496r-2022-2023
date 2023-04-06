@@ -4,6 +4,7 @@
 
 // - globals
 void (*auton)();
+int driver;
 
 void initialize() 
 {
@@ -12,7 +13,8 @@ void initialize()
 	glb::controller.clear();
 
 	// - autSelector
-	// auton = autonSelector();
+	auton = autons[robot::selector.select(autons.size(), autonNames)];
+	driver = robot::selector.select(2, {"keej", "felix"});
 
 	// - tasks
 	pros::Task intake(intake::control);
@@ -34,7 +36,16 @@ void opcontrol()
 	intake::curr = intake::idling;
 	while (true) 
 	{
-		normal();
+		switch (driver)
+		{
+			case 0:
+				keej();
+				break;
+
+			case 1:
+				felix();
+				break;
+		}
 		pros::delay(20);
 	}
 }
