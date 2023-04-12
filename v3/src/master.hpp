@@ -5,26 +5,19 @@
 #include "cata.hpp"
 #include "intake.hpp"
 
-
 void keej()
 {
+    std::vector<bool> cont = robot::controller.getAll(ALLBUTTONS);
     double lStick = glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
 
-    bool L1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
-    bool NL1 = glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
-    bool L2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-    bool R1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
-    bool R2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
     bool limit = glb::limit.get_value();
-    std::cout << glb::limit.get_value() << std::endl;
-
     double rvolt = lStick - rStick;
     double lvolt = lStick + rStick;
 
     robot::chass.spinDiffy(lvolt,rvolt);
 
-    if(R1)
+    if(cont[R1])
     {
         robot::itsuki.spin(127);
     }
@@ -32,17 +25,21 @@ void keej()
     else if(cata::curr == cata::idle)
     {
         robot::itsuki.stop('c');
-        std::cout << "curr state: idle, stopping intake!" << std::endl;
     }
     
-    if(NL1)
+    if(cont[NL1])
     {
         cata::fire();
     }
 
-    if(R2)
+    if(cont[NR2])
     {
-        cata::pause();
+        robot::tsukasa.toggle();
+    }
+
+    if(cont[NR1] && robot::tsukasa.state)
+    {
+        robot:tsukasa.toggle();
     }
 }
 
@@ -50,20 +47,14 @@ void felix()
 {
     double lStick = -glb::controller.get_analog(ANALOG_LEFT_Y);
     double rStick = glb::controller.get_analog(ANALOG_RIGHT_X);
-
-    bool L1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
-    bool NL1 = glb::controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
-    bool L2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-    bool R1 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
-    bool R2 = glb::controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+    std::vector<bool> cont = robot::controller.getAll(ALLBUTTONS);
     bool limit = glb::limit.get_value();
-
     double rvolt = lStick - rStick;
     double lvolt = lStick + rStick;
 
     robot::chass.spinDiffy(lvolt,rvolt);
 
-    if(R2)
+    if(cont[R2])
     {
         robot::itsuki.spin(127);
     }
@@ -71,11 +62,20 @@ void felix()
     else if(cata::curr == cata::idle)
     {
         robot::itsuki.stop('c');
-        std::cout << "curr state: idle, stopping intake!" << std::endl;
     }
     
-    if(NL1)
+    if(cont[NL1])
     {
         cata::fire();
+    }
+
+    if(cont[NR1])
+    {
+        robot::tsukasa.toggle();
+    }
+
+    if(cont[NR1] && robot::tsukasa.state)
+    {
+        robot::tsukasa.toggle();
     }
 }

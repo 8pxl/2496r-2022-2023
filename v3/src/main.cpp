@@ -13,8 +13,8 @@ void initialize()
 	glb::controller.clear();
 
 	// - autSelector
-	auton = autons[robot::selector.select(autons.size(), autonNames)];
-	driver = robot::selector.select(2, {"keej", "felix"});
+	auton = autons[robot::controller.select(autons.size(), autonNames)];
+	driver = robot::controller.select(2, {"keej", "felix"});
 
 	// - tasks
 	pros::Task intake(intake::control);
