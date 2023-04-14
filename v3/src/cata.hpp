@@ -6,9 +6,10 @@ namespace cata
 {
     enum states {idle, firing, reloading, paused};
     states curr;
+    bool boost;
     pros::Mutex smtx;
 
-    void control()
+    void control()  
     {
         while(true)
         {
@@ -18,11 +19,10 @@ namespace cata
             switch(curr)
             {
                 case idle:
-                    std::cout << "cata idle!" << std::endl;
                     break;
 
                 case firing:
-                    std::cout << "cata firing! limit: " << limit << std::endl;
+                    boost ? robot::boost.setState(true) : robot::boost.setState(false);
                     if(limit)
                     {
                         robot::itsuki.spin(-127);
@@ -31,11 +31,11 @@ namespace cata
                     else
                     {
                         curr = reloading;
+                        robot::boost.setState(false);
                     }
                     break;
                 
                 case reloading:
-                    std::cout << "cata reloading! liimt: " << limit << std::endl;
                     if(!limit)
                     {
                         robot::itsuki.spin(-127);
@@ -49,13 +49,11 @@ namespace cata
                     break;
 
                 case paused:
-                    // pausing should be called in a loop
                     std::cout << "cata paused!" << std::endl;
                     robot::itsuki.stop('b');
                     curr = reloading;
                     break;
             }
-
             smtx.unlock();
             pros::delay(20);
         }

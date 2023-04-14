@@ -2,6 +2,7 @@
 #define __GLOBAL__
 
 #include "lib/lib.hpp"
+#include <numeric>
 
 namespace glb
 {
@@ -16,11 +17,11 @@ namespace glb
     pros::Motor saki(10, pros::E_MOTOR_GEARSET_18, true); //NOLINT
 
     // pistons
-    // pros::ADIDigitalOut boostOne('E'); //NOLINT
+    pros::ADIDigitalOut boost('C'); //NOLINT
     // pros::ADIDigitalOut boostTwo('H'); //NOLINT
     // pros::ADIDigitalOut passOne('B'); //NOLINT
     // pros::ADIDigitalOut ptoOne('B'); //NOLINT
-    // pros::ADIDigitalOut ptoTwo('B'); //NOLINT
+    pros::ADIDigitalOut derrick('B'); 
 
 
     // sensors
@@ -36,8 +37,7 @@ namespace glb
     // variables
  //NOLINT
     bool red; //NOLINT
-    double DL = 0.5;
-    double DR = 0.5;
+    util::coordinate pos(0,0);
 }
 
 namespace robot
@@ -48,15 +48,16 @@ namespace robot
     lib::diffy itsuki(std::vector<pros::Motor> {glb::yuuta, glb::saki} ); //NOLINT
 
     //pistons
-    // lib::pis boost({glb::boostOne, glb::boostTwo}, true, ""); //NOLINT
+    lib::pis boost({glb::boost}, true, ""); //NOLINT
     // // lib::pis boostTwo({glb::boostOne}, true, ""); //NOLINT
     // lib::pis pass({glb::passOne}, true, ""); //NOLINT
     // // lib::pis passTwo({glb::passTwo}, true, ""); //NOLINT
     // lib::pis pto({glb::ptoOne, glb::ptoTwo}, true, ""); //NOLINT
+    lib::pis tsukasa({glb::derrick}, false, "");
 
     //sensors
     lib::imu imu(glb::imu,0); //NOLINT
-    util::controller selector(glb::controller);
+    util::controller controller(glb::controller);
     // lib::limit limit(glb::limit); //NOLINT
 
     //subsytem objects
