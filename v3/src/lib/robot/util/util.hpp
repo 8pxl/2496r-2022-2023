@@ -7,6 +7,7 @@
 #include <vector>
 
 #define PI 3.14159265358979323846
+#define ALLBUTTONS {pros::E_CONTROLLER_DIGITAL_L1, pros::E_CONTROLLER_DIGITAL_L2, pros::E_CONTROLLER_DIGITAL_R1, pros::E_CONTROLLER_DIGITAL_R2, pros::E_CONTROLLER_DIGITAL_UP, pros::E_CONTROLLER_DIGITAL_DOWN, pros::E_CONTROLLER_DIGITAL_LEFT, pros::E_CONTROLLER_DIGITAL_RIGHT, pros::E_CONTROLLER_DIGITAL_X, pros::E_CONTROLLER_DIGITAL_B, pros::E_CONTROLLER_DIGITAL_Y, pros::E_CONTROLLER_DIGITAL_A}
 typedef void(*fptr)();
 
 namespace util
@@ -19,9 +20,11 @@ namespace util
     class pid;
     class movingAverage;
     class timeRange;
+    struct controllerOutputs;
     class controller;
-    struct args;
-    struct action;
+    // enum buttons;
+    // struct args;
+    // struct action;
     double dtr(double input);
     double rtd(double input);
     int dirToSpin(double target,double currHeading);
@@ -295,17 +298,24 @@ class util::controller
 {
     private:
         pros::Controller* cont;
+        double leftCurve;
+        double rightCurve;
 
     public:
         controller(pros::Controller& cont) : cont(&cont) {}
 
+        enum driveMode
+        {
+            arcade,
+            tank
+        };
+
         int select(int num, std::vector<std::string> names)
         {
             int curr = 0;
+            cont -> clear();
             while(1)
             {   
-                cont -> clear();
-
                 if(cont -> get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
                 {
                     if (curr != num-1)
@@ -328,7 +338,7 @@ class util::controller
 
                     else
                     {
-                        curr = num;
+                        curr = num-1;
                     }
                 }
 
@@ -342,21 +352,67 @@ class util::controller
                 pros::delay(50);
             }
         }
+        
+        std::vector<bool> getAll(std::vector<pros::controller_digital_e_t> buttons)
+        {
+            std::vector<bool> out;
+            for (pros::controller_digital_e_t button : buttons)
+            {
+                out.push_back(cont -> get_digital(button));
+                out.push_back(cont -> get_digital_new_press(button));
+            }
+            return(out);
+        }
+
+        //https://www.desmos.com/calculator/puepnlubzh
+        double curve(double x, double scale) 
+        {
+            if (scale != 0) 
+            {
+                return(pow(2.718, (scale * ((std::fabs(x) - 127))) / 1000 ) * x); 
+            }
+            return x;
+        }
+
+        std::vector<double> drive(int direction, controller::driveMode mode)
+        {   
+            double lStick = curve(cont -> get_analog(ANALOG_LEFT_Y) * direction, leftCurve);
+            double rStick;
+            switch(mode)
+            {
+                case arcade:
+                    rStick = curve(cont ->get_analog(ANALOG_RIGHT_X), rightCurve);
+                    return(std::vector<double>{lStick + rStick, lStick - rStick});
+                
+                case tank:
+                    rStick = curve(cont -> get_analog(ANALOG_RIGHT_Y), rightCurve);
+                    return(std::vector<double>{lStick, rStick});
+            }
+
+            //you shoudlnt be here !
+            return(std::vector<double>{0,0});
+        }
+
+        void setCurves(double left, double right)
+        {
+            leftCurve = left;
+            rightCurve = right;
+        }
 };
 
-struct util::args
-{
-    double target;
-    bool hasArgs = 1;
-    util::pid pid;
-};
+// struct util::args
+// {
+//     double target;
+//     bool hasArgs = 1;
+//     util::pid pid;
+// };
 
-struct util::action 
-{
-    void(*func)(util::args);
-    util::timeRange range;
-    util::args args;
-}; 
+// struct util::action 
+// {
+//     void(*func)(util::args);
+//     util::timeRange range;
+//     util::args args;
+// }; 
 
 double util::dtr(double input) //NOLINT
 {

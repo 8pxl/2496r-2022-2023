@@ -34,6 +34,7 @@ void opcontrol()
 {
 	cata::curr = cata::reloading;
 	intake::curr = intake::idling;
+	robot::controller.setCurves(0, 4.8);
 	while (true) 
 	{
 		switch (driver)
