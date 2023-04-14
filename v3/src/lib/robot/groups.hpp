@@ -31,6 +31,7 @@ namespace lib
             diffy(const std::vector<pros::Motor> & motorsList) : mtrs(motorsList){}
 
             void spinDiffy(double rvolt, double lvolt);
+            void spinDiffy(std::vector<double> voltages);
 
             std::vector<double> getDiffy();
     };
@@ -40,9 +41,9 @@ namespace lib
         private:
             std::string name;
             std::vector<pros::ADIDigitalOut> pistons;
+            bool state;
         
         public:
-            bool state;
             
             pis(std::vector<pros::ADIDigitalOut> p, bool s, std::string title) : pistons(p), state(s), name(title)
             {
@@ -52,6 +53,8 @@ namespace lib
             void toggle();
 
             void setState(bool iState);
+
+            bool getState(){return state;}
     };
 }
 
@@ -129,6 +132,17 @@ void lib::diffy::spinDiffy(double rvolt, double lvolt)
     {
         motors[i].move(rvolt);
         motors[i + half].move(lvolt);
+    }
+}
+
+void lib::diffy::spinDiffy(std::vector<double> voltages) 
+{
+    int half = size/2;
+
+    for (int i=0; i < half; i++)
+    {
+        motors[i].move(voltages[0]);
+        motors[i + half].move(voltages[1]);
     }
 }
 
