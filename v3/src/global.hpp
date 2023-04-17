@@ -17,18 +17,18 @@ namespace glb
     pros::Motor saki(10, pros::E_MOTOR_GEARSET_18, true); //NOLINT
 
     // pistons
-    pros::ADIDigitalOut boost('C'); //NOLINT
+    pros::ADIDigitalOut boost('B'); //NOLINT
     // pros::ADIDigitalOut boostTwo('H'); //NOLINT
     // pros::ADIDigitalOut passOne('B'); //NOLINT
     // pros::ADIDigitalOut ptoOne('B'); //NOLINT
-    pros::ADIDigitalOut derrick('B'); 
+    pros::ADIDigitalOut derrick('C'); 
 
 
     // sensors
     pros::Imu imu(5); //NOLINT
     pros::Controller controller(pros::E_CONTROLLER_MASTER);    //NOLINT
     pros::ADIDigitalIn limit(1); //NOLINT
-    pros::ADIEncoder leftEncoder(3,4,false); //NOLINT
+    // pros::ADIEncoder leftEncoder(3,4,false); //NOLINT
     // pros::ADIEncoder horizEncoder(1,2,false); //NOLINT
     pros::Optical optical(20); //NOLINT
 
@@ -48,7 +48,7 @@ namespace robot
     lib::diffy itsuki(std::vector<pros::Motor> {glb::yuuta, glb::saki} ); //NOLINT
 
     //pistons
-    lib::pis boost({glb::boost}, true, ""); //NOLINT
+    lib::pis boost({glb::boost}, false, ""); //NOLINT
     // // lib::pis boostTwo({glb::boostOne}, true, ""); //NOLINT
     // lib::pis pass({glb::passOne}, true, ""); //NOLINT
     // // lib::pis passTwo({glb::passTwo}, true, ""); //NOLINT
