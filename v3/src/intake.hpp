@@ -1,8 +1,10 @@
+#ifndef __INTAKE__
+#define __INTAKE__
 #include "global.hpp"
 
 namespace intake
 {
-    enum states {intaking, idling, awaiting};
+    enum states {intaking, idling, awaiting, pistonUp, pistonDown};
     states curr;
     pros::Mutex smtx;
     int speed;
@@ -19,17 +21,32 @@ namespace intake
             switch(curr)
             {
                 case intaking:
-                    robot::itsuki.spin(speed);
+                    if(cata::curr == cata::idle)
+                    {
+                        robot::itsuki.spin(speed);
+                    }
                     break;
 
                 case idling:
                     break;
                 
                 case awaiting:
+                    robot::itsuki.spin(127);
                     if(timer.time() > delay)
                     {
+                        robot::itsuki.stop('c');
                         curr = next;
                     }
+                    break;
+
+                case pistonUp:
+                    robot::tsukasa.setState(true);
+                    curr = intaking;
+                    break;
+
+                case pistonDown:
+                    robot::tsukasa.setState(false);
+                    curr = intaking;
                     break;
             }
 
@@ -64,4 +81,16 @@ namespace intake
         curr = awaiting;
         smtx.give();
     }
+
+    void asyncPiston(int delay)
+    {
+        smtx.take();
+        intake::delay = delay;
+        intake::next = intake::pistonDown;
+        intake::timer.start();
+        curr = awaiting;
+        smtx.give();
+    }
 }
+
+#endif
