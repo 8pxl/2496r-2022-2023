@@ -32,9 +32,9 @@ void autonomous()
 
 void opcontrol() 
 {
-	cata::curr = cata::reloading;
+	// cata::curr = cata::reloading;
 	intake::curr = intake::idling;
-	robot::controller.setCurves(0, 4.8);
+	robot::controller.setCurves(0, 8);
 	while (true) 
 	{
 		switch (driver)
