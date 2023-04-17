@@ -2,10 +2,13 @@
 #define __CHASSIS__
 
 // - chassis specific macros 
-#define DL 368.2
-#define DR -362
-#define MAXSPEED 0.5672320069
-#define MAXACCEL 0.5672320069 / 70
+#define DL 252.5
+#define DR -259.7
+#define MAXSPEED 0.647953484803
+#define MAXACCEL 0.647953484803 / 28
+#define INCHESTOROTATIONS 46.29961981
+#define IP1MSTOMRPMINUTE 196.0017239
+// #define INCHESTOROTATIONS 55.55954377
 
 #include "global.hpp"
 
@@ -13,7 +16,7 @@ namespace chas
 {
   class follower;
   void spinTo(double target, double timeout, util::pidConstants constants); 
-  void drive(double target, double timeout, double tolerance, double max); //target = encoder units 
+  void drive(double target, double timeout, double max, util::pidConstants constants); //target = encoder units 
   void driveAngle(double target, double heading, double timeout, util::pidConstants lCons, util::pidConstants acons);
   void odomDrive(double distance, double timeout, double tolerance);
   std::vector<double> moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias);
@@ -23,9 +26,46 @@ namespace chas
   void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
   void arcTurn(double theta, double radius, double timeout, int dir, util::pidConstants cons); 
   std::vector<double> trapezoidalProfile(double dist, double maxSpeed, double accel);
-  void contradrive(double target,util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
-  void contraturn(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
+  // void profiledDrive(double target,util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
+  void profiledDrive(double target, int endDelay);
+  // void contraturn(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
 }
+
+class chas::follower
+{
+  private:
+    std::vector<double> profile;
+    util::pid controller;
+    util::pidConstants constants;
+    double sf;
+    double kv;
+    double negbias;
+    util::timer timer;
+
+  public:
+    follower(std::vector<double> profile, util::pidConstants constants, double kv, double sf, double negbias = 30) : profile(profile), kv(kv), constants(constants), sf(sf), negbias(negbias)
+    { 
+      controller = util::pid(constants, 0);
+    }
+    
+    double out(double curr)
+    {
+      int t = timer.time() / 10;
+      double rpm = profile[t] * sf;
+      double error = curr - rpm;
+      if (error > 0)
+      {
+        error += error/(1);
+      }
+      // printf("%f,%f,", curr, rpm);
+      return rpm * kv + controller.out(-error);
+    }
+
+    void start()
+    {
+      timer.start();
+    }
+};
 
   // class A
   // {
@@ -51,43 +91,6 @@ namespace chas
   //       var.setNum(num);
   //     }
   // };
-
-class chas::follower
-{
-  private:
-    std::vector<double> profile;
-    util::pid controller;
-    util::pidConstants constants;
-    double sf;
-    double kv;
-    double negbias;
-    util::timer timer;
-
-  public:
-    follower(std::vector<double> profile, util::pidConstants constants, double kv, double sf, double negbias = 30) : profile(profile), kv(kv), constants(constants), sf(sf), negbias(negbias)
-    { 
-      controller.update(constants);
-    }
-    
-    double out(double curr)
-    {
-      int t = timer.time() / 10;
-      double rpm = profile[t] * sf;
-      double error = curr - rpm;
-      if (error > 0)
-      {
-        error += error/(1);
-      }
-      printf("%f,%f,", curr, rpm);
-      return rpm * kv + controller.out(-error);
-    }
-
-    void start()
-    {
-      timer.start();
-    }
-};
-
 
 // void chas::spinTo(double target, double timeout, util::pidConstants constants = util::pidConstants(3.7, 1.3, 26, 0.05, 2.4, 20))
 // { 
@@ -160,7 +163,7 @@ class chas::follower
 //     glb::controller.print(0, 0, "%f", error);
 //     // glb::controller.print(0, 0, "%f", integral);
 //   }
-//   robot::chass.stop("b");
+//   robot::chass.stop('b');
 // } 
 
 
@@ -176,9 +179,11 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
     currHeading = robot::imu.degHeading();
     vel = util::dirToSpin(target,currHeading) * pid.out(util::minError(target,currHeading));
     robot::chass.spinDiffy(-vel,vel);
+    glb::controller.print(0,0,"%f", util::minError(target,currHeading) * util::dirToSpin(target,currHeading));
+    // glb::controller.print(1,0,"%f", constants.tolerance);
     pros::delay(10);
   }
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 } 
 
 
@@ -232,74 +237,21 @@ void chas::spinTo(double target, double timeout, util::pidConstants constants = 
 
 //     pros::delay(10);
 //   }
-//   robot::chass.stop("b");
+//   robot::chass.stop('b');
 // } 
 
-void chas::drive(double target, double timeout, double tolerance, double max = 127)
+void chas::drive(double target, double timeout, double max = 127, util::pidConstants constants = util::pidConstants(0.3,0.2,2.4,5,30,1000))
 { 
-  // timers
   util::timer timeoutTimer;
-
-  // basic constants
-  double kP = 0.3;
-  double kI = 0.2;
-  double kD = 2.4;
-  double endTime = 100000;
-
-  // general vars
-  double error;
-  double prevError;
-  bool end = false;
-
-  // eye vars
-  double integral = 0;
-  double integralThreshold = 30;
-  double maxIntegral = 10000;
-
-  // dee vars
-  double derivative;
-  
-  // pid loop 
+  util::pid pid(constants, 0);
   robot::chass.reset();
-
-  while (!end)
+  while (timeoutTimer.time() <= timeout)
   {
-
-    double currRotation = robot::chass.getRotation();
-
-    //pee
-    error = target - currRotation;
-    // glb::controller.print(0, 0, "%f", error);
-
-    //eye
-    // integral = error <= tolerance ? 0 : std::abs(error) < integralThreshold ? integral + error : integral;
-
-    if(integral > maxIntegral)
-    {
-      integral = 0;
-    }
-    //dee
-    derivative = error - prevError;
-    prevError = error;
-
-    //end conditions
-
-    end = timeoutTimer.time() >= timeout ? true : false;
-
-    // spin motors
-    double rVel = (error*kP + integral*kI + derivative*kD);
-
-    if(rVel > max)
-    {
-      rVel = max;
-    }
-
-    robot::chass.spinDiffy(rVel,rVel);
-
+    robot::chass.spin(pid.out(target - robot::chass.getRotation()));
+    glb::controller.print(0,0,"%f", target - robot::chass.getRotation());
     pros::delay(10);
-    // glb::controller.print(0, 0, "%f", error);
   }
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 } 
 
 void chas::driveAngle(double target, double heading, double timeout, util::pidConstants lCons = util::pidConstants(0.3,0.2,2.4,5,30,1000), util::pidConstants acons = util::pidConstants(4, 0.7, 4, 0, 190, 20))
@@ -353,7 +305,7 @@ void chas::driveAngle(double target, double heading, double timeout, util::pidCo
     glb::controller.print(0, 0, "%f", util::minError(heading, currHeading));
   }
 
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 }
 
 
@@ -415,7 +367,7 @@ void chas::odomDrive(double distance, double timeout, double tolerance)
 
     pros::delay(10);
   }
-  robot::chass.stop('.');
+  robot::chass.stop('b');
 }  
 
 std::vector<double> chas::moveToVel(util::coordinate target, double lkp, double rkp, double rotationBias)
@@ -482,7 +434,7 @@ void chas::moveTo(util::coordinate target, double timeout, util::pidConstants lC
     robot::chass.spinDiffy(rVel,lVel);
   }
 
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 }
 
 
@@ -566,7 +518,7 @@ void chas::timedSpin(double target, double speed,double timeout)
 
   }
 
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 }
 
 void chas::velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout)
@@ -606,10 +558,11 @@ void chas::arcTurn(double theta, double radius, double timeout, int dir, util::p
   theta = util::rtd(theta);
   ratio = sl/sr;
   curr = glb::imu.get_heading();
-  util::pid controller(cons, 1000);
+  util::pid controller(cons, 0);
 
   while (timer.time() < timeout)
   {
+    glb::controller.print(0,0,"%f", util::minError(theta, curr));
     curr = glb::imu.get_heading();
     vel = controller.out(util::minError(theta, curr)) * util::dirToSpin(theta,curr);
     vel = std::abs(vel) >= 127 ? (127 * util::sign(vel)) : vel;
@@ -629,9 +582,67 @@ void chas::arcTurn(double theta, double radius, double timeout, int dir, util::p
     pros::delay(10);
 
   }
-  robot::chass.stop("b");
+  robot::chass.stop('b');
 }
 
+// std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXSPEED, double accel = MAXACCEL)
+// {
+//   double max = std::min(std::sqrt(dist * accel), maxSpeed);
+//   double accelTime = max / accel;
+//   double accelDist = (accel / 2) * std::pow(accelTime, 2);
+//   double coastDist = dist - (2 * accelDist);
+//   double coastTime = coastDist / max;
+//   double totalTime = 2 * accelTime + coastTime;
+//   glb::controller.print(1,1,"%f", maxSpeed);
+//   double vel = 0;
+//   double diff;
+//   std::vector<double> profile;
+
+//   for (int i = 0; i < std::ceil(totalTime); i++)
+//   {
+//     if (i < std::floor(accelTime))
+//     {
+//       profile.push_back(vel);
+//       vel += accel;
+//     }
+
+//     else if (i < coastTime + accelTime)
+//     {
+//       profile.push_back(max);
+//     }
+
+//     else
+//     {
+//       profile.push_back(vel);
+//       vel -= accel;
+//     }
+//   }
+//   //second pass
+//   int size = profile.size();
+//   double traveled = std::reduce(profile.begin(), profile.end());
+//   diff = traveled - dist;
+//   double adj = diff / (size / 5);
+//   int num = std::ceil(size /5);
+//   for (int i = 0; i < num; i++)
+//   {
+//     if (profile[size - i - 1] > adj)
+//     {
+//         profile[size - i - 1] -= adj;
+//     }
+
+//     else
+//     {
+//       num += 1;
+//     }
+//     // printf("%f\n", profile[size-i]);
+//   }
+//   // }
+
+//   return profile;
+// }
+
+
+//MAXSPEED: inches per 10 ms
 std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXSPEED, double accel = MAXACCEL)
 {
   double max = std::min(std::sqrt(dist * accel), maxSpeed);
@@ -640,7 +651,6 @@ std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXS
   double coastDist = dist - (2 * accelDist);
   double coastTime = coastDist / max;
   double totalTime = 2 * accelTime + coastTime;
-  glb::controller.print(1,1,"%f", maxSpeed);
   double vel = 0;
   double diff;
   std::vector<double> profile;
@@ -688,67 +698,88 @@ std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXS
   return profile;
 }
 
+// void chas::profiledDrive(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout)
+// {
+//   //kv, rpm -> voltage
+//   //sf, in/ms -> rpm
+//   double targetRot = target * INCHESTOROTATIONS;
+//   std::vector<double> profile = chas::trapezoidalProfile(target);
+//   robot::chass.reset();
+//   chas::follower controller(profile, profileConstants, profileConstants.kv, sf);
+//   util::pid pid(constants, 0);
 
-void chas::contradrive(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout)
+//   // glb::controller.print(1,1, "%f", target);
+//   // glb::controller.print(1,1, "%f", target);
+//   // printf("%f", profile.size());
+
+//   for (int i = 0; i < profile.size(); i++)
+//   {
+//     // double curr = robot::chass.getSpeed();
+//     // printf("%f, ", profile[i] * sf * profileConstants.kv);
+//     // robot::chass.spin(controller.out(robot::chass.getSpeed()));
+//     robot::chass.spin(profile[i] * sf * profileConstants.kv);
+//     pros::delay(10);
+//   }
+
+//   util::timer timer;
+
+//   while(timer.time() < endTimeout)
+//   {
+//     glb::controller.print(0,0,"%f", robot::chass.getRotation()/target);
+//     // robot::chass.spin(pid.out(targetRot - robot::chass.getRotation()));
+//     // pros::delay(10);
+//   }
+
+//   // robot::chass.stop('b');
+//   robot::chass.stop('b');
+// }
+
+
+
+void chas::profiledDrive(double target, int endDelay = 500)
 {
   //kv, rpm -> voltage
   //sf, in/ms -> rpm
-  double targetRot = target * 58.76490206;
+  int sign = util::sign(target);
+  target = fabs(target);
+  double targetRot = target * INCHESTOROTATIONS;
   std::vector<double> profile = chas::trapezoidalProfile(target);
   robot::chass.reset();
-  chas::follower controller(profile,profileConstants, profileConstants.kv, sf);
-  util::pid pid(constants, 0);
-
-  // glb::controller.print(1,1, "%f", target);
-  // glb::controller.print(1,1, "%f", target);
-  // printf("%f", profile.size());
 
   for (int i = 0; i < profile.size(); i++)
   {
-    double curr = robot::chass.getSpeed();
-    // printf("%f, ", profile[i] * sf * profileConstants.kv);
-    robot::chass.spin(controller.out(robot::chass.getSpeed()));
+    robot::chass.spin(profile[i] * IP1MSTOMRPMINUTE * sign);
     pros::delay(10);
   }
-
-  util::timer timer;
-
-  while(timer.time() < endTimeout)
-  {
-    // glb::controller.print(1,1,"%f", robot::chass.getRotation());
-    robot::chass.spin(pid.out(targetRot - robot::chass.getRotation()));
-    pros::delay(10);
-  }
-
-  robot::chass.stop("b");
-  robot::chass.stop("b");
+  robot::chass.stop('b');
+  pros::delay(endDelay);
 }
 
-void chas::contraturn(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout)
-{
-  //kv, rpm -> voltage
-  //sf, deg/ms -> rpm
-  std::vector<double> profile = chas::trapezoidalProfile(target);
-  robot::chass.reset();
-  chas::follower controller(profile,profileConstants, profileConstants.kv, sf);
-  util::pid pid(constants, 0);
+// void chas::contraturn(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout)
+// {
+//   //kv, rpm -> voltage
+//   //sf, deg/ms -> rpm
+//   std::vector<double> profile = chas::trapezoidalProfile(target);
+//   robot::chass.reset();
+//   chas::follower controller(profile,profileConstants, profileConstants.kv, sf);
+//   util::pid pid(constants, 0);
 
-  for (int i = 0; i < profile.size(); i++)
-  {
-    double volts = controller.out(robot::chass.getSpeed());
-    robot::chass.spinDiffy(volts, -volts);
-  }
+//   for (int i = 0; i < profile.size(); i++)
+//   {
+//     double volts = controller.out(robot::chass.getSpeed());
+//     robot::chass.spinDiffy(volts, -volts);
+//   }
 
-  util::timer timer;
+//   util::timer timer;
 
-  while(timer.time() < endTimeout)
-  {
-    double curr = robot::imu.degHeading();
-    double volts = pid.out(util::minError(target, curr)) * util::dirToSpin(target, curr);
-    robot::chass.spinDiffy(volts, -volts);
-  }
+//   while(timer.time() < endTimeout)
+//   {
+//     double curr = robot::imu.degHeading();
+//     double volts = pid.out(util::minError(target, curr)) * util::dirToSpin(target, curr);
+//     robot::chass.spinDiffy(volts, -volts);
+//   }
 
-  robot::chass.stop("b");
-}
+//   robot::chass.stop('b');
+// }
 
 #endif
