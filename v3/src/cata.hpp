@@ -7,6 +7,7 @@ namespace cata
     enum states {idle, firing, reloading, paused};
     states curr;
     bool boost;
+    util::timer boostTimer;
     pros::Mutex smtx;
 
     void control()  
@@ -31,11 +32,17 @@ namespace cata
                     else
                     {
                         curr = reloading;
-                        robot::boost.setState(false);
+                        boostTimer.start();
                     }
                     break;
                 
                 case reloading:
+
+                    if(boostTimer.time() >= 400)
+                    {
+                        robot::boost.setState(false);
+                    }
+                    
                     if(!limit)
                     {
                         robot::itsuki.spin(-127);
