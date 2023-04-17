@@ -34,6 +34,8 @@ namespace lib
             void spinDiffy(std::vector<double> voltages);
 
             std::vector<double> getDiffy();
+            double getLeft();
+            double getRight();
     };
 
     class pis
@@ -159,6 +161,32 @@ std::vector<double> lib::diffy::getDiffy() //NOLINT
     }
     
     return(std::vector<double> {dr/half, dl/half});
+}
+
+double lib::diffy::getLeft()
+{
+    double dl = 0;
+    int half = size/2;
+    
+    for (int i=0; i < half; i++)
+    {
+        dl += motors[i].get_position();
+    }
+    
+    return(dl/half);
+}
+
+double lib::diffy::getRight()
+{
+    double dr = 0;
+    int half = size/2;
+    
+    for (int i = 0; i < half; i++)
+    {
+        dr+= motors[i+half].get_position();
+    }
+
+    return(dr/half);
 }
 
 
