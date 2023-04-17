@@ -183,8 +183,12 @@ class util::bezier
 class util::pidConstants
 {
     public:
-        double p,i,d,tolerance,integralThreshold, maxIntegral;
-        pidConstants(double kp, double ki, double kd, double deviation, double threshold, double maxI) : p(kp), i(ki), d(kd), tolerance(deviation), integralThreshold(threshold), maxIntegral(maxI) {}
+        //decel and acel = volts/msec / msec
+        double p,i,d,tolerance,integralThreshold, maxIntegral, kv;
+        pidConstants(){}
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral) {}
+
+        pidConstants(double kp, double ki, double kd, double tolerance, double integralThreshold, double maxIntegral, double kv) : p(kp), i(ki), d(kd), tolerance(tolerance), integralThreshold(integralThreshold), maxIntegral(maxIntegral), kv(kv) {}
 };
 
 class util::pid
@@ -196,20 +200,20 @@ class util::pid
         util::pidConstants constants;
 
     public:
-
+    
+        pid(){}
         pid(util::pidConstants cons, double error) : constants(cons), prevError(error){}
 
         double out(double error)
         {
             //eyes
-            integral = error <= constants.tolerance ? 0 : error < integralThreshold ? integral + error : integral;
+            // integral = std::fabs(error) <= constants.tolerance ? 0 : std::fabs(error) < integralThreshold ? integral + error : integral;
+            
+            if(std::fabs(error) < constants.tolerance) integral = 0;
+            else if(std::fabs(error) < constants.integralThreshold) integral += error;
+            if(integral > constants.maxIntegral) integral = constants.maxIntegral;
 
-            if(integral > constants.maxIntegral)
-            {
-                integral = 0;
-            }
-
-            //dee
+            //deex
             derivative = error - prevError;
             prevError = error;
 
