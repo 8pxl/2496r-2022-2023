@@ -38,7 +38,7 @@ namespace cata
                 
                 case reloading:
 
-                    if(boostTimer.time() >= 400)
+                    if(boostTimer.time() >= 330)
                     {
                         robot::boost.setState(false);
                     }
