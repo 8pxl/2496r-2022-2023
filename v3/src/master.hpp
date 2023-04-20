@@ -47,12 +47,13 @@ void keej()
     else if(cata::curr == cata::idle) itsuki.stop('c');
 
     if(cont[A]) wp();
+    if(cont[B]) cata::boost = !cata::boost;
 }
 
 void felix()
 {
     std::vector<bool> cont = robot::controller.getAll(ALLBUTTONS);
-    chass.spinDiffy(robot::controller.drive(1, util::controller::arcade));
+    chass.spinDiffy(robot::controller.drive(-1, util::controller::arcade));
     
     if(cont[NL1]) cata::fire();
     if(cont[NR1]) tsukasa.toggle();
