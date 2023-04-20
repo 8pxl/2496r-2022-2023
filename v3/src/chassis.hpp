@@ -5,7 +5,10 @@
 #define DL 252.5
 #define DR -259.7
 #define MAXSPEED 0.647953484803
-#define MAXACCEL 0.647953484803 / 28
+#define MAXACCEL_FORWARD 0.647953484803 / 18
+#define MAXDECEL_FORWARD 0.647953484803 / 24
+#define MAXACCEL_BACKWARD 0.647953484803 / 21
+#define MAXDECEL_BACKWARD 0.647953484803 / 48
 #define INCHESTOROTATIONS 46.29961981
 #define IP1MSTOMRPMINUTE 196.0017239
 // #define INCHESTOROTATIONS 55.55954377
@@ -26,6 +29,7 @@ namespace chas
   void velsUntilHeading(double rvolt, double lvolt, double heading, double tolerance, double timeout);
   void arcTurn(double theta, double radius, double timeout, int dir, util::pidConstants cons); 
   std::vector<double> trapezoidalProfile(double dist, double maxSpeed, double accel);
+  std::vector<double> asymTrapezoidalProfile(double dist, double maxSpeed, double accel, double decel);
   // void profiledDrive(double target,util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
   void profiledDrive(double target, int endDelay);
   // void contraturn(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout);
@@ -643,7 +647,7 @@ void chas::arcTurn(double theta, double radius, double timeout, int dir, util::p
 
 
 //MAXSPEED: inches per 10 ms
-std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXSPEED, double accel = MAXACCEL)
+std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXSPEED, double accel = MAXACCEL_FORWARD)
 {
   double max = std::min(std::sqrt(dist * accel), maxSpeed);
   double accelTime = max / accel;
@@ -698,6 +702,42 @@ std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXS
   return profile;
 }
 
+//https://www.desmos.com/calculator/py7hlti2em
+//https://www.desmos.com/calculator/zlayxbvrz8
+std::vector<double> chas::asymTrapezoidalProfile(double dist, double maxSpeed = MAXSPEED, double accel = MAXACCEL_FORWARD, double decel = MAXDECEL_FORWARD)
+{
+  double max = std::min(std::sqrt((2 * accel * decel * dist) / accel + decel), maxSpeed);
+  double accelTime = max / accel;
+  double decelTime = max / decel;
+  double coastDist = (dist / max) - (max / (2 * accel)) - (max / (2*decel));
+  double coastTime = coastDist / max;
+  double totalTime = accelTime + decelTime + coastTime;
+  double vel = 0;
+  double diff;
+  std::vector<double> profile;
+  for (int i = 0; i < std::ceil(totalTime); i++)
+  {
+    if (i < std::floor(accelTime))
+    {
+      profile.push_back(vel);
+      vel += accel;
+    }
+
+    else if (i < coastTime + accelTime)
+    {
+      profile.push_back(max);
+    }
+
+    else
+    {
+      profile.push_back(vel);
+      vel -= decel;
+    }
+  }
+  return profile;
+}
+
+
 // void chas::profiledDrive(double target, util::pidConstants profileConstants, double sf, util::pidConstants constants, int endTimeout)
 // {
 //   //kv, rpm -> voltage
@@ -738,17 +778,20 @@ std::vector<double> chas::trapezoidalProfile(double dist, double maxSpeed = MAXS
 
 void chas::profiledDrive(double target, int endDelay = 500)
 {
-  //kv, rpm -> voltage
-  //sf, in/ms -> rpm
+  //kv: rpm -> voltage
+  //sf: in/ms -> rpm
   int sign = util::sign(target);
   target = fabs(target);
   double targetRot = target * INCHESTOROTATIONS;
-  std::vector<double> profile = chas::trapezoidalProfile(target);
+  std::vector<double> profile;
+  if(sign > 0) profile = chas::asymTrapezoidalProfile(target);
+  else profile = chas::asymTrapezoidalProfile(target, MAXSPEED, MAXACCEL_BACKWARD, MAXDECEL_BACKWARD);
   robot::chass.reset();
-
+  robot::chass.reset();
   for (int i = 0; i < profile.size(); i++)
   {
     robot::chass.spin(profile[i] * IP1MSTOMRPMINUTE * sign);
+    glb::controller.print(0,0,"%f", profile[i] * IP1MSTOMRPMINUTE * sign);
     pros::delay(10);
   }
   robot::chass.stop('b');
