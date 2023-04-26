@@ -38,21 +38,25 @@ namespace cata
                 
                 case reloading:
 
-                    if(boostTimer.time() >= 330)
+                    if(boostTimer.time() >= 200)
                     {
                         robot::boost.setState(false);
-                    }
-                    
-                    if(!limit)
-                    {
-                        robot::itsuki.spin(-127);
-                    }
+                        if(!limit)
+                        {
+                            robot::itsuki.spin(-127);
+                        }
 
+                        else
+                        {
+                            robot::itsuki.stop('b');
+                            curr = idle;
+                        }
+                    }
                     else
                     {
                         robot::itsuki.stop('b');
-                        curr = idle;
                     }
+                    
                     break;
 
                 case paused:
