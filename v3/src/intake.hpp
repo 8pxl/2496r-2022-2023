@@ -21,7 +21,7 @@ namespace intake
             switch(curr)
             {
                 case intaking:
-                    if(cata::curr == cata::idle)
+                    if(glb::limit.get_value())
                     {
                         robot::itsuki.spin(speed);
                     }
