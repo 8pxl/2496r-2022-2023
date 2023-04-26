@@ -22,6 +22,8 @@ namespace glb
     // pros::ADIDigitalOut passOne('B'); //NOLINT
     // pros::ADIDigitalOut ptoOne('B'); //NOLINT
     pros::ADIDigitalOut derrick('C'); 
+    pros::ADIDigitalOut expansion('D'); 
+    pros::ADIDigitalOut release('E');
 
 
     // sensors
@@ -54,6 +56,8 @@ namespace robot
     // // lib::pis passTwo({glb::passTwo}, true, ""); //NOLINT
     // lib::pis pto({glb::ptoOne, glb::ptoTwo}, true, ""); //NOLINT
     lib::pis tsukasa({glb::derrick}, false, "");
+    lib::pis expansion({glb::expansion}, false, "");
+    lib::pis release({glb::release}, false, "");
 
     //sensors
     lib::imu imu(glb::imu,0); //NOLINT
