@@ -68,6 +68,7 @@ void wp()
     // chass.stop('b');
     // pros::delay(100);
     cata::curr = cata::reloading;
+    cata::slowTimer.startTime = pros::millis() - 500;
     while(!(cata::curr == cata::idle))
     {
         pros::delay(10);
@@ -78,31 +79,35 @@ void wp()
     pros::delay(300);
     profiledDrive(-7,150);
     profiledDrive(6,200);
-    spinTo(356.5, 900, onethreeefive);
+    spinTo(355.5, 900, onethreeefive);
     cata::fire();
-    pros::delay(300);
+    pros::delay(600);
     spinTo(234, 900, onethreeefive);
     tsukasa.toggle();
     profiledDrive(24.3,50);
     tsukasa.toggle();
     pros::delay(600);
     // intake::asyncPiston(299);
-    profiledDrive(21, 200);
+    profiledDrive(21, 250);
     // tsukasa.toggle();
     spinTo(332,800,ninety);
-    profiledDrive(14, 200);
+    profiledDrive(14, 150);
     cata::fire();
-    pros::delay(400);
-    profiledDrive(-14.5,130);
+    pros::delay(300);
+    profiledDrive(-19,130);
     spinTo(221, 730, ninety);
     profiledDrive(62.7, 200);
-    spinTo(285, 900, fourfive);
+    spinTo(287, 900, fourfive);
     cata::fire();
-    pros::delay(250);
-    spinTo(246,400,fourfive);
-    arcTurn(dtr(270), 410, 800, -1, arc);
+    pros::delay(300);
+    // release.toggle();
+    profiledDrive(-9,200);
+    spinTo(227,400,fourfive);
+    // cata::curr = cata::reloading;
+    arcTurn(dtr(270), 435, 570, -1, arc);
     profiledDrive(4,30);
     profiledDrive(-4,200);
+
 }
 
 void elevenwp() 
@@ -385,21 +390,120 @@ void nearHalf()
     cata::fire();
 }
 
+void skills()
+{
+    intake::spin(127);
+    profiledDrive(-10, 100);
+    profiledDrive(15, 100);
+    spinTo(270, 600, ninety);
+    profiledDrive(14, 100);
+    profiledDrive(-7, 100);
+    spinTo(178, 600, ninety);
+    profiledDrive(-45, 100);
+    cata::fire();
+    pros::delay(200);
+    profiledDrive(50, 100);
+    spinTo(225, 600, fourfive);
+    expansion.toggle();
+}
+
+void near()
+{
+    cata::curr = cata::reloading;
+    cata::slowTimer.startTime = pros::millis() - 700;
+    while(!(cata::curr == cata::idle))
+    {
+        pros::delay(10);
+    }
+    cata::boost = true;
+    itsuki.spin(127);
+    robot::tsukasa.toggle();
+    pros::delay(300);
+    profiledDrive(-7,150);
+    profiledDrive(6,200);
+    spinTo(355, 900, onethreeefive);
+    itsuki.stop('c');
+    cata::fire();
+    pros::delay(700);
+    spinTo(243, 900, onethreeefive);
+    profiledDrive(17.4,150);
+    itsuki.spin(127);
+    spinTo(135,800,ninety);
+    tsukasa.toggle();
+    profiledDrive(7,100);
+    tsukasa.toggle();
+    pros::delay(650);
+    profiledDrive(-6.5,100);
+    spinTo(347,1100,oneeighty);
+    itsuki.stop('c');
+    cata::fire();
+    pros::delay(700);
+    profiledDrive(-4,100);
+    spinTo(229, 900, ninety);
+    tsukasa.toggle();
+    profiledDrive(11);
+    itsuki.spin(127);
+    tsukasa.toggle();
+    pros::delay(650);
+    // intake::asyncPiston(299);
+    profiledDrive(29, 200);
+    // tsukasa.toggle();
+    spinTo(327,800,ninety);
+    profiledDrive(6,130);
+    itsuki.stop('c');
+    cata::fire();
+    pros::delay(100);
+    release.toggle();
+}
+
+void wpTruncate()
+{
+    cata::curr = cata::reloading;
+    cata::slowTimer.startTime = pros::millis() - 500;
+    while(!(cata::curr == cata::idle))
+    {
+        pros::delay(10);
+    }
+    cata::boost = true;
+    intake::spin(127);
+    robot::tsukasa.toggle();
+    pros::delay(300);
+    profiledDrive(-7,150);
+    profiledDrive(6,200);
+    spinTo(357.5, 900, onethreeefive);
+    cata::fire();
+    pros::delay(400);
+    spinTo(234, 900, onethreeefive);
+    tsukasa.toggle();
+    profiledDrive(24.3,50);
+    tsukasa.toggle();
+    pros::delay(600);
+    // intake::asyncPiston(299);
+    profiledDrive(21, 200);
+    // tsukasa.toggle();
+    spinTo(332,800,ninety);
+    profiledDrive(14, 200);
+    cata::fire();
+    pros::delay(300);
+    release.toggle();
+}
 void far()
 {
     cata::boost = true;
     cata::curr = cata::reloading;
+    cata::slowTimer.startTime = pros::millis() - 500;
     while(!(cata::curr == cata::idle))
     {
         pros::delay(10);
     }
     tsukasa.toggle();
-    intake::spin(127);
     profiledDrive(21, 100);
+    itsuki.spin(127);
     tsukasa.toggle();
     pros::delay(450);
     profiledDrive(-5, 100);
     spinTo(17, 1200, ninety);
+    itsuki.stop('c');
     cata::fire();
     pros::delay(250);
     cata::curr = cata::idle;
@@ -409,22 +513,27 @@ void far()
     profiledDrive(5, 50);
     profiledDrive(-3, 50);
     spinTo(135, 900, onethreeefive);
+    itsuki.spin(127);
     profiledDrive(50, 300);
     spinTo(55, 900, ninety);
+    itsuki.stop('c');
     cata::fire();
     pros::delay(250);
     spinTo(0, 900 , fourfive);
+    itsuki.spin(127);
     profiledDrive(20, 100);
     spinTo(5,900, fourfive);
     profiledDrive(25, 100);
     spinTo(0,900,fourfive);
     profiledDrive(-45, 200);
     spinTo(55, 900, ninety);
+    itsuki.stop('c');
     cata::fire();
+    release.toggle();
 }
 
-fptr WP = wp; fptr EIGHTWP = eightwp; fptr NEARHALF = nearHalf; fptr FAR = far;
-std::vector<fptr> autons{WP, EIGHTWP, NEARHALF, FAR}; 
-std::vector<std::string> autonNames{"wp", "eightwp", "nearHalf", "far"};
+fptr WP = wp; fptr EIGHTWP = eightwp; fptr NEAR = near; fptr FAR = far; fptr WPTRUNCATE = wpTruncate; fptr SKILLS = skills;
+std::vector<fptr> autons{WP, EIGHTWP, NEAR, FAR, WPTRUNCATE, SKILLS}; 
+std::vector<std::string> autonNames{"wp", "eightwp", "near", "far", "truncated wp", "skills"};
 
 #endif

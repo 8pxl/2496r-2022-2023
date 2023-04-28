@@ -1,7 +1,6 @@
 #include "global.hpp"
 #include "autons.hpp"
 #include "main.h"
-#include "pros/misc.h"
 #include "cata.hpp"
 #include "intake.hpp"
 
@@ -35,10 +34,13 @@ enum buttons
     NA = 23 
 };
 
+// bool discProtection = true;
+
 void keej()
 {
     std::vector<bool> cont = robot::controller.getAll(ALLBUTTONS);
     chass.spinDiffy(robot::controller.drive(1, util::controller::arcade));
+    // bool cataIdle = discProtection ? glb::limit.get_value() : cata::curr = cata::idle;
     bool cataIdle = cata::curr == cata::idle;
     
     if(cont[NL1]) cata::fire();
@@ -51,20 +53,26 @@ void keej()
     if(cont[NUP]) expansion.toggle();
     // if(cont[A]) wp();
     if(cont[NX]) robot::boost.toggle();
+    if(cont[NY]) cata::curr = cata::idle;
 }
 
 void felix()
 {
     std::vector<bool> cont = robot::controller.getAll(ALLBUTTONS);
     chass.spinDiffy(robot::controller.drive(-1, util::controller::arcade));
+    // bool cataIdle = discProtection ? glb::limit.get_value() : cata::curr = cata::idle;
     bool cataIdle = cata::curr == cata::idle;
     
     if(cont[NL1]) cata::fire();
     if(cont[NR1]) tsukasa.toggle();
     if(cont[NR2] && tsukasa.getState()) tsukasa.toggle();
     if(cont[R2] && cataIdle) itsuki.spin(127);
+    else if(cont[L2]) itsuki.spin(-127);
     else if(cataIdle) itsuki.stop('c');
     if(cont[NB]) cata::boost = !cata::boost;
     if(cont[NUP]) expansion.toggle();
     if(cont[NX]) robot::boost.toggle();
+    if(cont[NA]) robot::release.toggle();
+    if(cont[NY]) cata::curr = cata::idle;
+    // if(cont[NY]) discProtection = !discProtection;
 }

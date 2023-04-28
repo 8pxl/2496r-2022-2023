@@ -25,6 +25,14 @@ namespace intake
                     {
                         robot::itsuki.spin(speed);
                     }
+
+                    // else
+                    // {
+                    //     robot::itsuki.stop('c');
+                    //     // curr = idling;
+                    //     // cata::curr = cata::reloading;
+                    // }
+
                     break;
 
                 case idling:

@@ -8,6 +8,7 @@ namespace cata
     states curr;
     bool boost;
     util::timer boostTimer;
+    util::timer slowTimer;
     pros::Mutex smtx;
 
     void control()  
@@ -20,9 +21,11 @@ namespace cata
             switch(curr)
             {
                 case idle:
+                    std::cout << "cata idle! limit = " << limit << std::endl;
                     break;
 
                 case firing:
+                    std::cout << "cata firing! limit = " << limit << std::endl;
                     boost ? robot::boost.setState(true) : robot::boost.setState(false);
                     if(limit)
                     {
@@ -33,30 +36,42 @@ namespace cata
                     {
                         curr = reloading;
                         boostTimer.start();
+                        slowTimer.start();
                     }
                     break;
                 
                 case reloading:
+                    std::cout << "cata reloading! limit = " << limit << std::endl;
 
-                    if(boostTimer.time() >= 200)
+                    if(boostTimer.time() >= 310)
                     {
                         robot::boost.setState(false);
-                        if(!limit)
+                    }
+        
+                    if(slowTimer.time() >= 310)
+                    {
+                        if(slowTimer.time() <= 1310)
                         {
                             robot::itsuki.spin(-127);
                         }
 
                         else
                         {
-                            robot::itsuki.stop('b');
-                            curr = idle;
+                            robot::itsuki.spin(-75);
                         }
                     }
+
                     else
                     {
                         robot::itsuki.stop('b');
                     }
                     
+                    if(limit)
+                    {
+                        robot::itsuki.stop('b');
+                        curr = idle;
+                    }
+
                     break;
 
                 case paused:
